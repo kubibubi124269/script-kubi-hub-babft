@@ -1,0 +1,4 @@
+.tools/
+.test-output/
+node_modules/
+*.rbxl.lock
