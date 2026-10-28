@@ -1,0 +1,115 @@
+{
+  "commit": "7b73cfd09120fa86be5dc26bf5f8790a2eab844f",
+  "files": [
+    {
+      "path": "FEATURES.md",
+      "bytes": 11354,
+      "sha256": "ecc53902baa8d2eb0732cc18441ce037b5541f43fa0fd186d150294330d0468a"
+    },
+    {
+      "path": "loader.lua",
+      "bytes": 116,
+      "sha256": "7f7b393666fa0d3c3d1765c15dbc344fbb4767038d43177687a9a9f6b623524e"
+    },
+    {
+      "path": "main.lua",
+      "bytes": 126179,
+      "sha256": "d7feddf26036cf655cd86060b2f21f5236b4ea7cd0c628026ded1985d823b034",
+      "lines": 1520,
+      "functions": 132,
+      "spawnSites": 4,
+      "privateBuildCall": true
+    },
+    {
+      "path": "README.md",
+      "bytes": 6391,
+      "sha256": "358a06a269a6f0ee79710a36c95fcd0fa8739fb426259704ee29c06e7fc99753"
+    },
+    {
+      "path": "Red_Worm.Build",
+      "bytes": 585958,
+      "sha256": "d93bfd23d3028d59f12e2cf8e4fb33c9d03b47ddf355f4aa641a25482b4800f5",
+      "elements": 2830,
+      "materials": {
+        "MetalBlock": 4,
+        "Servo": 6,
+        "HarpoonDragon": 1,
+        "Bar": 11,
+        "Motor": 1,
+        "JetPack": 1,
+        "BackWheel": 2,
+        "Piston": 8,
+        "CarSeat": 1,
+        "Switch": 4,
+        "FrontWheel": 2,
+        "WoodBlock": 11,
+        "PlasticBlock": 2490,
+        "ConcreteBlock": 288
+      },
+      "boundRows": 5
+    },
+    {
+      "path": "shredder.json",
+      "bytes": 200262,
+      "sha256": "d65b76601cd31be3b8081914517139c6fc59b94960284932e3297db3dfaeffd7",
+      "elements": 960,
+      "materials": {
+        "BackWheel": 2,
+        "CameraDome": 1,
+        "MetalBlock": 1,
+        "NeonBlock": 28,
+        "PilotSeat": 1,
+        "PlasticBlock": 224,
+        "Rope": 1,
+        "SpikeTrap": 40,
+        "Switch": 1,
+        "Thruster": 4,
+        "TitaniumBlock": 657
+      },
+      "boundRows": 1
+    },
+    {
+      "path": "Working_Shredder.Build",
+      "bytes": 200519,
+      "sha256": "c253eb9a504fdbfce30c4f84b729d4a64c8e84c85cf1eeb2783a14cc1db88274",
+      "elements": 960,
+      "materials": {
+        "BackWheel": 2,
+        "CameraDome": 1,
+        "MetalBlock": 1,
+        "NeonBlock": 28,
+        "PilotSeat": 1,
+        "PlasticBlock": 224,
+        "Rope": 1,
+        "SpikeTrap": 40,
+        "Switch": 1,
+        "Thruster": 4,
+        "TitaniumBlock": 657
+      },
+      "boundRows": 1
+    },
+    {
+      "path": "worm-red.json",
+      "bytes": 585698,
+      "sha256": "9e2593376320158bde52598cd289a7931c6ee6b0d938a7132d4409704a125085",
+      "elements": 2830,
+      "materials": {
+        "MetalBlock": 4,
+        "Servo": 6,
+        "HarpoonDragon": 1,
+        "Bar": 11,
+        "Motor": 1,
+        "JetPack": 1,
+        "BackWheel": 2,
+        "Piston": 8,
+        "CarSeat": 1,
+        "Switch": 4,
+        "FrontWheel": 2,
+        "WoodBlock": 11,
+        "PlasticBlock": 2490,
+        "ConcreteBlock": 288
+      },
+      "boundRows": 5
+    }
+  ]
+}

@@ -1,0 +1,121 @@
+{
+  "version": "5.0.0",
+  "modules": [
+    {
+      "name": "Util",
+      "file": "src/core/Util.lua",
+      "sha256": "f13fbd98e01fc05eac31e144c12736602665278d947b29331e3bac09a7c48579"
+    },
+    {
+      "name": "Runtime",
+      "file": "src/core/Runtime.lua",
+      "sha256": "764e4ac30e5848ce3c5378f394489343632abb1490c15df3d63db82b44fef5d5"
+    },
+    {
+      "name": "Log",
+      "file": "src/modules/debug/Log.lua",
+      "sha256": "ae407f792966abbc9fb267924f0b39000ff8c74f21476469772d8b220a1e4434"
+    },
+    {
+      "name": "Config",
+      "file": "src/config/Config.lua",
+      "sha256": "80633844e25b429751b31c504eb0ec88f14988115b8c7d27baeb2ff2f62a51bc"
+    },
+    {
+      "name": "Inventory",
+      "file": "src/modules/inventory/Inventory.lua",
+      "sha256": "2d002f93765b8405293dbcbbc75ab936393332cc12b1959317392f77b12700a3"
+    },
+    {
+      "name": "Schema",
+      "file": "src/schematics/Schema.lua",
+      "sha256": "2efbadf49318b0d19449abc7ab802036f04372e344dbcb48d33e7de42cc9543c"
+    },
+    {
+      "name": "LegacyShapes",
+      "file": "src/schematics/LegacyShapes.lua",
+      "sha256": "5a23f62aa9afb7d50dd02d8c2aadeeda2e5217e1e0a2503e365184a5501d1a7d"
+    },
+    {
+      "name": "LegacyPlans",
+      "file": "src/schematics/LegacyPlans.lua",
+      "sha256": "2d9ac97d9e4a9ca2caf240265dd63a168b911681336a4ddce4520810d0d901af"
+    },
+    {
+      "name": "WormMK2",
+      "file": "src/schematics/WormMK2.lua",
+      "sha256": "64db85889538e8023f8c4dd42a102e1dc96394ace3a86e74d80f39c609538049"
+    },
+    {
+      "name": "DynamiteStack",
+      "file": "src/schematics/DynamiteStack.lua",
+      "sha256": "f6f7234507aee1520fb5786b2658a7046230d0db062f12c036c6e8f16d59af72"
+    },
+    {
+      "name": "Library",
+      "file": "src/schematics/Library.lua",
+      "sha256": "4f653fb5d282f4631dbe6c4e55517ef006e5b4631c9de4f2a546c8eaefccbd58"
+    },
+    {
+      "name": "Adapter",
+      "file": "src/core/Adapter.lua",
+      "sha256": "bc33cd8488fabe45a63cc803abdb1e3e6b44a8ff2e0df150910c8e7d8769596b"
+    },
+    {
+      "name": "Farm",
+      "file": "src/modules/farm/Controller.lua",
+      "sha256": "99305e7a3c375d9343988cc36684543b93e7923358ac4199d0c6c1514920aded"
+    },
+    {
+      "name": "Builder",
+      "file": "src/modules/builder/Controller.lua",
+      "sha256": "be025d6e5b25ffb54b46ffcb4833eefabcd7db6f110a524ee27ba47d8e3ee8ad"
+    },
+    {
+      "name": "Version",
+      "file": "src/modules/tools/Version.lua",
+      "sha256": "6cad82d9b8e526c71c5a4ca322cc2530d9a60e7a1b7a55be807a0a6e23ae9b79"
+    },
+    {
+      "name": "Performance",
+      "file": "src/modules/tools/Performance.lua",
+      "sha256": "91884d385f090bb62d4e037ca7bfa62f27d830e848d79d4ba1adb7b031893062"
+    },
+    {
+      "name": "Movement",
+      "file": "src/modules/movement/Controller.lua",
+      "sha256": "278f3b77bac692b100a911b2dfc6f604588201ab62fa6db270e4bcb74b2f3d12"
+    },
+    {
+      "name": "Effects",
+      "file": "src/modules/tools/Effects.lua",
+      "sha256": "4320a9f713107b148e6bb0e89df4f9bcc0e11a721a444a8f43a6e65fdc9ada3c"
+    },
+    {
+      "name": "Layout",
+      "file": "src/ui/Layout.lua",
+      "sha256": "e1cae2a16cbd5642d7a14458179fd4b5439d2299259776791408fcdd19c70d29"
+    },
+    {
+      "name": "Navigation",
+      "file": "src/ui/Navigation.lua",
+      "sha256": "5c88f989ab40813011bccba6e42098e42757e18782569ace29b749ca94bd38ce"
+    },
+    {
+      "name": "Preview",
+      "file": "src/ui/Preview.lua",
+      "sha256": "11d47f6e1609702ea810f5cf992b016e41f64aae8fec6140ee5f7a13aa249431"
+    },
+    {
+      "name": "UI",
+      "file": "src/ui/Window.lua",
+      "sha256": "676b5645a404d605071091f773f48896916eb923df961281a46ef856312aa6d4"
+    },
+    {
+      "name": "Application",
+      "file": "src/core/Application.lua",
+      "sha256": "b8dfcc2fbddd658f2c344e5c5c92ba024d893d327cf687980d08509597bd6703"
+    }
+  ],
+  "mainSha256": "4136270fadf2aeea3e27ef286c02aa6c902e2233fa4108fc3d758394e39af894"
+}
