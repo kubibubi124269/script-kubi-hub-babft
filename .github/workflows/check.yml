@@ -1,0 +1,26 @@
+name: Luau checks
+on: [push, pull_request]
+permissions:
+  contents: read
+jobs:
+  validate:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - name: Install pinned official Luau 0.744
+        run: |
+          mkdir -p .tools
+          curl -fsSL https://github.com/luau-lang/luau/releases/download/0.744/luau-ubuntu.zip -o .tools/luau.zip
+          echo '6506f0852c623aaffcb28494aac16c26dc04a269ea0e16cc0aafc8c8ac79f3ec  .tools/luau.zip' | sha256sum --check
+          unzip -q .tools/luau.zip -d .tools
+          chmod +x .tools/luau .tools/luau-compile
+      - name: Syntax, logic and GUI contract tests
+        env:
+          LUAU_BIN: ./.tools/luau
+          LUAU_COMPILE: ./.tools/luau-compile
+        run: node tools/test.cjs
+      - name: Generated files must match source
+        run: git diff --exit-code -- main.lua studio/Server.bundle.lua studio/KubiHubTestKit.rbxmx docs/build-manifest.json
