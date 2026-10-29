@@ -1,1 +1,13 @@
-{"version":"5.0.0","releaseDate":"2026-10-28","changes":["Sześć głównych zakładek, zwijane sekcje i wyszukiwanie funkcji","Osobny Circle Maker z pozycją, materiałem, warstwami i łukiem","Dokładne identyfikatory materiałów i nieznany stan zamiast fałszywego zera","WORM MK2 z natywnymi połączeniami do własnego środowiska testowego","Jeden dynamit, jedno siedzenie, 3000 drewna w planie stosu","Profile JSON, historia edycji, raport błędów i kontrolery transakcji"],"compatibility":"W publicznym BABFT: podgląd, generatory i asystent. Automatyzacja i mechanika wymagają uprawnionego adaptera we własnej grze. Fizyka WORM-a wymaga testu w Studio."}
+{
+  "version": "5.1.0",
+  "releaseDate": "2026-10-29",
+  "changes": [
+    "Naprawione warstwy schematów i zachowanie obrotu w eksporcie",
+    "Poprawione anulowanie budowy, granice obszaru i stare komunikaty błędów",
+    "Nowe koła i importy nie dziedziczą poprzedniego materiału ani obrotu",
+    "Kopie ustawień odzyskują się również po błędzie odczytu; odrzucane są nieznane materiały",
+    "Builder: wyśrodkowanie, przesunięcia X/Y/Z i dopasowanie zwykłych planów",
+    "Kopiowanie listy materiałów, wybór kroku oraz lżejsza obsługa podglądu"
+  ],
+  "compatibility": "W publicznym BABFT: podgląd, generatory i asystent. Automatyzacja i mechanika wymagają uprawnionego adaptera we własnej grze. Fizyka WORM-a wymaga testu w Studio."
+}
