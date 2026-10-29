@@ -26,7 +26,10 @@ return function(Util)
   self.remote=r;self.cancelRemote=cancel;local reply=self:call('hello')
   if not reply.ok or reply.authorized~=true or reply.userId~=self.context.userId or reply.placeId~=self.context.placeId or reply.protocol~=1 or type(reply.session)~='string' then self.remote=nil;return false,reply.error or 'Serwer nie potwierdził uprawnień.' end
   self.session=reply.session;self.capabilities={};for _,cap in ipairs({'build','mechanics','inventory','farm','movement'}) do self.capabilities[cap]=type(reply.capabilities)=='table' and reply.capabilities[cap]==true end
-  if type(reply.zone)=='table' and Util.vector(reply.zone.size,10000) and reply.zone.size[1]>0 and reply.zone.size[2]>0 and reply.zone.size[3]>0 then self.zone={size=Util.copy(reply.zone.size)} end
+  if type(reply.zone)=='table' and Util.vector(reply.zone.size,10000) and reply.zone.size[1]>0 and reply.zone.size[2]>0 and reply.zone.size[3]>0 then
+   self.zone={size=Util.copy(reply.zone.size)}
+   if Util.vector(reply.zone.min,10000) and Util.vector(reply.zone.max,10000) then local valid=true;for i=1,3 do if reply.zone.min[i]>=reply.zone.max[i] then valid=false end end;if valid then self.zone.min=Util.copy(reply.zone.min);self.zone.max=Util.copy(reply.zone.max) end end
+  end
   self.minFarmInterval=Util.number(reply.minFarmInterval,.5,.1,10);self.label=tostring(reply.label or 'Autoryzowany adapter'):sub(1,120);return true
  end
  function Adapter:cancel(transaction)

@@ -1,4 +1,4 @@
-# KUBI HUB ULTIMATE V5.0
+# KUBI HUB ULTIMATE V5.1
 
 Sześć głównych zakładek: **PRO, Builder, Autofarm, Shapes, Circle Maker, Settings**. Sekcje są zwijane, a wyszukiwarka u góry znajduje funkcje i ustawienia. Prawy Ctrl lub pływający przycisk **K** pokazuje okno.
 
@@ -36,14 +36,14 @@ Serwer domyślnie działa wyłącznie w Studio. Użycie we własnej opublikowane
 
 ## Testy
 
-Wykonano kompilację oficjalnym Luau 0.744, **40 testów logiki i 18 sprawdzeń kontraktu GUI w mocku**. Mock nie renderuje Roblox i nie symuluje fizyki. **Testów Studio ani V5 w BABFT nie wykonano.**
+Wykonano kompilację oficjalnym Luau 0.744, **61 testów logiki i 30 sprawdzeń kontraktu GUI w mocku**. Mock nie renderuje Roblox i nie symuluje fizyki. **Testów Studio ani V5 w BABFT nie wykonano.**
 
 ```text
 node tools/build.cjs
 LUAU_BIN=/path/to/luau LUAU_COMPILE=/path/to/luau-compile node tools/test.cjs
 ```
 
-[Raport i ograniczenia](docs/V5-REPORT.md) · [Testy i oczekiwane wyniki](docs/TESTING.md) · [Historia zmian](CHANGELOG.md) · [Układ funkcji](FEATURES.md).
+[Raport V5.1 i ograniczenia](docs/V5.1-REPORT.md) · [Testy i oczekiwane wyniki](docs/TESTING.md) · [Historia zmian](CHANGELOG.md) · [Układ funkcji](FEATURES.md).
 
 ## Modele społeczności
 

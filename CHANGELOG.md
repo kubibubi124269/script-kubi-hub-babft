@@ -1,5 +1,13 @@
 # Historia zmian
 
+## 5.1.0 — 2026-10-29
+
+Najpierw odtworzono błędy V5.0 w testach, następnie poprawiono warstwy od pierwszej, walidację importowanych danych i flag, zachowanie obrotu i zawiasów w eksporcie, odrzucanie nieznanych materiałów ustawień, odzyskiwanie kopii po błędzie odczytu, stare komunikaty błędów oraz pełne granice obszaru. Nieznana odpowiedź na anulowanie nie jest już przedstawiana jako CANCELLED, a stan committed wymaga poprawnej liczby części.
+
+Nowo generowane i importowane projekty zaczynają z neutralnymi przekształceniami; obrót i materiał poprzedniego modelu nie zmieniają nowego koła ani nie podwajają obrotu importu. Szybkie importy mają unikalne ID. Odświeżanie katalogu nie dopisuje bez końca tekstu wyszukiwarki. Kamera nie tworzy ponownie części podglądu przy każdym kliknięciu. Kontrolki odzwierciedlają cofanie i wczytane ustawienia.
+
+Po naprawach dodano wyśrodkowanie X/Z, przesunięcia, skalowanie zwykłych planów 10–200%, dopasowanie do odczytanych lub ręcznych wymiarów, listę materiałów do skopiowania i przejście do konkretnego elementu. Dopasowanie jest jedną zmianą UNDO, a mechaniki nie skaluje. Nadal sześć zakładek i ten sam loader. Weryfikacja offline: 61 testów logiki, 30 sprawdzeń GUI, dwa importy modeli; testów w Roblox/Studio nie wykonano.
+
 ## 5.0.0 — 2026-10-28
 
 Przebudowa V4.1 na 23 moduły z deterministycznym main.lua. Sześć zakładek, zwijane sekcje, wyszukiwanie funkcji i osobny Circle Maker. Osobne ID tytanu i metalu, wymagane/posiadane/brakujące materiały oraz stan nieznany. Stos: jeden Dynamite, jedno Seat i 3000 WoodBlock. WORM MK2 ma graf 14 zawiasów i jednego kierowcę. Własny adapter Studio, kontrolery budowania i cykli, profile JSON, raporty, 40 testów logiki i 18 sprawdzeń GUI w mocku.

@@ -8,7 +8,7 @@ return function(M)
   self.frame=self:create('Frame',{Name='Window',BackgroundColor3=self.palette.bg,BorderSizePixel=0,Active=true},self.gui);self:corner(self.frame,14)
   self.header=self:create('Frame',{Size=UDim2.new(1,0,0,65),BackgroundColor3=self.palette.panel,BorderSizePixel=0,Active=true},self.frame);self:corner(self.header,14)
   self:create('TextLabel',{Position=UDim2.fromOffset(18,8),Size=UDim2.new(1,-120,0,25),BackgroundTransparency=1,Text='KUBI HUB  /  ULTIMATE',TextColor3=self.palette.text,TextSize=19,Font=Enum.Font.GothamBold,TextXAlignment=Enum.TextXAlignment.Left},self.header)
-  self.subtitle=self:create('TextLabel',{Position=UDim2.fromOffset(18,36),Size=UDim2.new(1,-120,0,18),BackgroundTransparency=1,Text='V5.0  •  ASYSTENT BUDOWANIA',TextColor3=self.palette.muted,TextSize=11,Font=Enum.Font.Gotham,TextXAlignment=Enum.TextXAlignment.Left},self.header)
+  self.subtitle=self:create('TextLabel',{Position=UDim2.fromOffset(18,36),Size=UDim2.new(1,-120,0,18),BackgroundTransparency=1,Text='V'..M.Version.current..'  •  ASYSTENT BUDOWANIA',TextColor3=self.palette.muted,TextSize=11,Font=Enum.Font.Gotham,TextXAlignment=Enum.TextXAlignment.Left},self.header)
   self.nav=self:create('ScrollingFrame',{BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=2,CanvasSize=UDim2.new(),AutomaticCanvasSize=Enum.AutomaticSize.XY},self.frame)
   self.navLayout=self:create('UIListLayout',{Padding=UDim.new(0,6),SortOrder=Enum.SortOrder.LayoutOrder},self.nav)
   self.content=self:create('Frame',{BackgroundTransparency=1},self.frame)
@@ -97,17 +97,18 @@ return function(M)
   local at=parent;while at and at~=self.content do local r=self.cardBodies[at];if r then r.terms=r.terms..' '..tostring(text);return end;at=at.Parent end
  end
  function UI:button(parent,text,fn,tip,list)
-  self:rememberTerm(parent,text)
+  if not list then self:rememberTerm(parent,text) end
   local b=self:create('TextButton',{Size=UDim2.new(1,0,0,38),BackgroundColor3=self.palette.panel,Text=text,TextColor3=self.palette.text,TextSize=12,TextWrapped=true,Font=Enum.Font.GothamBold,BorderSizePixel=0},parent);self:corner(b,8)
   self:bind(b.Activated,function()self.app:run(self.current or 'GUI',fn)end,list)
   if tip then self:bind(b.MouseEnter,function()if self.app.config.data.ui.tooltips then self.tooltip.Text=tip;local p=self.app.input:GetMouseLocation();local v=workspace.CurrentCamera.ViewportSize;self.tooltip.Position=UDim2.fromOffset(math.clamp(p.X,0,math.max(0,v.X-290)),math.clamp(p.Y-82,0,math.max(0,v.Y-80)));self.tooltip.Visible=true end end,list);self:bind(b.MouseLeave,function()self.tooltip.Visible=false end,list) end
   return b
  end
- function UI:field(parent,title,initial,fn,multiline)
+ function UI:field(parent,title,initial,fn,multiline,get)
   self:rememberTerm(parent,title)
   self:label(parent,title,26)
   local box=self:create('TextBox',{Size=UDim2.new(1,0,0,multiline and 140 or 35),BackgroundColor3=self.palette.bg,BorderSizePixel=0,Text=tostring(initial or ''),PlaceholderText=title,TextColor3=self.palette.text,PlaceholderColor3=self.palette.muted,TextSize=12,Font=multiline and Enum.Font.Code or Enum.Font.Gotham,TextWrapped=true,ClearTextOnFocus=false,MultiLine=multiline==true,TextXAlignment=Enum.TextXAlignment.Left,TextYAlignment=multiline and Enum.TextYAlignment.Top or Enum.TextYAlignment.Center},parent);self:corner(box,7)
-  if fn then self:bind(box.FocusLost,function()self.app:run('GUI',function()local value=fn(box.Text);if value~=nil then box.Text=tostring(value) end end)end) end;return box
+  if fn then self:bind(box.FocusLost,function()self.app:run('GUI',function()local value,err=fn(box.Text);if value==false then if get then box.Text=tostring(get()) end;return false,err end;if value~=nil then box.Text=tostring(value) end end)end) end
+  if get then local function refresh()box.Text=tostring(get())end;refresh();self.refreshers[#self.refreshers+1]=refresh end;return box
  end
  function UI:cycle(parent,title,values,get,set)
   local button

@@ -14,7 +14,7 @@ return function(Util,Schema,LegacyShapes,LegacyPlans,WormMK2,DynamiteStack)
   return self
  end
  function Library:list(query,category,sort,favorites,onlyFavorites)
-  local out={};query=(query or ''):lower()
+  local out={};query=(query or ''):lower();favorites=favorites or {}
   for _,item in pairs(self.items) do if (not category or category=='Wszystkie' or item.category==category) and (not onlyFavorites or favorites[item.id]) and (item.name:lower():find(query,1,true) or item.id:lower():find(query,1,true)) then out[#out+1]=item end end
   table.sort(out,function(a,b)if sort=='Bloki' and #a.elements~=#b.elements then return #a.elements<#b.elements end;return a.name<b.name end);return out
  end

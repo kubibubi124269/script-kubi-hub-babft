@@ -32,4 +32,12 @@ end
 function Util.rotate(v,r)
  local m=Util.matrix(r);return {m[1]*v[1]+m[2]*v[2]+m[3]*v[3],m[4]*v[1]+m[5]*v[2]+m[6]*v[3],m[7]*v[1]+m[8]*v[2]+m[9]*v[3]}
 end
+function Util.yawRotation(rotation,yaw)
+ local m=Util.matrix(rotation);local a=math.rad(yaw);local c,s=math.cos(a),math.sin(a)
+ local out={c*m[1]+s*m[7],c*m[2]+s*m[8],c*m[3]+s*m[9],m[4],m[5],m[6],-s*m[1]+c*m[7],-s*m[2]+c*m[8],-s*m[3]+c*m[9]}
+ local y=math.asin(math.clamp(out[3],-1,1));local x,z
+ if math.abs(math.cos(y))>1e-7 then x=math.atan2(-out[6],out[9]);z=math.atan2(-out[2],out[1])
+ else x=math.atan2((out[3]>=0 and 1 or -1)*out[4],out[5]);z=0 end
+ return {math.deg(x),math.deg(y),math.deg(z)}
+end
 return Util
