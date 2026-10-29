@@ -1,5 +1,11 @@
 # Testy i oczekiwane wyniki
 
+## Aktualizacja V5.1 — 2026-10-29
+
+61 testów logiki, 30 sprawdzeń kontraktu GUI oraz oba importy modeli. Nowe regresje odtwarzają błędy: numer pierwszej warstwy, błędne BindTable, eksport i ponowny import obróconego projektu, nieznane materiały, niedostępny główny profil, fałszywe anulowanie, mały projekt poza działką, wzrost tekstu wyszukiwarki i nadpisanie szybkiego importu. Dodatkowe testy sprawdzają wyśrodkowanie z UNDO, przesunięcie pivotów wraz z częściami, dopasowanie obróconego dużego planu, zachowanie źródła oraz odmowę skalowania mechaniki.
+
+W grze należy osobno sprawdzić: V5.1.0 w nagłówku, warstwę 1 podłogi, eksport/import po obrocie 90°, utworzenie drewnianego koła po wybraniu tytanu w poprzednim planie, wyśrodkowanie mostu, dopasowanie zwykłego projektu i UNDO. Ręczne wymiary są pomocą w planowaniu, nie potwierdzeniem wymiarów publicznego BABFT. Ograniczenia API i brak testu natywnej fizyki pozostają aktualne.
+
 ## Wykonane offline
 
 Oficjalny Luau 0.744 i Node z bibliotekami wbudowanymi. SHA256 Windows ZIP: fde3e22c557aac6afe20a34e8050b7d8c290fa42638c04274a307ed5d0ef0db8. CI przypina Linux ZIP i sprawdza SHA256. Wynik tools/test.cjs: 40 testów logiki i 18 sprawdzeń kontraktu GUI, bez niepowodzeń. Log trafia do .test-output/results.txt.
