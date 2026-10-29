@@ -1,5 +1,5 @@
 {
-  "version": "5.1.0",
+  "version": "5.1.1",
   "modules": [
     {
       "name": "Util",
@@ -74,7 +74,7 @@
     {
       "name": "Version",
       "file": "src/modules/tools/Version.lua",
-      "sha256": "c3fa56b50afdb119bf488a515608c3ea3308949f7c37ba47f2b0f03b27a35408"
+      "sha256": "32aad0617da3a579093a0563a2176ad882466050cddbcf373ed402dcd5c078cf"
     },
     {
       "name": "Performance",
@@ -94,7 +94,7 @@
     {
       "name": "Layout",
       "file": "src/ui/Layout.lua",
-      "sha256": "e1cae2a16cbd5642d7a14458179fd4b5439d2299259776791408fcdd19c70d29"
+      "sha256": "2b758264a60f5957ec73e23de643e6eae4c2cf3f0c1ea9b8131e30815e04eb0e"
     },
     {
       "name": "Navigation",
@@ -109,13 +109,13 @@
     {
       "name": "UI",
       "file": "src/ui/Window.lua",
-      "sha256": "402a5fec28c3eadafca62c3673707938788fa51ead49435bccc80242165efacb"
+      "sha256": "9570087f98920fec8d21ee47ad8e60c02db5780f8f1ef09f38a3e5fb99455d47"
     },
     {
       "name": "Application",
       "file": "src/core/Application.lua",
-      "sha256": "920602283ddc0b8a0c4991a73e3341ad97e187b3fc17a401807955d6218952ec"
+      "sha256": "a4d17a8281eb42eb6e544161be764e5c6d763a94b3b0e8b4a9e634e42c82c95a"
     }
   ],
-  "mainSha256": "1af080df8ca4c52035887a201ff261893e755b1637c8bf938f70aa749a46a20f"
+  "mainSha256": "b048705acf710dfd0452ca8710784b1445fb4dd975163ed57c7af3fdae7e8bf1"
 }
