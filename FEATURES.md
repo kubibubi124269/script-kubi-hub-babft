@@ -8,3 +8,5 @@
 - **Settings**: profile i JSON, cofnięcie konfiguracji, motyw, układ kompaktowy, statystyki, ostatnia sesja, pełny raport błędów, wydajność i wyłączenie huba.
 
 Górna wyszukiwarka indeksuje nagłówki, opisy, przyciski i pola. Wynik otwiera właściwą zakładkę i rozwija sekcję. Nazwy wszystkich konstrukcji można przeszukać wewnątrz biblioteki Shapes. Nagłówki zwijają sekcje. Statystyki i diagnostyka nie zajmują oddzielnych zakładek.
+
+V5.1.1: w wąskim oknie nawigacja ma trzy kolumny, a poniżej szerokości 420 px dwie. Wszystkie sześć zakładek pozostaje widoczne. Kliknięcie dolnego paska rozwija **Settings / Ostatni komunikat** z pełnym tekstem. Bez dostępu do budowania przycisk **ASYSTENT** rozwija instrukcję ręczną; BUILD oraz pauza/anulowanie pojawiają się po potwierdzeniu uprawnienia serwera.

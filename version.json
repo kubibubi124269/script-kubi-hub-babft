@@ -1,13 +1,12 @@
 {
-  "version": "5.1.0",
+  "version": "5.1.1",
   "releaseDate": "2026-10-29",
   "changes": [
-    "Naprawione warstwy schematów i zachowanie obrotu w eksporcie",
-    "Poprawione anulowanie budowy, granice obszaru i stare komunikaty błędów",
-    "Nowe koła i importy nie dziedziczą poprzedniego materiału ani obrotu",
-    "Kopie ustawień odzyskują się również po błędzie odczytu; odrzucane są nieznane materiały",
-    "Builder: wyśrodkowanie, przesunięcia X/Y/Z i dopasowanie zwykłych planów",
-    "Kopiowanie listy materiałów, wybór kroku oraz lżejsza obsługa podglądu"
+    "Wszystkie sześć zakładek widoczne w siatce w wąskim oknie",
+    "Opisy i statystyki dopasowują wysokość do tekstu",
+    "Pełna treść komunikatu po kliknięciu dolnego paska",
+    "Skróty diagnostyki rozwijają właściwą sekcję Settings",
+    "Bez dostępu do budowania przycisk otwiera instrukcję ręczną"
   ],
   "compatibility": "W publicznym BABFT: podgląd, generatory i asystent. Automatyzacja i mechanika wymagają uprawnionego adaptera we własnej grze. Fizyka WORM-a wymaga testu w Studio."
 }

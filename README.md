@@ -1,6 +1,8 @@
-# KUBI HUB ULTIMATE V5.1
+# KUBI HUB ULTIMATE V5.1.1
 
 Sześć głównych zakładek: **PRO, Builder, Autofarm, Shapes, Circle Maker, Settings**. Sekcje są zwijane, a wyszukiwarka u góry znajduje funkcje i ustawienia. Prawy Ctrl lub pływający przycisk **K** pokazuje okno.
+
+W wąskim oknie wszystkie zakładki mieszczą się w dwóch lub trzech rzędach. Opisy i statystyki rosną razem z tekstem. Kliknięcie dolnego paska otwiera pełny komunikat w Settings. Bez dostępu do budowania przycisk **ASYSTENT** otwiera instrukcję ręczną; V5.1.1 nie dodaje automatycznego budowania w publicznym BABFT.
 
 Stały loader pozostaje bez zmian:
 
@@ -36,14 +38,14 @@ Serwer domyślnie działa wyłącznie w Studio. Użycie we własnej opublikowane
 
 ## Testy
 
-Wykonano kompilację oficjalnym Luau 0.744, **61 testów logiki i 30 sprawdzeń kontraktu GUI w mocku**. Mock nie renderuje Roblox i nie symuluje fizyki. **Testów Studio ani V5 w BABFT nie wykonano.**
+Wykonano kompilację oficjalnym Luau 0.744, **63 testy logiki i 45 sprawdzeń kontraktu GUI w mocku**. Mock nie renderuje Roblox i nie symuluje fizyki. **Testów Studio ani nowej wersji w BABFT nie wykonano.**
 
 ```text
 node tools/build.cjs
 LUAU_BIN=/path/to/luau LUAU_COMPILE=/path/to/luau-compile node tools/test.cjs
 ```
 
-[Raport V5.1 i ograniczenia](docs/V5.1-REPORT.md) · [Testy i oczekiwane wyniki](docs/TESTING.md) · [Historia zmian](CHANGELOG.md) · [Układ funkcji](FEATURES.md).
+[Raport poprawki GUI](docs/V5.1.1-REPORT.md) · [Raport V5.1 i ograniczenia](docs/V5.1-REPORT.md) · [Testy i oczekiwane wyniki](docs/TESTING.md) · [Historia zmian](CHANGELOG.md) · [Układ funkcji](FEATURES.md).
 
 ## Modele społeczności
 
