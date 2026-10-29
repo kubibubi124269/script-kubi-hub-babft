@@ -49,7 +49,7 @@ return function(M)
   local cost=M.Inventory.requirements(schema);for material,n in pairs(cost) do if not s.budget[material] or s.budget[material]<n then return failure('Missing material '..material) end end
   local model=Instance.new('Model');model.Name=schema.name;model:SetAttribute('OwnerUserId',s.ownerId);model.Parent=s.folder
   local base=CFrame.new(s.origin)*CFrame.Angles(0,math.rad(p.yaw),0)
-  local tx={state='open',model=model,schema=schema,cost=cost,base=base,parts={},next=1,touched=os.clock()};s.transactions[p.id]=tx
+  local tx={state='open',model=model,schema=schema,cost=cost,base=base,yaw=p.yaw,parts={},next=1,touched=os.clock()};s.transactions[p.id]=tx
   for material,n in pairs(cost) do s.budget[material]=s.budget[material]-n end
   return {ok=true,transaction=p.id}
  end
@@ -87,11 +87,11 @@ return function(M)
    for _,part in pairs(tx.parts) do part.CanCollide=false;part.Anchored=false end
    local rootPart=tx.parts[tx.schema.root];rootPart.CanCollide=true;rootPart.CustomPhysicalProperties=PhysicalProperties.new(1,.7,0)
    local attachment=Instance.new('Attachment');attachment.Name='DriveAttachment';attachment.Parent=rootPart
-   local orientation=Instance.new('AlignOrientation');orientation.Mode=Enum.OrientationAlignmentMode.OneAttachment;orientation.Attachment0=attachment;orientation.MaxTorque=150000;orientation.Responsiveness=8;orientation.CFrame=tx.base.Rotation;orientation.Parent=rootPart
-   s.rig={root=rootPart,seat=tx.parts[tx.schema.driver],hinges=hinges,mouth=false,heading=select(2,tx.base:ToOrientation()),orientation=orientation,stopped=false}
+   local orientation=Instance.new('AlignOrientation');orientation.Mode=Enum.OrientationAlignmentMode.OneAttachment;orientation.Attachment0=attachment;orientation.MaxTorque=150000;orientation.Responsiveness=8;orientation.CFrame=rootPart.CFrame.Rotation;orientation.Parent=rootPart
+   s.rig={root=rootPart,seat=tx.parts[tx.schema.driver],hinges=hinges,mouth=false,heading=select(2,rootPart.CFrame:ToOrientation()),orientation=orientation,stopped=false}
    rootPart:SetNetworkOwner(nil)
   end
-  tx.state='committed';tx.model:SetAttribute('BuildCommitted',true);s.lastSchema=tx.schema;return {ok=true,count=#tx.schema.elements,connected=true}
+  tx.state='committed';tx.model:SetAttribute('BuildCommitted',true);s.lastSchema=assert(M.Schema.bakeYaw(tx.schema,tx.yaw));return {ok=true,count=#tx.schema.elements,connected=true}
  end
  local function dispatch(player,s,kind,p)
   if kind=='inventory' then return {ok=true,values=M.Util.copy(s.budget),source='Budżet własnego zestawu testowego — nie ekwipunek BABFT'}
@@ -120,7 +120,7 @@ return function(M)
   local s=sessions[player]
   if packet.kind=='hello' then
    if not s then s=newSession(player);s.ownerId=player.UserId end
-   return {ok=true,authorized=true,userId=player.UserId,placeId=game.PlaceId,protocol=1,session=s.token,label='Własny test Studio / dozwolony serwer',capabilities={build=true,mechanics=true,inventory=true,farm=true,movement=true},zone={size={120,200,120}},minFarmInterval=.3}
+   return {ok=true,authorized=true,userId=player.UserId,placeId=game.PlaceId,protocol=1,session=s.token,label='Własny test Studio / dozwolony serwer',capabilities={build=true,mechanics=true,inventory=true,farm=true,movement=true},zone={size={120,200,120},min={-59,-6,-59},max={59,200,59}},minFarmInterval=.3}
   end
   if not s or packet.session~=s.token then return failure('Invalid session') end
   if s.cache[packet.id] then return s.cache[packet.id] end
