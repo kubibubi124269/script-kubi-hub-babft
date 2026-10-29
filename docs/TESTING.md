@@ -1,5 +1,11 @@
 # Testy i oczekiwane wyniki
 
+## Poprawka GUI V5.1.1 — 2026-10-29
+
+63 testy logiki, 45 sprawdzeń kontraktu GUI, oba importy modeli oraz kompilacja klienta i serwera przeszły offline. Regresje sprawdzają pomieszczenie sześciu zakładek przy szerokościach 300–699 px, położenie treści poniżej nawigacji, pełny długi komunikat, kierowanie do właściwej sekcji Settings, odświeżanie raportu i przejście do instrukcji ręcznej bez rozpoczynania budowy. Mock kontroluje właściwości AutomaticSize i wyrównanie tekstu; nie dowodzi wyglądu natywnego interfejsu Roblox.
+
+Do sprawdzenia przez użytkownika w BABFT: nagłówek V5.1.1; po zmniejszeniu okna wszystkie sześć zakładek w dwóch/trzech rzędach; brak dużych pustych przestrzeni między opisami; pełny komunikat po kliknięciu dolnego paska; przycisk ASYSTENT rozwija instrukcję ręczną. Automatyczna budowa w publicznym BABFT nadal nie jest dostępna.
+
 ## Aktualizacja V5.1 — 2026-10-29
 
 61 testów logiki, 30 sprawdzeń kontraktu GUI oraz oba importy modeli. Nowe regresje odtwarzają błędy: numer pierwszej warstwy, błędne BindTable, eksport i ponowny import obróconego projektu, nieznane materiały, niedostępny główny profil, fałszywe anulowanie, mały projekt poza działką, wzrost tekstu wyszukiwarki i nadpisanie szybkiego importu. Dodatkowe testy sprawdzają wyśrodkowanie z UNDO, przesunięcie pivotów wraz z częściami, dopasowanie obróconego dużego planu, zachowanie źródła oraz odmowę skalowania mechaniki.
@@ -16,10 +22,10 @@ tests/RobloxMock.lua i uiSmoke.lua uruchamiają pełny klient, sześć zakładek
 
 ## Do wykonania w BABFT — NIE WYKONANO
 
-1. Ten sam loader: oczekiwane V5.0 i sześć zakładek.
+1. Ten sam loader: oczekiwane V5.1.1 i sześć zakładek.
 2. Wpisz „promień” u góry; wynik Circle Maker otwiera właściwą sekcję.
 3. Wygeneruj WoodBlock, promień 4, 8 segmentów, jedna warstwa: osiem części podglądu i jawny stan materiałów.
-4. Bez mostu BUILD wyjaśnia brak uprawnionego API i nie liczy podglądu jako postawionych części.
+4. Bez mostu ASYSTENT otwiera instrukcję ręczną i nie liczy podglądu jako postawionych części.
 5. Plan stosu wymaga 1 Seat, 1 Dynamite i 3000 WoodBlock. Ponowne uruchomienie zostawia jedno GUI. Raport znajduje się w Settings.
 
 ## Do wykonania w Studio — NIE WYKONANO

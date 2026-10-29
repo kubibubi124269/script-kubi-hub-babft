@@ -5,7 +5,7 @@ return function(M)
   self.player=game:GetService('Players').LocalPlayer;assert(self.player,'V5 wymaga klienta / LocalScript.');self.player:WaitForChild('PlayerGui',10)
   self.input=game:GetService('UserInputService');self.runService=game:GetService('RunService');self.http=game:GetService('HttpService')
   self.log=M.Log.new(function()return os.date('%Y-%m-%d %H:%M:%S')end)
-  self.runtime=M.Runtime.new(self.clock,function(module,err)self.log:error(module,err);if self.ui then self.ui:toast(module,'Wystąpił błąd. Szczegóły w DEBUG.',true) end end)
+  self.runtime=M.Runtime.new(self.clock,function(module,err)self.log:error(module,err);if self.ui then self.ui:toast(module,'Wystąpił błąd. Szczegóły: Settings / Raport błędów.',true) end end)
   self.codec={encode=function(v)return self.http:JSONEncode(v)end,decode=function(s)return self.http:JSONDecode(s)end}
   self.storage=self:storageAdapter();self.config=M.Config.new(self.codec,self.storage,self.log)
   local saved=_G.KubiHubV5Settings;if type(saved)=='table' then local value=M.Config.validate(saved);if value then self.config.data=value end end
@@ -78,7 +78,7 @@ return function(M)
   local p=M.Performance.get(self.config.data.performance.profile,self.fps);self.preview:set(self.builder.schema,self.inventorySnapshot,{limit=p.previewLimit,layer=self.config.data.builder.previewLayer,yaw=self.builder.options.yaw});self.previewDirty=false;self.previewRevision=self.builder.revision
   local report=self.builder:assistant(self.inventorySnapshot);local b=report.bounds.size
   self.planInfo.Text=string.format('%s\n%d części • %d połączeń • %.1f × %.1f × %.1f studów\nPodgląd: %d obiektów / %d części. Czerwone: brakujące, bursztynowe: nieodczytane.',self.builder.schema.name,report.elements,report.connections,b[1],b[2],b[3],self.preview.shown,report.elements)
-  self.materialInfo.Text='Źródło: '..self.inventorySnapshot.source..'\n'..M.Inventory.describe(report.materials);self.materialInfo.Size=UDim2.new(1,0,0,math.max(80,#report.materials.rows*50+40))
+  self.materialInfo.Text='Źródło: '..self.inventorySnapshot.source..'\n'..M.Inventory.describe(report.materials)
   if self.placementInfo then
    local b=self.builder.bounds;local zone=self.adapter.zone;local fits=zone and b.min[1]>=(zone.min and zone.min[1] or -zone.size[1]/2)-1e-6 and b.max[1]<=(zone.max and zone.max[1] or zone.size[1]/2)+1e-6 and b.min[3]>=(zone.min and zone.min[3] or -zone.size[3]/2)-1e-6 and b.max[3]<=(zone.max and zone.max[3] or zone.size[3]/2)+1e-6
    self.placementInfo.Text=string.format('Skala %.0f%% • środek X %.1f / Z %.1f\n%s',(self.builder.options.scale or 1)*100,b.center[1],b.center[3],zone and (fits and 'Obrys X/Z mieści się w odczytanym obszarze. Serwer sprawdzi również wysokość i uprawnienia.' or 'Obrys X/Z wychodzi poza odczytany obszar.') or 'Granice działki nieodczytane. Ręczne wymiary poniżej służą do planowania.')
@@ -122,8 +122,12 @@ return function(M)
   ui:field(b,'Warstwa • 0 = wszystkie',0,function(v)self.config.data.builder.previewLayer=M.Util.number(tonumber(v),0,0,1000,true);self.previewDirty=true;return self.config.data.builder.previewLayer end,false,function()return self.config.data.builder.previewLayer or 0 end)
   self.materialInfo=ui:label(b,'',180)
   ui:button(b,'Kopiuj listę materiałów',function()local text=M.Inventory.describe(M.Inventory.compare(self.builder.schema,self.inventorySnapshot));self:copy(text,self.schemaBox);self:notify('Builder','Lista materiałów znajduje się też w polu importu / eksportu.')end)
-  ui:button(b,'BUILD — sprawdź i zbuduj przez adapter',function()self:refreshPreview();return self.builder:start(self.inventorySnapshot)end,'Tylko uprawniony serwer i własna działka. Podgląd nie jest budowlą serwerową.')
-  ui:button(b,'Pauza budowania',function()return self.builder:pause()end);ui:button(b,'Wznów budowanie',function()return self.builder:resume()end);ui:button(b,'Anuluj własną transakcję',function()return self.builder:cancel()end)
+  self.buildAvailability=ui:label(b,'')
+  self.buildButton=ui:button(b,'ASYSTENT — pokaż kroki budowania',function()
+   if not self.adapter.capabilities.build then ui:reveal(self.assistantBody);return true end
+   self:refreshPreview();return self.builder:start(self.inventorySnapshot)
+  end,'Bez połączenia z budowaniem: instrukcja ręczna. Po potwierdzeniu uprawnień serwera: budowa na własnej działce.')
+  self.buildControls={ui:button(b,'Pauza budowania',function()return self.builder:pause()end),ui:button(b,'Wznów budowanie',function()return self.builder:resume()end),ui:button(b,'Anuluj własną transakcję',function()return self.builder:cancel()end)}
   self.buildInfo=ui:label(b,'',75)
   local edits=ui:card(builder,'Edytor i historia','Obrót dotyczy budowy na działce; kamera podglądu obraca się niezależnie. Odbicie mechanicznego rig-u jest zablokowane, by nie uszkodzić jego osi.')
   local function edit(k,v)local options=M.Util.copy(self.builder.options);options[k]=v;local ok,err=self.builder:edit(options);if ok then self.config.data.builder=M.Util.copy(options);self.previewDirty=true end;return ok,err end
@@ -141,6 +145,7 @@ return function(M)
   for _,spec in ipairs({{'Ręczna szerokość obszaru','width'},{'Ręczna długość obszaru','depth'}}) do local f=spec;ui:field(placement,f[1],self.manualZone[f[2]],function(v)self.manualZone[f[2]]=M.Util.number(tonumber(v),120,10,300);return self.manualZone[f[2]] end) end
   ui:button(placement,'Dopasuj do obszaru',function()local w,d=self.manualZone.width,self.manualZone.depth;local zone=self.adapter.zone or {size={w,200,d},min={-w/2+1,-6,-d/2+1},max={w/2-1,200,d/2-1}};return changed(self.builder:fit(zone))end,'Używa granic adaptera, jeśli są znane. Inaczej używa ręcznych wymiarów z marginesem jednego studa; jest to pomoc w planowaniu.')
   local assistant=ui:card(builder,'Asystent ręcznego budowania','Współrzędne są względem konstrukcji. Stos drewna zawiera celowe nałożenie elementów; nie uruchamiam eksplozji ani nie wysyłam go do publicznego serwera.')
+  self.assistantBody=assistant
   self.stepInfo=ui:label(assistant,'',140);ui:button(assistant,'Poprzedni element',function()self.manualStep=self.manualStep-1;self:updateStep()end);ui:button(assistant,'Następny element',function()self.manualStep=self.manualStep+1;self:updateStep()end)
   ui:field(assistant,'Przejdź do elementu',1,function(v)self.manualStep=M.Util.number(tonumber(v),self.manualStep,1,#self.builder.schema.elements,true);self:updateStep();return self.manualStep end,false,function()return self.manualStep end)
   local schematics=ui:page('SCHEMATICS','SCHEMATICS');local sc=ui:card(schematics,'Biblioteka konstrukcji','Zachowana geometria poprzednich projektów, WORM MK2 oraz własne projekty. Stan mechaniki jest oddzielony od samego planu.')
@@ -165,13 +170,15 @@ return function(M)
   ui:button(pl,'Mini kopia własnego awatara',function()self.effects:clone(self.player.Character,.4)end);ui:button(pl,'Duża kopia własnego awatara',function()self.effects:clone(self.player.Character,2)end);ui:button(pl,'Wyczyść własne efekty',function()self.effects:clear()end)
   ui:button(pl,'WORM: otwórz / zamknij paszczę • klawisz E',function()return self.adapter:rig('mouth')end,'Działa po zbudowaniu rig-u przez autoryzowany adapter i zajęciu własnego fotela.')
   local tools=ui:page('TOOLS','TOOLS');self:toolsPage(tools)
-  local stats=ui:page('STATS','STATS');local st=ui:card(stats,'Rzeczywiste pomiary sesji','Brak pomiaru jest oznaczony „—”. FPS dotyczy klienta. Czas odpowiedzi adaptera jest osobnym pomiarem i nie jest przedstawiany jako ping Roblox.')
-  self.statsInfo=ui:label(st,'',210);self.lastSession=ui:label(st,_G.KubiHubLastSession and ('Poprzednia sesja:\n'.._G.KubiHubLastSession) or 'Pierwsza sesja V'..M.Version.current..'.',100)
   local settings=ui:page('SETTINGS','SETTINGS');self:settingsPage(settings)
-  local debugPage=ui:page('DEBUG','DEBUG');local dbg=ui:card(debugPage,'Błędy, zadania i zgodność','Raport zawiera datę, moduł, poziom i szczegóły błędu. Nie zawiera tokenów ani odczytu plików przeglądarki.')
+  ui.statusBody=ui:card(settings,'Ostatni komunikat','Kliknięcie paska u dołu huba otwiera tutaj pełną treść komunikatu. Starsze wpisy są w raporcie błędów.')
+  ui.statusInfo=ui:label(ui.statusBody,'Gotowy. Brak nowych komunikatów.')
+  local stats=ui:page('STATS','STATS');local st=ui:card(stats,'Rzeczywiste pomiary sesji','Brak pomiaru jest oznaczony „—”. FPS dotyczy klienta. Czas odpowiedzi adaptera jest osobnym pomiarem i nie jest przedstawiany jako ping Roblox.');ui.routes.STATS=st
+  self.statsInfo=ui:label(st,'',210);self.lastSession=ui:label(st,_G.KubiHubLastSession and ('Poprzednia sesja:\n'.._G.KubiHubLastSession) or 'Pierwsza sesja V'..M.Version.current..'.',100)
+  local debugPage=ui:page('DEBUG','DEBUG');local dbg=ui:card(debugPage,'Raport błędów, zadania i zgodność','Raport zawiera datę, moduł, poziom i szczegóły błędu. Nie zawiera tokenów ani odczytu plików przeglądarki.');ui.routes.DEBUG=dbg;self.debugBody=dbg
   self.debugInfo=ui:label(dbg,'',140);self.debugBox=ui:field(dbg,'Raport do skopiowania','',nil,true);self.debugBox.Size=UDim2.new(1,0,0,260)
   ui:button(dbg,'Odśwież raport',function()self.debugBox.Text=self:report()end);ui:button(dbg,'Skopiuj raport',function()self:copy(self:report(),self.debugBox)end);ui:button(dbg,'Wyczyść historię',function()self.log:clear();self.debugBox.Text='' end)
-  local performance=ui:page('PERFORMANCE','PERFORMANCE');local perf=ui:card(performance,'Wydajność KUBI HUB','Profile zmieniają limit obiektów podglądu i częstotliwość statystyk. Nie zmieniają Windows, innych aplikacji ani całego świata gry.')
+  local performance=ui:page('PERFORMANCE','PERFORMANCE');local perf=ui:card(performance,'Wydajność KUBI HUB','Profile zmieniają limit obiektów podglądu i częstotliwość statystyk. Nie zmieniają Windows, innych aplikacji ani całego świata gry.');ui.routes.PERFORMANCE=perf
   ui:cycle(perf,'Profil',{'QUALITY','BALANCED','PERFORMANCE'},function()return self.config.data.performance.profile end,function(v)self.config.data.performance.profile=v;self.previewDirty=true end);self.performanceInfo=ui:label(perf,'',110)
   ui:button(perf,'Wyczyść podgląd i efekty',function()self.preview:clear();self.effects:clear();self.previewDirty=false end);ui:button(perf,'Przywróć podgląd',function()self.previewDirty=true;self:refreshPreview()end)
  end
@@ -239,18 +246,22 @@ return function(M)
   local fs=self.farm:summary();local counts=self.runtime:counts();local _,hum,root=self.movement:character();local speed=root and root.AssemblyLinearVelocity.Magnitude;local active=(self.farm.state=='RUNNING' and 1 or 0)+(self.builder:isBusy() and 1 or 0)+(self.movement.fly and 1 or 0)+(#self.effects.objects>0 and 1 or 0)
   local p=M.Performance.get(self.config.data.performance.profile,self.fps);self.runtime.schedules.Dashboard.interval=p.statsInterval
   self.homeInfo.Text=string.format('Wersja %s • %s\nAktywne moduły: %d\nFarm: %s • Builder: %s\nSchematy: %d • błędy walidacji biblioteki: %d',M.Version.current,self.adapter.label,active,self.farm.state,self.builder.state,#self.library:list(),#self.library.errors)
-  self.ui.subtitle.Text='V'..M.Version.current..'  •  '..(self.adapter.session and 'UPRAWNIONY ADAPTER / '..self.adapter.label or 'ASYSTENT • BRAK API BUDOWANIA')
+  local canBuild=self.adapter.capabilities.build==true
+  self.ui.subtitle.Text='V'..M.Version.current..'  •  '..(canBuild and 'BUDOWANIE POŁĄCZONE' or 'TRYB ASYSTENTA')
+  self.buildAvailability.Text=canBuild and 'Serwer potwierdził dostęp do budowania na własnej działce.' or 'W tej sesji budowanie w grze jest niedostępne. Możesz używać podglądu, generatorów, listy materiałów i instrukcji ręcznej. Kod PRO nie odblokowuje dostępu do serwera.'
+  self.buildButton.Text=canBuild and 'BUILD — sprawdź i zbuduj przez adapter' or 'ASYSTENT — pokaż kroki budowania'
+  for _,button in ipairs(self.buildControls) do button.Visible=canBuild end
   self.farmInfo.Text=string.format('Stan: %s • etap: %d\nCykle potwierdzone %d • nieudane %d\nŚredni cykl: %s s • cykle/h: %s\nOstatni błąd: %s',fs.state,fs.stage,fs.completed,fs.failed,fs.average and string.format('%.2f',fs.average) or '—',fs.cyclesPerHour and string.format('%.1f',fs.cyclesPerHour) or '—',fs.lastError~='' and fs.lastError or '—')
   self.buildInfo.Text=string.format('Stan: %s\nCzęści potwierdzone przez serwer: %d / %d\n%s',self.builder.state,self.builder.placed,self.builder.total,self.builder.error or '')
   self.movementInfo.Text=string.format('Prędkość rzeczywista: %s stud/s\nFly: %s • uprawnienie: %s',speed and string.format('%.1f',speed) or '—',self.movement.fly and 'ON' or 'OFF',self.adapter.capabilities.movement and 'potwierdzone' or 'brak adaptera')
   self.playerInfo.Text=hum and string.format('%s\nZdrowie: %.0f / %.0f • stan: %s',self.player.DisplayName,hum.Health,hum.MaxHealth,hum:GetState().Name) or 'Oczekiwanie na postać.'
   self.statsInfo.Text=string.format('Sesja %.1f min • FPS %.1f\nCykle %d • nieudane %d\nŚredni czas cyklu %s s\nOdpowiedź adaptera %s ms\nZadania %d • połączenia %d • harmonogramy %d\nBrak symulowanych nagród ani złota.',fs.elapsed/60,self.fps,fs.completed,fs.failed,fs.average and string.format('%.2f',fs.average) or '—',self.adapter.lastLatency and string.format('%.1f',self.adapter.lastLatency) or '—',counts.jobs,counts.connections,counts.schedules)
   self.debugInfo.Text='Środowisko: '..self.adapter.label..'\nZadania klienta: '..counts.jobs..' • aktywne połączenia: '..counts.connections..'\nFarm / Builder / Movement: '..self.farm.state..' / '..self.builder.state..' / '..(self.movement.fly and 'FLY' or 'OFF')
-  if self.ui.current=='DEBUG' then self.debugBox.Text=self:report() end
+  if self.ui.current=='SETTINGS' and self.debugBody.Visible then self.debugBox.Text=self:report() end
   self.performanceInfo.Text=string.format('FPS %.1f • limit podglądu %d\nCzęstotliwość statystyk: co %.1f s\nObiekty podglądu: %d • lokalne efekty: %d',self.fps,p.previewLimit,p.statsInterval,#self.preview.parts,#self.effects.objects)
  end
  function App:stopAll()
-  self.farm:stop();self.builder:cancel();self.movement:reset();self.effects:clear();self.adapter:cancel('all');self:notify('Core','Zatrzymano moduły. Trwające żądanie serwera może jeszcze kończyć zatwierdzanie; stan sprawdzisz w DEBUG.')
+  self.farm:stop();self.builder:cancel();self.movement:reset();self.effects:clear();self.adapter:cancel('all');self:notify('Core','Zatrzymano moduły. Trwające żądanie serwera może jeszcze kończyć zatwierdzanie; stan sprawdzisz w Settings / Raport błędów.')
  end
  function App:unload()
   if not self.alive then return end

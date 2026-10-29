@@ -1,5 +1,11 @@
 # Historia zmian
 
+## 5.1.1 — 2026-10-29
+
+Poprawka problemów widocznych na zrzucie ekranu: sześć zakładek w siatce w wąskim oknie, automatyczna wysokość tekstu bez pustych obszarów i uciętych opisów oraz zwykłe znaki [+]/[-] w nagłówkach. Kliknięcie dolnego paska otwiera pełny komunikat. Skróty DEBUG/STATS/PERFORMANCE rozwijają właściwą sekcję Settings; raport odświeża się w tej zakładce.
+
+Bez potwierdzonego dostępu do budowania przycisk otwiera instrukcję ręczną, a nie próbuje uruchamiać niedostępnej transakcji. Kontrolki budowy pojawiają się po potwierdzeniu uprawnienia przez serwer. Ta poprawka nie dodaje publicznego API BABFT. Weryfikacja offline: 63 testy logiki, 45 sprawdzeń kontraktu GUI oraz dwa importy modeli. Natywne renderowanie i fizyka nie były testowane.
+
 ## 5.1.0 — 2026-10-29
 
 Najpierw odtworzono błędy V5.0 w testach, następnie poprawiono warstwy od pierwszej, walidację importowanych danych i flag, zachowanie obrotu i zawiasów w eksporcie, odrzucanie nieznanych materiałów ustawień, odzyskiwanie kopii po błędzie odczytu, stare komunikaty błędów oraz pełne granice obszaru. Nieznana odpowiedź na anulowanie nie jest już przedstawiana jako CANCELLED, a stan committed wymaga poprawnej liczby części.
