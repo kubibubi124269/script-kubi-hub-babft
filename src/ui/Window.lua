@@ -1,23 +1,23 @@
 return function(M)
  local UI={};UI.__index=UI
  function UI.new(app)
-  local self=setmetatable({app=app,pages={},buttons={},order=0,listConnections={},accentItems={},cards={},cardBodies={},firstCard={},refreshers={}},UI)
+  local self=setmetatable({app=app,pages={},buttons={},order=0,listConnections={},accentItems={},cards={},cardBodies={},firstCard={},refreshers={},routes={}},UI)
   self.palette={bg=Color3.fromRGB(12,15,24),panel=Color3.fromRGB(20,25,38),card=Color3.fromRGB(27,33,49),text=Color3.fromRGB(235,239,250),muted=Color3.fromRGB(150,165,190),accent=Color3.fromRGB(83,133,247),red=Color3.fromRGB(244,95,120)}
   local old=app.player.PlayerGui:FindFirstChild('KubiHubUltimateV5');if old then old:Destroy() end
   self.gui=self:create('ScreenGui',{Name='KubiHubUltimateV5',ResetOnSpawn=false,DisplayOrder=95,ZIndexBehavior=Enum.ZIndexBehavior.Sibling},app.player.PlayerGui);app.runtime:own(self.gui)
   self.frame=self:create('Frame',{Name='Window',BackgroundColor3=self.palette.bg,BorderSizePixel=0,Active=true},self.gui);self:corner(self.frame,14)
   self.header=self:create('Frame',{Size=UDim2.new(1,0,0,65),BackgroundColor3=self.palette.panel,BorderSizePixel=0,Active=true},self.frame);self:corner(self.header,14)
-  self:create('TextLabel',{Position=UDim2.fromOffset(18,8),Size=UDim2.new(1,-120,0,25),BackgroundTransparency=1,Text='KUBI HUB  /  ULTIMATE',TextColor3=self.palette.text,TextSize=19,Font=Enum.Font.GothamBold,TextXAlignment=Enum.TextXAlignment.Left},self.header)
-  self.subtitle=self:create('TextLabel',{Position=UDim2.fromOffset(18,36),Size=UDim2.new(1,-120,0,18),BackgroundTransparency=1,Text='V'..M.Version.current..'  •  ASYSTENT BUDOWANIA',TextColor3=self.palette.muted,TextSize=11,Font=Enum.Font.Gotham,TextXAlignment=Enum.TextXAlignment.Left},self.header)
-  self.nav=self:create('ScrollingFrame',{BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=2,CanvasSize=UDim2.new(),AutomaticCanvasSize=Enum.AutomaticSize.XY},self.frame)
-  self.navLayout=self:create('UIListLayout',{Padding=UDim.new(0,6),SortOrder=Enum.SortOrder.LayoutOrder},self.nav)
+  self.title=self:create('TextLabel',{Position=UDim2.fromOffset(18,8),Size=UDim2.new(1,-120,0,25),BackgroundTransparency=1,Text='KUBI HUB  /  ULTIMATE',TextColor3=self.palette.text,TextSize=19,Font=Enum.Font.GothamBold,TextXAlignment=Enum.TextXAlignment.Left},self.header)
+  self.subtitle=self:create('TextLabel',{Position=UDim2.fromOffset(18,36),Size=UDim2.new(1,-120,0,18),BackgroundTransparency=1,Text='V'..M.Version.current..'  •  TRYB ASYSTENTA',TextColor3=self.palette.muted,TextSize=11,Font=Enum.Font.Gotham,TextXAlignment=Enum.TextXAlignment.Left},self.header)
+  self.nav=self:create('ScrollingFrame',{BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=2,CanvasSize=UDim2.new(),AutomaticCanvasSize=Enum.AutomaticSize.Y},self.frame)
+  self.navLayout=self:create('UIGridLayout',{CellPadding=UDim2.fromOffset(6,6),FillDirection=Enum.FillDirection.Horizontal,SortOrder=Enum.SortOrder.LayoutOrder},self.nav)
   self.content=self:create('Frame',{BackgroundTransparency=1},self.frame)
   self.search=self:create('TextBox',{PlaceholderText='Szukaj funkcji lub schematu…',Text='',ClearTextOnFocus=false,BackgroundColor3=self.palette.card,TextColor3=self.palette.text,PlaceholderColor3=self.palette.muted,TextSize=13,Font=Enum.Font.Gotham,BorderSizePixel=0},self.frame);self:corner(self.search,8)
   self.results=self:create('ScrollingFrame',{Size=UDim2.fromScale(1,1),BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=3,CanvasSize=UDim2.new(),AutomaticCanvasSize=Enum.AutomaticSize.Y,Visible=false},self.content)
   self:create('UIListLayout',{Padding=UDim.new(0,7),SortOrder=Enum.SortOrder.LayoutOrder},self.results)
   self:bind(self.search:GetPropertyChangedSignal('Text'),function()self:searchCards()end)
   self.footer=self:create('TextButton',{Position=UDim2.new(0,14,1,-32),Size=UDim2.new(1,-28,0,24),Text='Gotowy. Prawy Ctrl: pokaż / ukryj.',TextColor3=self.palette.muted,TextSize=11,TextTruncate=Enum.TextTruncate.AtEnd,TextXAlignment=Enum.TextXAlignment.Left,BackgroundTransparency=1,Font=Enum.Font.Gotham},self.frame)
-  self:bind(self.footer.Activated,function()self:show('DEBUG')end)
+  self:bind(self.footer.Activated,function()if self.statusBody then self:reveal(self.statusBody) else self:show('DEBUG') end end)
   local function headerButton(text,x,fn)local b=self:create('TextButton',{Size=UDim2.fromOffset(28,28),Position=UDim2.new(1,x,0,17),BackgroundColor3=self.palette.card,Text=text,TextColor3=self.palette.text,TextSize=17,Font=Enum.Font.GothamBold,BorderSizePixel=0},self.header);self:corner(b,7);self:bind(b.Activated,fn)end
   headerButton('−',-76,function()self:hide()end);headerButton('×',-40,function()app:stopAll();self:hide()end)
   self.bubble=self:create('TextButton',{Name='Reopen',Position=UDim2.new(0,10,.5,-24),Size=UDim2.fromOffset(48,48),Text='K',BackgroundColor3=self.palette.accent,TextColor3=Color3.new(1,1,1),TextSize=23,Font=Enum.Font.GothamBold,Visible=false,BorderSizePixel=0},self.gui);self:corner(self.bubble,12);self:bind(self.bubble.Activated,function()self.frame.Visible=true;self.bubble.Visible=false end)
@@ -51,8 +51,11 @@ return function(M)
  function UI:fit()
   local c=workspace.CurrentCamera;if not c then return end;local v=c.ViewportSize;local s=self.app.config.data.ui;local b=M.Layout.compute(v.X,v.Y,s.width,s.height,s.compact);self.layout=b
   self.frame.Size=UDim2.fromOffset(b.width,b.height);self.frame.Position=UDim2.fromOffset(math.clamp(s.x*v.X,4,math.max(4,v.X-b.width-4)),math.clamp(s.y*v.Y,4,math.max(4,v.Y-b.height-4)))
-  self.nav.Position=UDim2.fromOffset(12,b.narrow and 76 or 80);self.nav.Size=b.narrow and UDim2.new(1,-24,0,34) or UDim2.new(0,155,1,-125);self.navLayout.FillDirection=b.narrow and Enum.FillDirection.Horizontal or Enum.FillDirection.Vertical
-  for _,button in pairs(self.buttons) do button.Size=b.narrow and UDim2.fromOffset(112,32) or UDim2.new(1,-5,0,35) end
+  self.title.TextSize=b.width<420 and 13 or 19;self.subtitle.TextSize=b.width<420 and 9 or 11
+  self.nav.Position=UDim2.fromOffset(12,b.narrow and 76 or 80);self.nav.Size=UDim2.fromOffset(b.navWidth,b.navHeight)
+  self.nav.ScrollingEnabled=not b.narrow;self.nav.AutomaticCanvasSize=b.narrow and Enum.AutomaticSize.None or Enum.AutomaticSize.Y;self.nav.CanvasSize=UDim2.new();self.nav.CanvasPosition=Vector2.zero
+  self.navLayout.FillDirectionMaxCells=b.navColumns;self.navLayout.CellSize=UDim2.fromOffset(b.navCellWidth,b.navCellHeight)
+  for _,button in pairs(self.buttons) do button.Size=UDim2.fromOffset(b.navCellWidth,b.navCellHeight) end
   self.search.Position=UDim2.fromOffset(b.contentX,b.contentY);self.search.Size=UDim2.fromOffset(b.contentWidth,32)
   self.content.Position=UDim2.fromOffset(b.contentX,b.contentY+42);self.content.Size=UDim2.fromOffset(b.contentWidth,math.max(40,b.contentHeight-42))
  end
@@ -64,14 +67,21 @@ return function(M)
   self.pages[id]=page;self.buttons[id]=self:button(self.nav,title,function()self:show(id)end,nil,false);self.buttons[id].LayoutOrder=M.Navigation.rank(id);self:fit();return page
  end
  function UI:show(id)
-  id=M.Navigation.resolve(id)
+  local target=self.routes[id];id=M.Navigation.resolve(id)
   if not self.pages[id] then return end
   if self.search.Text~='' then self.search.Text='' end;self.results.Visible=false
-  self.current=id;for name,page in pairs(self.pages) do page.Visible=name==id;self.buttons[name].BackgroundColor3=name==id and self.palette.accent or self.palette.panel end
+  self.scrollTarget=nil;self.current=id;for name,page in pairs(self.pages) do page.Visible=name==id;self.buttons[name].BackgroundColor3=name==id and self.palette.accent or self.palette.panel end
+  if target then self:scrollTo(self.cardBodies[target]) end
+ end
+ function UI:scrollTo(record)
+  if not record then return end;record.open(true);self.scrollTarget=record
+ end
+ function UI:reveal(body)
+  local record=self.cardBodies[body];if not record then return end;self:show(record.page);self:scrollTo(record)
  end
  function UI:hide()self.frame.Visible=false;self.bubble.Visible=true;self.tooltip.Visible=false end
  function UI:label(parent,text,height)
-  return self:create('TextLabel',{Size=UDim2.new(1,0,0,height or 35),BackgroundTransparency=1,Text=text,TextColor3=self.palette.text,TextWrapped=true,Font=Enum.Font.Gotham,TextSize=13,TextXAlignment=Enum.TextXAlignment.Left,TextYAlignment=Enum.TextYAlignment.Center},parent)
+  return self:create('TextLabel',{Size=UDim2.new(1,0,0,0),AutomaticSize=Enum.AutomaticSize.Y,BackgroundTransparency=1,Text=text,TextColor3=self.palette.text,TextWrapped=true,Font=Enum.Font.Gotham,TextSize=13,TextXAlignment=Enum.TextXAlignment.Left,TextYAlignment=Enum.TextYAlignment.Top},parent)
  end
  function UI:card(page,title,description)
   local card=self:create('Frame',{Size=UDim2.new(1,-5,0,0),AutomaticSize=Enum.AutomaticSize.Y,BackgroundColor3=self.palette.card,BorderSizePixel=0},page);self:corner(card,11)
@@ -80,11 +90,11 @@ return function(M)
   local body=self:create('Frame',{Size=UDim2.new(1,0,0,0),AutomaticSize=Enum.AutomaticSize.Y,BackgroundTransparency=1},card)
   self:create('UIListLayout',{Padding=UDim.new(0,8),SortOrder=Enum.SortOrder.LayoutOrder},body)
   local record={outer=card,body=body,title=title,page=page.Name,terms=title..' '..(description or '')};self.cards[#self.cards+1]=record;self.cardBodies[body]=record
-  local function open(value)body.Visible=value;heading.Text=(value and '▾  ' or '▸  ')..title end;record.open=open
+  local function open(value)body.Visible=value;heading.Text=(value and '[-]  ' or '[+]  ')..title end;record.open=open
   self:bind(heading.Activated,function()open(not body.Visible)end)
   open(not self.firstCard[page.Name]);self.firstCard[page.Name]=true
   if description then self:label(body,description,72) end
-  record.result=self:button(self.results,(M.Navigation.titles[page.Name] or page.Name)..'  /  '..title,function()self:show(page.Name);open(true);task.defer(function()if self.app.alive then page.CanvasPosition=Vector2.new(0,math.max(0,card.AbsolutePosition.Y-page.AbsolutePosition.Y+page.CanvasPosition.Y)) end end)end)
+  record.result=self:button(self.results,(M.Navigation.titles[page.Name] or page.Name)..'  /  '..title,function()self:reveal(body)end)
   return body
  end
  function UI:searchCards()
@@ -142,10 +152,16 @@ return function(M)
  end
  function UI:refreshControls()for _,fn in ipairs(self.refreshers) do fn()end end
  function UI:toast(module,message,bad)
-  self.footer.Text='['..module..'] '..tostring(message);self.footer.TextColor3=bad and self.palette.red or self.palette.muted
+  local full='['..module..'] '..tostring(message)
+  if self.statusInfo then self.statusInfo.Text=full end
+  self.footer.Text='['..module..'] Komunikat — kliknij, aby przeczytać.';self.footer.TextColor3=bad and self.palette.red or self.palette.muted
   if self.notification then self.notification:Destroy() end
-  self.notification=self:create('TextLabel',{Size=UDim2.fromOffset(310,80),Position=UDim2.new(1,-326,1,-98),BackgroundColor3=self.palette.panel,Text='['..module..'] '..tostring(message):sub(1,220),TextColor3=bad and self.palette.red or self.palette.text,TextWrapped=true,TextSize=12,Font=Enum.Font.Gotham,ZIndex=80},self.gui);self:corner(self.notification,10);self.notifyUntil=self.app.clock()+5
+  self.notification=self:create('TextLabel',{AnchorPoint=Vector2.new(1,1),Size=UDim2.new(0,math.min(310,workspace.CurrentCamera.ViewportSize.X-24),0,0),AutomaticSize=Enum.AutomaticSize.Y,Position=UDim2.new(1,-12,1,-18),BackgroundColor3=self.palette.panel,Text='['..module..'] Nowy komunikat.\nPełna treść: kliknij pasek u dołu huba.',TextColor3=bad and self.palette.red or self.palette.text,TextWrapped=true,TextSize=12,Font=Enum.Font.Gotham,ZIndex=80},self.gui);self:corner(self.notification,10)
+  self:create('UIPadding',{PaddingLeft=UDim.new(0,12),PaddingRight=UDim.new(0,12),PaddingTop=UDim.new(0,10),PaddingBottom=UDim.new(0,10)},self.notification);self.notifyUntil=self.app.clock()+5
  end
- function UI:tick()if self.notification and self.app.clock()>=self.notifyUntil then self.notification:Destroy();self.notification=nil end end
+ function UI:tick()
+  if self.notification and self.app.clock()>=self.notifyUntil then self.notification:Destroy();self.notification=nil end
+  if self.scrollTarget then local r=self.scrollTarget;self.scrollTarget=nil;local page=self.pages[r.page];page.CanvasPosition=Vector2.new(0,math.max(0,r.outer.AbsolutePosition.Y-page.AbsolutePosition.Y+page.CanvasPosition.Y)) end
+ end
  return UI
 end
