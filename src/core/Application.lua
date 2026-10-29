@@ -28,7 +28,7 @@ return function(M)
   self.runtime:schedule('InventoryRefresh',2,function()if self.adapter.capabilities.inventory and not self.adapter.pending and not self.builder:isBusy() and self.farm.state=='STOPPED' then self:refreshInventory() end end)
   self.runtime:schedule('PreviewRefresh',.2,function()if self.previewDirty and self.ui.current=='BUILDER' then self:refreshPreview() end end)
   self.runtime:job('Adapter',function()local ok,err=self.adapter:connect(game:GetService('ReplicatedStorage'));if ok then self.log:add('Adapter',self.adapter.label);self:refreshInventory() else self.log:add('Adapter',err,'WARN') end;return true end,task.spawn)
-  self.log:add('Core','KUBI HUB ULTIMATE V5.0 uruchomiony.');self:updateDashboard();return self
+  self.log:add('Core','KUBI HUB ULTIMATE V'..M.Version.current..' uruchomiony.');self:updateDashboard();return self
  end
  function App:storageAdapter()
   _G.KubiHubV5Profiles=type(_G.KubiHubV5Profiles)=='table' and _G.KubiHubV5Profiles or {};local memory=_G.KubiHubV5Profiles
@@ -45,7 +45,7 @@ return function(M)
   if not ok then self.log:error(module,a);self.ui:toast(module,tostring(a):sub(1,170),true);return false end
   if type(a)=='table' and a.ok~=nil then b=a.error;a=a.ok end
   if a==false then self.log:add(module,tostring(b or 'Funkcja niedostępna.'),'WARN');self.ui:toast(module,b or 'Funkcja niedostępna.',true);return false end
-  self.previewDirty=true;return true
+  if self.builder and self.builder.revision~=self.previewRevision then self.previewDirty=true;self.ui:refreshControls() end;return true
  end
  function App:notify(module,text)self.log:add(module,text);self.ui:toast(module,text)end
  function App:copy(text,box)
@@ -53,7 +53,7 @@ return function(M)
   if type(setclipboard)=='function' then setclipboard(text);self:notify('Tools','Skopiowano tekst.') else self:notify('Tools','Tekst jest w polu. Zaznacz go i skopiuj ręcznie.') end
  end
  function App:needPro(feature)
-  if self.pro then return true end;self.ui:show('SETTINGS');self.ui:toast('PRO','Wpisz klucz społeczności, aby odblokować '..feature);return false,'Funkcja PRO wymaga klucza.'
+  if self.pro then return true end;self.ui:show('PRO');self.ui:toast('PRO','Wpisz klucz w sekcji PRO — społeczność i klucz, aby odblokować '..feature);return false,'Funkcja PRO wymaga klucza.'
  end
  function App:applyConfig()
   self:stopAll();self.farm.settings=self.config.data.farm;self.movement.settings=self.config.data.movement
@@ -65,19 +65,24 @@ return function(M)
   if not self.adapter.capabilities.inventory then self.inventorySnapshot=self.readInventory();return end
   local reply=self.adapter:inventory();if reply.ok and type(reply.values)=='table' then self.serverInventory=true;self.inventorySnapshot=M.Inventory.snapshot(reply.values,reply.source or self.adapter.label);self.previewDirty=true else self.log:add('Inventory',reply.error or 'Brak danych adaptera.','WARN') end
  end
- function App:select(id)
+ function App:select(id,reset)
   local item=self.library.items[id];if not item then return false,'Nie znaleziono schematu.' end
-  local ok,err=self.builder:select(item);if not ok then return false,err end
-  if item.mechanical then self.config.data.builder.mirrorX=false;self.config.data.builder.mirrorZ=false end
+  local ok,err=self.builder:select(item,reset);if not ok then return false,err end
+  if reset then self.config.data.builder=M.Util.copy(self.builder.options) end
+  if item.mechanical then self.config.data.builder.mirrorX=false;self.config.data.builder.mirrorZ=false;self.config.data.builder.scale=1 end
   ok,err=self.builder:edit(self.config.data.builder,false);if not ok then return false,err end
-  self.manualStep=1;self.previewDirty=true;self:refreshPreview();return true
+  self.manualStep=1;self.previewDirty=true;self.ui:refreshControls();self:refreshPreview();return true
  end
  function App:refreshPreview()
   if not self.builder.schema or not self.preview then return end
-  local p=M.Performance.get(self.config.data.performance.profile,self.fps);self.preview:set(self.builder.schema,self.inventorySnapshot,{limit=p.previewLimit,layer=self.config.data.builder.previewLayer,yaw=self.builder.options.yaw});self.previewDirty=false
+  local p=M.Performance.get(self.config.data.performance.profile,self.fps);self.preview:set(self.builder.schema,self.inventorySnapshot,{limit=p.previewLimit,layer=self.config.data.builder.previewLayer,yaw=self.builder.options.yaw});self.previewDirty=false;self.previewRevision=self.builder.revision
   local report=self.builder:assistant(self.inventorySnapshot);local b=report.bounds.size
   self.planInfo.Text=string.format('%s\n%d części • %d połączeń • %.1f × %.1f × %.1f studów\nPodgląd: %d obiektów / %d części. Czerwone: brakujące, bursztynowe: nieodczytane.',self.builder.schema.name,report.elements,report.connections,b[1],b[2],b[3],self.preview.shown,report.elements)
   self.materialInfo.Text='Źródło: '..self.inventorySnapshot.source..'\n'..M.Inventory.describe(report.materials);self.materialInfo.Size=UDim2.new(1,0,0,math.max(80,#report.materials.rows*50+40))
+  if self.placementInfo then
+   local b=self.builder.bounds;local zone=self.adapter.zone;local fits=zone and b.min[1]>=(zone.min and zone.min[1] or -zone.size[1]/2)-1e-6 and b.max[1]<=(zone.max and zone.max[1] or zone.size[1]/2)+1e-6 and b.min[3]>=(zone.min and zone.min[3] or -zone.size[3]/2)-1e-6 and b.max[3]<=(zone.max and zone.max[3] or zone.size[3]/2)+1e-6
+   self.placementInfo.Text=string.format('Skala %.0f%% • środek X %.1f / Z %.1f\n%s',(self.builder.options.scale or 1)*100,b.center[1],b.center[3],zone and (fits and 'Obrys X/Z mieści się w odczytanym obszarze. Serwer sprawdzi również wysokość i uprawnienia.' or 'Obrys X/Z wychodzi poza odczytany obszar.') or 'Granice działki nieodczytane. Ręczne wymiary poniżej służą do planowania.')
+  end
   self:updateStep()
  end
  function App:updateStep()
@@ -93,11 +98,11 @@ return function(M)
  end
  function App:pages()
   local ui=self.ui
-  local home=ui:page('HOME','HOME');local h=ui:card(home,'KUBI HUB ULTIMATE V5.0','Nowy warsztat z walidowanymi schematami, profilem ustawień i jawnym stanem zgodności. Brak adaptera oznacza tryb asystenta.')
+  local home=ui:page('HOME','HOME');local h=ui:card(home,'KUBI HUB ULTIMATE V'..M.Version.current,'Nowy warsztat z walidowanymi schematami, profilem ustawień i jawnym stanem zgodności. Brak adaptera oznacza tryb asystenta.')
   self.homeInfo=ui:label(h,'',125);ui:button(h,'WORM MK2 — otwórz warsztat',function()local ok,err=self:select('WORM_MK2');ui:show('BUILDER');return ok,err end)
   ui:button(h,'Biblioteka schematów',function()ui:show('SCHEMATICS')end);ui:button(h,'STOP WSZYSTKIE MODUŁY',function()self:stopAll()end)
   local news=ui:card(home,'Ostatnie zmiany','Materiały z osobnymi identyfikatorami. WORM z grafem połączeń. Stos: 1 laska dynamitu, 1 siedzenie, 3000 drewna. Nowy podgląd i profile. Uprawnione budowanie wymaga adaptera.')
-  self.versionInfo=ui:label(news,'V5.0.0 • wydanie 2026-10-28. Najnowsza wersja: jeszcze nie sprawdzono.',85)
+  self.versionInfo=ui:label(news,'V'..M.Version.current..' • wydanie '..M.Version.releaseDate..'. Najnowsza wersja: jeszcze nie sprawdzono.',85)
   ui:button(news,'Sprawdź aktualizację',function()
    if self.versionJob and not self.versionJob.done then return false,'Trwa sprawdzanie wersji.' end
    self.versionJob=self.runtime:job('Version',function()local value,err=M.Version.fetch(function(url)return game:HttpGet(url)end,self.codec.decode);if not value then self.log:add('Version',err,'WARN');self.versionInfo.Text=err;return false end;self.versionInfo.Text='Obecna '..M.Version.current..' • najnowsza '..value.version..' • '..value.releaseDate..'\n'..value.compatibility..'\n'..table.concat(value.changes,'; ');self:notify('Version',value.update and 'Dostępna jest aktualizacja. Kod nie został podmieniony.' or 'Brak nowszej wersji.');return true end,task.spawn)
@@ -106,7 +111,7 @@ return function(M)
   self.farmInfo=ui:label(f,'',155)
   for _,a in ipairs({{'START',function()return self.farm:start()end},{'STOP',function()return self.farm:stop()end},{'PAUZA',function()return self.farm:pause()end},{'WZNÓW',function()return self.farm:resume()end},{'RESET SESJI',function()return self.farm:reset()end}}) do ui:button(f,a[1],a[2]) end
   ui:cycle(f,'Profil',{'NORMAL','FAST','TURBO','HYPER','LIGHTNING','SONIC'},function()return self.config.data.farm.profile end,function(v)self.config.data.farm.profile=v end)
-  ui:field(f,'Stop po potwierdzonych cyklach • 0 bez limitu',0,function(v)self.config.data.farm.stopAfter=M.Util.number(tonumber(v),0,0,10000,true);return self.config.data.farm.stopAfter end)
+  ui:field(f,'Stop po potwierdzonych cyklach • 0 bez limitu',0,function(v)self.config.data.farm.stopAfter=M.Util.number(tonumber(v),0,0,10000,true);return self.config.data.farm.stopAfter end,false,function()return self.config.data.farm.stopAfter end)
   local builder=ui:page('BUILDER','BUILDER');local b=ui:card(builder,'Podgląd 3D i budowanie','Przeciągnij podgląd, by obrócić kamerę. Kółko myszy lub przyciski zmieniają zoom. Obszar podglądu jest oddzielony od świata gry.')
   self.preview=M.Preview.new(b);self.runtime:own(self.preview.viewport)
   ui:bind(self.preview.viewport.InputBegan,function(i)if ui:isPress(i) then ui.previewDrag=i.Position end end)
@@ -114,8 +119,9 @@ return function(M)
   self.planInfo=ui:label(b,'',112)
   for _,v in ipairs({{'Widok perspektywiczny','PERSPECTIVE'},{'Widok z góry','TOP'},{'Widok z boku','SIDE'}}) do local a=v;ui:button(b,a[1],function()self.preview:view(a[2])end) end
   ui:button(b,'Przybliż',function()self.preview:changeZoom(.8)end);ui:button(b,'Oddal',function()self.preview:changeZoom(1.25)end)
-  ui:field(b,'Warstwa • 0 = wszystkie',0,function(v)self.config.data.builder.previewLayer=M.Util.number(tonumber(v),0,0,1000,true);self.previewDirty=true;return self.config.data.builder.previewLayer end)
+  ui:field(b,'Warstwa • 0 = wszystkie',0,function(v)self.config.data.builder.previewLayer=M.Util.number(tonumber(v),0,0,1000,true);self.previewDirty=true;return self.config.data.builder.previewLayer end,false,function()return self.config.data.builder.previewLayer or 0 end)
   self.materialInfo=ui:label(b,'',180)
+  ui:button(b,'Kopiuj listę materiałów',function()local text=M.Inventory.describe(M.Inventory.compare(self.builder.schema,self.inventorySnapshot));self:copy(text,self.schemaBox);self:notify('Builder','Lista materiałów znajduje się też w polu importu / eksportu.')end)
   ui:button(b,'BUILD — sprawdź i zbuduj przez adapter',function()self:refreshPreview();return self.builder:start(self.inventorySnapshot)end,'Tylko uprawniony serwer i własna działka. Podgląd nie jest budowlą serwerową.')
   ui:button(b,'Pauza budowania',function()return self.builder:pause()end);ui:button(b,'Wznów budowanie',function()return self.builder:resume()end);ui:button(b,'Anuluj własną transakcję',function()return self.builder:cancel()end)
   self.buildInfo=ui:label(b,'',75)
@@ -124,9 +130,19 @@ return function(M)
   ui:cycle(edits,'Obrót', {0,90,180,270},function()return self.builder.options.yaw end,function(v)return edit('yaw',v)end)
   ui:cycle(edits,'Materiał',{'ORIGINAL','WoodBlock','MetalBlock','TitaniumBlock','PlasticBlock'},function()return self.builder.options.material end,function(v)return edit('material',v)end)
   ui:toggle(edits,'Lustro X',function()return self.builder.options.mirrorX end,function(v)return edit('mirrorX',v)end);ui:toggle(edits,'Lustro Z',function()return self.builder.options.mirrorZ end,function(v)return edit('mirrorZ',v)end)
-  ui:button(edits,'UNDO',function()return self.builder:undo()end);ui:button(edits,'REDO',function()return self.builder:redo()end)
+  ui:button(edits,'UNDO',function()local ok,err=self.builder:undo();if ok then self.config.data.builder=M.Util.copy(self.builder.options) end;return ok,err end);ui:button(edits,'REDO',function()local ok,err=self.builder:redo();if ok then self.config.data.builder=M.Util.copy(self.builder.options) end;return ok,err end)
+  local placement=ui:card(builder,'Pozycja i dopasowanie schematu','Przesunięcia są w osiach konstrukcji przed obrotem. Wyśrodkowanie oraz dopasowanie zapisują jedną zmianę w UNDO. Mechaniki nie zmniejszam.')
+  self.placementInfo=ui:label(placement,'',115)
+  for _,spec in ipairs({{'Przesunięcie X','offsetX'},{'Przesunięcie Y','offsetY'},{'Przesunięcie Z','offsetZ'}}) do local f=spec;ui:field(placement,f[1],0,function(v)local value=tonumber(v);if not M.Util.finite(value) or math.abs(value)>1000 then return false,'Podaj przesunięcie od -1000 do 1000.' end;local ok,err=edit(f[2],value);if not ok then return false,err end;return value end,false,function()return self.builder.options[f[2]] or 0 end) end
+  ui:field(placement,'Skala zwykłego planu • procent',100,function(v)local value=tonumber(v);if not M.Util.finite(value) or value<10 or value>200 then return false,'Skala: 10–200%.' end;local ok,err=edit('scale',value/100);if not ok then return false,err end;return value end,false,function()return (self.builder.options.scale or 1)*100 end)
+  local function changed(ok,err)if ok then self.config.data.builder=M.Util.copy(self.builder.options);self.previewDirty=true;ui:refreshControls() end;return ok,err end
+  ui:button(placement,'Wyśrodkuj schemat X/Z',function()return changed(self.builder:center())end)
+  self.manualZone={width=120,depth=120}
+  for _,spec in ipairs({{'Ręczna szerokość obszaru','width'},{'Ręczna długość obszaru','depth'}}) do local f=spec;ui:field(placement,f[1],self.manualZone[f[2]],function(v)self.manualZone[f[2]]=M.Util.number(tonumber(v),120,10,300);return self.manualZone[f[2]] end) end
+  ui:button(placement,'Dopasuj do obszaru',function()local w,d=self.manualZone.width,self.manualZone.depth;local zone=self.adapter.zone or {size={w,200,d},min={-w/2+1,-6,-d/2+1},max={w/2-1,200,d/2-1}};return changed(self.builder:fit(zone))end,'Używa granic adaptera, jeśli są znane. Inaczej używa ręcznych wymiarów z marginesem jednego studa; jest to pomoc w planowaniu.')
   local assistant=ui:card(builder,'Asystent ręcznego budowania','Współrzędne są względem konstrukcji. Stos drewna zawiera celowe nałożenie elementów; nie uruchamiam eksplozji ani nie wysyłam go do publicznego serwera.')
   self.stepInfo=ui:label(assistant,'',140);ui:button(assistant,'Poprzedni element',function()self.manualStep=self.manualStep-1;self:updateStep()end);ui:button(assistant,'Następny element',function()self.manualStep=self.manualStep+1;self:updateStep()end)
+  ui:field(assistant,'Przejdź do elementu',1,function(v)self.manualStep=M.Util.number(tonumber(v),self.manualStep,1,#self.builder.schema.elements,true);self:updateStep();return self.manualStep end,false,function()return self.manualStep end)
   local schematics=ui:page('SCHEMATICS','SCHEMATICS');local sc=ui:card(schematics,'Biblioteka konstrukcji','Zachowana geometria poprzednich projektów, WORM MK2 oraz własne projekty. Stan mechaniki jest oddzielony od samego planu.')
   ui:field(sc,'Szukaj schematu','',function(v)self.schemaQuery=v;self:renderSchematics();return v end)
   ui:cycle(sc,'Kategoria',{'Wszystkie','Pojazdy','Łodzie','Samoloty','Konstrukcje mechaniczne','WORMS','Proste budowle','Własne projekty'},function()return self.schemaCategory end,function(v)self.schemaCategory=v;self:renderSchematics()end)
@@ -138,7 +154,7 @@ return function(M)
   for _,spec in ipairs({{'Czerwony WORM','worm-red.json'},{'SHREDDER','shredder.json'}}) do local a=spec;ui:button(assets,'Wczytaj podgląd: '..a[1],function()
    local text=game:HttpGet('https://raw.githubusercontent.com/kubibubi124269/script-kubi-hub-babft/main/'..a[2]);if #text>2000000 then return false,'Plik przekracza 2 MB.' end
    local schema,errors=M.Schema.import(self.codec.decode(text));if not schema then return false,table.concat(errors,'; ') end;schema.id='asset_'..a[2]:gsub('[^%w]','_');schema.name=a[1]..' — podgląd';schema.assistantOnly=true;schema.importedMechanics=true
-   local ok,err=self.library:save(schema);if not ok then return false,err end;ok,err=self:select(schema.id);if ok then self:renderSchematics();ui:show('BUILDER') end;return ok,err
+   local ok,err=self.library:save(schema);if not ok then return false,err end;ok,err=self:select(schema.id,true);if ok then self:renderSchematics();ui:show('BUILDER') end;return ok,err
   end) end
   local movement=ui:page('MOVEMENT','MOVEMENT');local mv=ui:card(movement,'Ruch własnej postaci','W dozwolonym środowisku testowym: WASD / joystick, Spacja w górę, lewy Ctrl w dół. Respawn zatrzymuje moduł i wymaga ręcznego wznowienia.')
   self.movementInfo=ui:label(mv,'',75)
@@ -150,7 +166,7 @@ return function(M)
   ui:button(pl,'WORM: otwórz / zamknij paszczę • klawisz E',function()return self.adapter:rig('mouth')end,'Działa po zbudowaniu rig-u przez autoryzowany adapter i zajęciu własnego fotela.')
   local tools=ui:page('TOOLS','TOOLS');self:toolsPage(tools)
   local stats=ui:page('STATS','STATS');local st=ui:card(stats,'Rzeczywiste pomiary sesji','Brak pomiaru jest oznaczony „—”. FPS dotyczy klienta. Czas odpowiedzi adaptera jest osobnym pomiarem i nie jest przedstawiany jako ping Roblox.')
-  self.statsInfo=ui:label(st,'',210);self.lastSession=ui:label(st,_G.KubiHubLastSession and ('Poprzednia sesja:\n'.._G.KubiHubLastSession) or 'Pierwsza sesja V5.0.',100)
+  self.statsInfo=ui:label(st,'',210);self.lastSession=ui:label(st,_G.KubiHubLastSession and ('Poprzednia sesja:\n'.._G.KubiHubLastSession) or 'Pierwsza sesja V'..M.Version.current..'.',100)
   local settings=ui:page('SETTINGS','SETTINGS');self:settingsPage(settings)
   local debugPage=ui:page('DEBUG','DEBUG');local dbg=ui:card(debugPage,'Błędy, zadania i zgodność','Raport zawiera datę, moduł, poziom i szczegóły błędu. Nie zawiera tokenów ani odczytu plików przeglądarki.')
   self.debugInfo=ui:label(dbg,'',140);self.debugBox=ui:field(dbg,'Raport do skopiowania','',nil,true);self.debugBox.Size=UDim2.new(1,0,0,260)
@@ -162,12 +178,12 @@ return function(M)
  function App:toolsPage(page)
   local ui=self.ui;local c=ui:card(page,'Import / eksport schematów','Tylko JSON lub dane LP_BUILD. Tekst nigdy nie jest uruchamiany jako Lua. Połączenia WORM-a w formacie V5 są zachowywane.')
   self.schemaBox=ui:field(c,'Dane projektu','',nil,true)
-  ui:button(c,'Eksport wybranego schematu',function()self:copy(self.codec.encode(self.builder.schema),self.schemaBox)end)
+  ui:button(c,'Eksport wybranego schematu',function()local schema,errors=self.builder:export();if not schema then return false,table.concat(errors,'; ') end;self:copy(self.codec.encode(schema),self.schemaBox)end)
   ui:button(c,'Import i zapisz własny projekt',function()
    local text=self.schemaBox.Text;if #text>2000000 then return false,'Limit pliku 2 MB.' end
    if text:match('^%s*LP_META') then local marker=text:find('LP_BUILD',1,true);if not marker then return false,'Brak sekcji LP_BUILD.' end;text=text:sub(marker+8) end
    local raw=self.codec.decode(text);local schema,errors=M.Schema.import(raw);if not schema then return false,table.concat(errors,'; ') end
-   schema.id='custom_'..math.floor(self.clock()*1000);schema.name='Własny projekt '..self.library.revision+1;local ok,value=self.library:save(schema);if not ok then return false,value end;self:select(schema.id);self:renderSchematics();self:notify('Schematics','Zapisano własny schemat w sesji. Eksport JSON służy do trwałej kopii.');return true
+   schema.id=self:newSchemaId('custom');schema.name='Własny projekt '..self.library.revision+1;local ok,value=self.library:save(schema);if not ok then return false,value end;self:select(schema.id,true);self:renderSchematics();self:notify('Schematics','Zapisano własny schemat w sesji. Eksport JSON służy do trwałej kopii.');return true
   end)
   ui:button(c,'Eksport własnej budowli serwerowej',function()if not self.adapter.capabilities.build then return false,'Brak uprawnionego adaptera eksportu.' end;local r=self.adapter:snapshot();if not r.ok then return false,r.error end;self:copy(self.codec.encode(r.schema),self.schemaBox)end)
   local shapePage=ui:page('SHAPES','Shapes');local generators=ui:card(shapePage,'Shape Lab — bryły','Kula, kopuła, spirala i ściana. Gotowe konstrukcje znajdziesz wyżej w bibliotece. Osobna zakładka Circle Maker służy do kół i łuków.')
@@ -178,7 +194,7 @@ return function(M)
   ui:toggle(generators,'Wypełnienie',function()return self.generator.filled end,function(v)self.generator.filled=v end)
   ui:button(generators,'Utwórz plan i pokaż',function()
    local o=M.Util.copy(self.generator);local p;if self.generatorKind=='CIRCLE' then p=M.LegacyShapes.circle(o) elseif self.generatorKind=='SPHERE' or self.generatorKind=='DOME' then o.dome=self.generatorKind=='DOME';p=M.LegacyShapes.sphere(o) elseif self.generatorKind=='SPIRAL' then o.turns=o.layers;p=M.LegacyShapes.spiral(o) else o.width=o.radius;o.height=o.layers;p=M.LegacyShapes.wall(o) end
-   local schema,errors=M.Schema.fromLegacy('generated_'..math.floor(self.clock()*1000),'Generator '..self.generatorKind,p,'Własne projekty');if not schema then return false,table.concat(errors,'; ') end;self.library:save(schema);self:select(schema.id);self:renderSchematics();self.ui:show('BUILDER')
+   local schema,errors=M.Schema.fromLegacy(self:newSchemaId('generated'),'Generator '..self.generatorKind,p,'Własne projekty');if not schema then return false,table.concat(errors,'; ') end;local ok,err=self.library:save(schema);if not ok then return false,err end;ok,err=self:select(schema.id,true);if not ok then return false,err end;self:renderSchematics();self.ui:show('BUILDER')
   end)
   local circlePage=ui:page('CIRCLE','Circle Maker');local circle=ui:card(circlePage,'Circle Maker — koła, dyski i łuki','Ustaw środek konstrukcji względem własnej działki, materiał, rozmiar i warstwy. Podgląd oraz lista materiałów pojawią się w Builderze.')
   self.circle={radius=12,segments=40,layers=1,thickness=1,layerGap=2,arc=360,axis='XZ',kind='WoodBlock',filled=false,x=0,y=2,z=0}
@@ -189,8 +205,8 @@ return function(M)
    local o=self.circle;local estimated=o.filled and (2*math.floor(o.radius/2)+1)^2*o.layers or (o.segments+1)*o.layers*o.thickness
    if estimated>M.Schema.limit then return false,'Plan może przekroczyć 6000 części. Zmniejsz promień, warstwy albo grubość.' end
    local parts=M.LegacyShapes.circle(o);for _,p in ipairs(parts) do p.x=p.x+o.x;p.y=p.y+o.y;p.z=p.z+o.z end
-   local schema,errors=M.Schema.fromLegacy('circle_'..math.floor(self.clock()*1000),'Koło / łuk '..o.radius,parts,'Własne projekty');if not schema then return false,table.concat(errors,'; ') end
-   local ok,err=self.library:save(schema);if not ok then return false,err end;ok,err=self:select(schema.id);if ok then self:renderSchematics();ui:show('BUILDER') end;return ok,err
+   local schema,errors=M.Schema.fromLegacy(self:newSchemaId('circle'),'Koło / łuk '..o.radius,parts,'Własne projekty');if not schema then return false,table.concat(errors,'; ') end
+   local ok,err=self.library:save(schema);if not ok then return false,err end;ok,err=self:select(schema.id,true);if ok then self:renderSchematics();ui:show('BUILDER') end;return ok,err
   end)
   local dynamite=ui:card(shapePage,'Dynamit + drewno — plan','3000 drewnianych bloków w jednym punkcie nad laską dynamitu i jedno siedzenie. To plan / asystent; detonacja i wysyłanie nakładających się bloków na publiczny serwer są wyłączone.')
   ui:button(dynamite,'Otwórz dokładny plan stosu',function()local ok,err=self:select('DYNAMITE_STACK');ui:show('BUILDER');return ok,err end)
@@ -210,6 +226,9 @@ return function(M)
   ui:button(pro,'Kopiuj zaproszenie Discord',function()self:copy('https://discord.gg/qmWGb4Q9p',self.configBox)end)
   ui:button(pro,'Wyłącz hub i posprzątaj',function()self:unload()end)
  end
+ function App:newSchemaId(prefix)
+  local id;repeat self.schemaSerial=(self.schemaSerial or 0)+1;id=prefix..'_'..math.floor(self.clock()*1000)..'_'..self.schemaSerial until not self.library.items[id];return id
+ end
  function App:report()
   local count=self.runtime:counts();local lines={self.log:text(),'','Środowisko: '..self.adapter.label,'Adapter: '..tostring(self.adapter.session~=nil),'Zadania klienta: '..count.jobs,'Połączenia klienta: '..count.connections,'Harmonogramy: '..count.schedules,'Otwarte RF adaptera: '..tostring(self.adapter.pending~=nil),'Źródło materiałów: '..self.inventorySnapshot.source}
   if self.builder.schema then lines[#lines+1]=M.Inventory.describe(M.Inventory.compare(self.builder.schema,self.inventorySnapshot)) end
@@ -219,8 +238,8 @@ return function(M)
   if self.deferredConfig and not self.builder:isBusy() then self.deferredConfig=false;self:applyConfig() end
   local fs=self.farm:summary();local counts=self.runtime:counts();local _,hum,root=self.movement:character();local speed=root and root.AssemblyLinearVelocity.Magnitude;local active=(self.farm.state=='RUNNING' and 1 or 0)+(self.builder:isBusy() and 1 or 0)+(self.movement.fly and 1 or 0)+(#self.effects.objects>0 and 1 or 0)
   local p=M.Performance.get(self.config.data.performance.profile,self.fps);self.runtime.schedules.Dashboard.interval=p.statsInterval
-  self.homeInfo.Text=string.format('Wersja 5.0.0 • %s\nAktywne moduły: %d\nFarm: %s • Builder: %s\nSchematy: %d • błędy walidacji biblioteki: %d',self.adapter.label,active,self.farm.state,self.builder.state,#self.library:list(),#self.library.errors)
-  self.ui.subtitle.Text='V5.0  •  '..(self.adapter.session and 'UPRAWNIONY ADAPTER / '..self.adapter.label or 'ASYSTENT • BRAK API BUDOWANIA')
+  self.homeInfo.Text=string.format('Wersja %s • %s\nAktywne moduły: %d\nFarm: %s • Builder: %s\nSchematy: %d • błędy walidacji biblioteki: %d',M.Version.current,self.adapter.label,active,self.farm.state,self.builder.state,#self.library:list(),#self.library.errors)
+  self.ui.subtitle.Text='V'..M.Version.current..'  •  '..(self.adapter.session and 'UPRAWNIONY ADAPTER / '..self.adapter.label or 'ASYSTENT • BRAK API BUDOWANIA')
   self.farmInfo.Text=string.format('Stan: %s • etap: %d\nCykle potwierdzone %d • nieudane %d\nŚredni cykl: %s s • cykle/h: %s\nOstatni błąd: %s',fs.state,fs.stage,fs.completed,fs.failed,fs.average and string.format('%.2f',fs.average) or '—',fs.cyclesPerHour and string.format('%.1f',fs.cyclesPerHour) or '—',fs.lastError~='' and fs.lastError or '—')
   self.buildInfo.Text=string.format('Stan: %s\nCzęści potwierdzone przez serwer: %d / %d\n%s',self.builder.state,self.builder.placed,self.builder.total,self.builder.error or '')
   self.movementInfo.Text=string.format('Prędkość rzeczywista: %s stud/s\nFly: %s • uprawnienie: %s',speed and string.format('%.1f',speed) or '—',self.movement.fly and 'ON' or 'OFF',self.adapter.capabilities.movement and 'potwierdzone' or 'brak adaptera')
