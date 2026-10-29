@@ -8,6 +8,22 @@ local found=false;for _,r in ipairs(first.ui.cards)do if r.result.Visible and r.
 for _,r in ipairs(first.ui.cards)do if r.title:find('Circle Maker',1,true)then r.result.Activated:Fire();check(r.body.Visible,'search expands matching section');check(first.ui.current=='CIRCLE','search opens matching tab')end end
 first.ui:show('BUILDER');check(first.preview.shown>0 and first.preview.shown<=350,'viewport has bounded sampled geometry')
 local function button(app,text)for _,o in ipairs(app.ui.gui:GetDescendants())do if o:IsA('TextButton') and o.Text==text then return o end end;error('Missing button: '..text)end
+button(first,'ASYSTENT — pokaż kroki budowania').Activated:Fire()
+check(first.ui.current=='BUILDER' and first.assistantBody.Visible,'unavailable server build opens the usable manual assistant')
+check(first.builder.placed==0 and not first.builder:isBusy(),'manual assistant never starts a server build or fake progress')
+for _,b in ipairs(first.buildControls)do check(not b.Visible,'transaction control is hidden without build access')end
+local longMessage=string.rep('Pełna treść komunikatu. ',40)..'KONIEC'
+first.ui:toast('BUILDER',longMessage,true);first.ui.footer.Activated:Fire()
+check(first.ui.current=='SETTINGS' and first.ui.statusBody.Visible,'status bar expands the actual message section')
+check(first.ui.statusInfo.Text=='[BUILDER] '..longMessage,'full status message is preserved beyond the toast limit')
+check(first.ui.statusInfo.AutomaticSize==Enum.AutomaticSize.Y and first.ui.statusInfo.TextYAlignment==Enum.TextYAlignment.Top,'message text grows vertically and aligns to the top')
+first.ui:show('DEBUG');check(first.debugBody.Visible and first.ui.scrollTarget==first.ui.cardBodies[first.debugBody],'debug route expands and targets the report instead of session stats')
+first:updateDashboard();check(first.debugBox.Text:find('Środowisko:',1,true)~=nil,'report refresh runs in the real Settings tab')
+first.adapter.capabilities.build=true;first:updateDashboard()
+check(first.buildButton.Text=='BUILD — sprawdź i zbuduj przez adapter' and first.buildControls[1].Visible,'build controls appear only after confirmed capability')
+first.adapter.capabilities.build=nil;first:updateDashboard()
+local sectionHeading=button(first,'[-]  Raport błędów, zadania i zgodność');sectionHeading.Activated:Fire()
+check(sectionHeading.Text=='[+]  Raport błędów, zadania i zgodność','section controls use supported plain text symbols')
 local libraryCard;for _,r in ipairs(first.ui.cards)do if r.title=='Biblioteka konstrukcji'then libraryCard=r end end
 local termsLength=#libraryCard.terms;local connections=first.runtime:counts().connections
 for _=1,20 do first:renderSchematics()end
@@ -31,6 +47,8 @@ button(first,'Kopiuj listę materiałów').Activated:Fire();check(first.schemaBo
 local oldSpeed=hum.WalkSpeed;local second=startHub();check(not first.alive,'second execution unloads first runtime');check(first.runtime:counts().connections==0,'old event connections are disconnected')
 n=0;for _,o in ipairs(player.PlayerGui:GetChildren())do if o.Name=='KubiHubUltimateV5'then n+=1 end end;check(n==1,'second execution leaves one GUI')
 check(hum.WalkSpeed==oldSpeed,'startup preserves original character movement')
-for _,size in ipairs({Vector2.new(320,600),Vector2.new(760,600),Vector2.new(1280,720)})do workspace.CurrentCamera.ViewportSize=size;second.ui:fit();check(second.ui.layout.width<=size.X-8,'responsive window fits '..size.X)end
+for _,size in ipairs({Vector2.new(320,600),Vector2.new(580,527),Vector2.new(760,600),Vector2.new(1280,720)})do workspace.CurrentCamera.ViewportSize=size;second.ui:fit();check(second.ui.layout.width<=size.X-8,'responsive window fits '..size.X)
+ if second.ui.layout.narrow then check(not second.ui.nav.ScrollingEnabled and second.ui.navLayout.FillDirectionMaxCells==second.ui.layout.navColumns,'narrow navigation displays the complete tab grid at '..size.X)end
+end
 second:unload();check(second.runtime:counts().connections==0,'unload removes current connections');check(second.ui.gui.Parent==nil,'unload destroys owned GUI')
 print('UI SMOKE COMPLETE: mock contract only; no native visual or physics claim')
