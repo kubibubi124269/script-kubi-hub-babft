@@ -51,4 +51,32 @@ for _,size in ipairs({Vector2.new(320,600),Vector2.new(580,527),Vector2.new(760,
  if second.ui.layout.narrow then check(not second.ui.nav.ScrollingEnabled and second.ui.navLayout.FillDirectionMaxCells==second.ui.layout.navColumns,'narrow navigation displays the complete tab grid at '..size.X)end
 end
 second:unload();check(second.runtime:counts().connections==0,'unload removes current connections');check(second.ui.gui.Parent==nil,'unload destroys owned GUI')
+-- BABFT compatibility is exercised against a tool/folder fixture, never a live game.
+game.PlaceId=537413528;player.TeamColor='White';local zone=child(workspace,'Part','WhiteZone');zone.Size=Vector3.new(120,2,120);zone.CFrame=CFrame.new();child(zone,'StringValue','TeamColor').Value='White'
+local blocks=child(workspace,'Folder','Blocks');local own=child(blocks,'Folder',player.Name);local backpack=child(player,'Backpack');local tool=child(backpack,'Tool','BuildingTool');local rf=child(tool,'RemoteFunction','RF');local sent=0
+rf.InvokeServer=function(_,material,amount,plot,relative,anchored,cf,flag)
+ sent+=1;assert((material=='WoodBlock' or material=='Seat') and amount>0 and plot==zone and anchored==true and flag==false)
+ local model=child(own,'Model',material);local part=child(model,'Part','PPart');part.Size=material=='Seat' and Vector3.new(2,1,2) or Vector3.new(2,2,2);part.CFrame=cf;return model
+end
+local native=startHub();check(native.adapter.mode=='BABFT','actual BABFT place selects native compatibility instead of the Studio-only bridge')
+check(sent==0 and not native.adapter.capabilities.build,'loading the hub never places a probe or authorizes untested tools')
+check(native.buildTestButton.Visible and native.babftRefresh.Visible,'BABFT has visible tool test and refresh actions')
+native.buildTestButton.Activated:Fire();check(sent==1 and #own:GetChildren()==1,'explicit probe sends one placement and observes the resulting own block')
+check(native.adapter.capabilities.build and native.buildButton.Text=='BUILD — zbuduj statyczny plan w BABFT','successful native probe enables the actual build action')
+local piece=table.clone(native.builder.schema.elements[1]);piece.material='WoodBlock';piece.position={4,2,0};piece.color=nil;piece.size={2,2,2};piece.class='Part'
+local seat=table.clone(piece);seat.id='native_seat';seat.material='Seat';seat.class='Seat';seat.position={6,2,0}
+assert(native.builder:select({schemaVersion=2,id='native_test',name='Static fixture',elements={piece,seat},connections={}},true))
+assert(native.builder:start(native.inventorySnapshot));for _=1,6 do native.builder:tick()end
+check(native.builder.state=='COMPLETED' and native.builder.placed==2 and sent==3,'static build integrates native adapter, observed placement and completion controller')
+check(#own:GetChildren()==3 and own:FindFirstChild('Seat')~=nil,'one native seat is placed without scaling it to the generic block size')
+local nested=child(data,'Folder','Inventory');child(nested,'IntValue','GlassBlock').Value=17;data.ChildAdded:Fire(nested)
+check(native.readInventory().items.GlassBlock.count==17,'inventory finds exact identifiers in nested game inventory folders')
+local glass=nested:FindFirstChild('GlassBlock');glass.Value=9;glass.Changed:Fire()
+check(native.readInventory().items.GlassBlock.count==9,'nested inventory changes update the observed count')
+local rootWood=data:FindFirstChild('WoodBlock');rootWood:Destroy();local alias=child(nested,'IntValue','Wood');alias.Value=27;data.ChildRemoved:Fire(rootWood);nested.ChildAdded:Fire(alias)
+check(native.readInventory().items.WoodBlock.count==27 and native.readInventory().items.TitaniumBlock.count==10000,'explicit wood alias does not confuse metal and titanium')
+player.CharacterAdded:Fire(ch);check(not native.adapter.capabilities.build,'respawn invalidates the old tool test')
+rf.InvokeServer=function()sent+=1;return nil end;local beforeProbe=sent;native.buildTestButton.Activated:Fire()
+check(not native.adapter.capabilities.build and sent==beforeProbe+1,'a tool returning normally without a replicated block cannot unlock build or trigger a retry')
+native:unload();check(native.runtime:counts().connections==0,'native compatibility unload disconnects inventory and GUI listeners')
 print('UI SMOKE COMPLETE: mock contract only; no native visual or physics claim')
