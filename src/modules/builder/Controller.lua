@@ -74,10 +74,10 @@ return function(Util,Schema,Inventory)
     self.placed=self.placed+#r.ids;self.nextIndex=self.nextIndex+#r.ids
    elseif j.phase=='commit' then
     if r.count~=self.total or r.connected~=true then self:fail('Serwer nie potwierdził całej konstrukcji i połączeń.');return end
-    self.state='COMPLETED';self.runtime:release('Builder');self.log:add('Builder','Serwer potwierdził '..self.total..' części i połączenia. Fizyka wymaga testu integracyjnego.');return
+    self.state='COMPLETED';self.runtime:release('Builder');self.log:add('Builder',self.adapter.mode=='BABFT' and ('Odczytano '..self.total..' nowych części w Twojej budowli BABFT. Plan statyczny; nie odtwarzano mechaniki.') or ('Serwer potwierdził '..self.total..' części i połączenia. Fizyka wymaga testu integracyjnego.'));return
    elseif j.phase=='cancel' then
     if r.state~='committed' and r.state~='cancelled' or r.state=='committed' and r.count~=self.total then self:fail('Brak poprawnego potwierdzenia anulowania lub zakończenia budowy.');return end
-    self.state=r.state=='committed' and 'COMPLETED' or 'CANCELLED';if r.state=='committed' then self.placed=r.count or self.placed;self.log:add('Builder','Zatwierdzanie zakończyło się przed anulowaniem. Konstrukcja pozostaje na serwerze.','WARN') end;self.runtime:release('Builder');return
+    self.state=r.state=='committed' and 'COMPLETED' or 'CANCELLED';if r.state=='committed' then self.placed=r.count or self.placed;self.log:add('Builder','Zatwierdzanie zakończyło się przed anulowaniem. Konstrukcja pozostaje na serwerze.','WARN') elseif self.adapter.mode=='BABFT' then self.placed=r.count or self.placed;self.log:add('Builder','Zatrzymano wysyłanie bloków. Już postawione części pozostają na działce.','WARN') end;self.runtime:release('Builder');return
    end
   end
   if self.state=='CANCELLING' then
