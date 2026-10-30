@@ -1,5 +1,11 @@
 # Testy i oczekiwane wyniki
 
+## Tryb narzędzi BABFT V5.2 — 2026-10-30
+
+Offline: 74 testy logiki, 58 sprawdzeń kontraktu klienta w mocku, dwa importy i kompilacja 25 modułów. Nowe przypadki sprawdzają wybór trybu po PlaceId, brak samoczynnego budowania, blokadę przed testem, jeden jawny test drewna, odrzucenie niepotwierdzonego wyniku, limity wywołań, kolejność części, anulowanie w trakcie odpowiedzi, dokładną liczbę części i odmowę udawania mechanicznego WORM-a. Fixture narzędzia tworzy obiekty testowe; nie jest serwerem Roblox. Sprawdzono również jedno siedzenie o natywnym rozmiarze, podfoldery materiałów, alias drewna, zmiany liczb, brak mieszania metalu z tytanem, unieważnienie próby po respawnie i sprzątanie po wyłączeniu.
+
+W BABFT — NIE WYKONANO: ten sam loader → V5.2.0 → dołącz do drużyny → Builder → TEST 1 BLOKU. Oczekuj jednego rzeczywistego drewna na własnej działce i dopiero wtedy aktywnego BUILD. W razie błędu kliknij dolny pasek i skopiuj pełny komunikat oraz Settings / Raport błędów. Przetestuj mały plan z dwóch zwykłych bloków, jedno siedzenie, dopiero potem skalowanie/malowanie, STOP w trakcie żądania i respawn. STOP nie usuwa już utworzonych bloków. Potwierdź widoczność z drugiego klienta, zanim nazwiesz replikację sprawdzoną. Nie potwierdzono obecnego protokołu BABFT ani cennika materiałów.
+
 ## Poprawka GUI V5.1.1 — 2026-10-29
 
 63 testy logiki, 45 sprawdzeń kontraktu GUI, oba importy modeli oraz kompilacja klienta i serwera przeszły offline. Regresje sprawdzają pomieszczenie sześciu zakładek przy szerokościach 300–699 px, położenie treści poniżej nawigacji, pełny długi komunikat, kierowanie do właściwej sekcji Settings, odświeżanie raportu i przejście do instrukcji ręcznej bez rozpoczynania budowy. Mock kontroluje właściwości AutomaticSize i wyrównanie tekstu; nie dowodzi wyglądu natywnego interfejsu Roblox.

@@ -1,5 +1,5 @@
 {
-  "version": "5.1.1",
+  "version": "5.2.0",
   "modules": [
     {
       "name": "Util",
@@ -19,7 +19,7 @@
     {
       "name": "Inventory",
       "file": "src/modules/inventory/Inventory.lua",
-      "sha256": "2d002f93765b8405293dbcbbc75ab936393332cc12b1959317392f77b12700a3"
+      "sha256": "ad722d49384925bd7f44b14e0068b54218de3883df983d6c6c0979eefa9323e2"
     },
     {
       "name": "Config",
@@ -62,6 +62,16 @@
       "sha256": "2c1e35a93434bdcdd899095e3cf483578d168eabeb33445a3c178a9f9809988a"
     },
     {
+      "name": "BabftAdapter",
+      "file": "src/core/BabftAdapter.lua",
+      "sha256": "06572972c0eb3b0930d3931501f5e528cf7b3d87203b2d3edb763ad146273cfd"
+    },
+    {
+      "name": "BabftEnvironment",
+      "file": "src/modules/babft/Environment.lua",
+      "sha256": "48c94b58c112d5fabe161caa21ba0c920528d54db725e2e5e22648d31f300361"
+    },
+    {
       "name": "Farm",
       "file": "src/modules/farm/Controller.lua",
       "sha256": "99305e7a3c375d9343988cc36684543b93e7923358ac4199d0c6c1514920aded"
@@ -69,12 +79,12 @@
     {
       "name": "Builder",
       "file": "src/modules/builder/Controller.lua",
-      "sha256": "31e16dc20a2dc11bb0d0edabbe8133af436ac475308ae1c6edc5d0ad6cf6e78b"
+      "sha256": "5f1c55c22b42d7ef498eb5ff4c8cca504053b42da827e5a86a5bb7fbaabaf0a6"
     },
     {
       "name": "Version",
       "file": "src/modules/tools/Version.lua",
-      "sha256": "32aad0617da3a579093a0563a2176ad882466050cddbcf373ed402dcd5c078cf"
+      "sha256": "1fe75cee7dd6d702dd64aa35f39138c2429fd6c6e02f2aa9f93b4bb5733e2cc1"
     },
     {
       "name": "Performance",
@@ -114,8 +124,8 @@
     {
       "name": "Application",
       "file": "src/core/Application.lua",
-      "sha256": "a4d17a8281eb42eb6e544161be764e5c6d763a94b3b0e8b4a9e634e42c82c95a"
+      "sha256": "ea0eb7043cc38992e82a46edf63af0d050de0495126d46444c19be1acac7d458"
     }
   ],
-  "mainSha256": "b048705acf710dfd0452ca8710784b1445fb4dd975163ed57c7af3fdae7e8bf1"
+  "mainSha256": "5a9da2757a401d95186d4bdd973fc6a472a736233ddfbf7185e6fe3a4b68e90a"
 }
