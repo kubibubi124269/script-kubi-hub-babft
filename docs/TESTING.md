@@ -1,5 +1,11 @@
 # Testy i oczekiwane wyniki
 
+## Awaria startu V5.2.1 — 2026-10-30
+
+Przed naprawą zaostrzony mock FindFirstChild(name, recursive) kończył pełny start V5.2.0 komunikatem „FindFirstChild recursive must be a boolean”; stos prowadził przez Inventory.readPlayer i observePlayer do Application.new, przed tworzeniem GUI. Poprzedni mock ignorował dodatkowy argument i nie odtwarzał tej awarii. [Kontrakt API Roblox](https://create.roblox.com/docs/reference/engine/classes/Instance#FindFirstChild) wymaga boolean jako opcjonalnego drugiego argumentu. gsub zwraca także liczbę zamian, dlatego zapisano sam alias w zmiennej przed wywołaniem.
+
+Po naprawie: 77 testów logiki, 58 sprawdzeń pełnego klienta w mocku oraz oba importy przechodzą. Trzy nowe regresje używają sprawdzającego argumenty obiektu: brak innych materiałów nie przerywa odczytu, aliasy Wood/Metal/Titanium pozostają osobne, a dokładny WoodBlock ma pierwszeństwo nad Wood. Start klienta sprawdzono w trybie asystenta i w fixture BABFT. Nie jest to natywny test Roblox; użytkownik powinien uruchomić ten sam loader i potwierdzić nagłówek V5.2.1.
+
 ## Tryb narzędzi BABFT V5.2 — 2026-10-30
 
 Offline: 74 testy logiki, 58 sprawdzeń kontraktu klienta w mocku, dwa importy i kompilacja 25 modułów. Nowe przypadki sprawdzają wybór trybu po PlaceId, brak samoczynnego budowania, blokadę przed testem, jeden jawny test drewna, odrzucenie niepotwierdzonego wyniku, limity wywołań, kolejność części, anulowanie w trakcie odpowiedzi, dokładną liczbę części i odmowę udawania mechanicznego WORM-a. Fixture narzędzia tworzy obiekty testowe; nie jest serwerem Roblox. Sprawdzono również jedno siedzenie o natywnym rozmiarze, podfoldery materiałów, alias drewna, zmiany liczb, brak mieszania metalu z tytanem, unieważnienie próby po respawnie i sprzątanie po wyłączeniu.
