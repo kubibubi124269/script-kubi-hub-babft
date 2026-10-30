@@ -10,6 +10,7 @@ local Library=require('../src/schematics/Library')(U,Schema,Shapes,require('../s
 local Farm=require('../src/modules/farm/Controller')(U)
 local Builder=require('../src/modules/builder/Controller')(U,Schema,Inventory)
 local Adapter=require('../src/core/Adapter')(U)
+local BabftAdapter=require('../src/core/BabftAdapter')(U,Schema,Inventory)
 local Layout=require('../src/ui/Layout');local Nav=require('../src/ui/Navigation')
 local total=0;local failed=0
 local function test(name,fn)local ok,e=pcall(fn);total+=1;if not ok then failed+=1;print('FAIL '..name..': '..tostring(e)) else print('PASS '..name) end end
@@ -116,4 +117,24 @@ test('mechanical fit never silently shrinks a rig',function()local b=builderFixt
 test('new project reset prevents double import transforms',function()local b=builderFixture();local o=U.copy(b.options);o.yaw=90;o.material='MetalBlock';o.offsetX=12;assert(b:edit(o));local exported=assert(b:export());assert(b:select(exported,true));eq(b.options.yaw,0);eq(b.options.offsetX,0);eq(b.options.material,'ORIGINAL');for i=1,3 do near(b.schema.elements[1].position[i],exported.elements[1].position[i])end end)
 test('old profiles receive neutral placement defaults',function()local c=assert(Config.validate({schemaVersion=2,builder={yaw=90}}));eq(c.builder.scale,1);eq(c.builder.offsetX,0);assert(not Config.validate({builder={scale=0/0}}))end)
 test('fit honors rotated bounds and reports unusably small target',function()local b=builderFixture();local s=U.copy(sample);s.elements[2].position[3]=500;assert(b:select(s));local o=U.copy(b.options);o.yaw=90;assert(b:edit(o));assert(b:fit({size={100,100,100}}));assert(b.bounds.size[1]<=100+1e-6);eq(b:fit({size={3,100,3}}),false)end)
+local function babftFixture()
+ now=0;local platform={calls=0,aliveObjects={}}
+ function platform:inspect()return {build=true,farm=false,zone={size={120,200,120}},text='tool fixture'}end
+ function platform:inventory()return {WoodBlock=100}end
+ function platform:preflight()return true end
+ function platform:place()self.calls+=1;local o={id=self.calls};self.aliveObjects[o]=true;return {ok=true,object=o}end
+ function platform:stillOwned(o)return self.aliveObjects[o]==true end
+ local a=BabftAdapter.new({userId=1,clock=function()return now end,spawn=function(fn)fn()end,wait=function(dt)now+=dt end,alive=function()return true end},platform);a:connect();return a,platform
+end
+test('BABFT tool detection cannot unlock build before a successful probe',function()local a,p=babftFixture();eq(a.capabilities.build,false);eq(a:beginBuild('a',sample,0).ok,false);eq(p.calls,0)end)
+test('failed or unconfirmed BABFT probe leaves build locked',function()local a,p=babftFixture();p.place=function()return {ok=false,error='no replicated block'}end;eq(a:testBuild().ok,false);eq(a.capabilities.build,false);eq(a.buildVerified,false)end)
+test('BABFT probe uses exactly one wood block and unlocks static builds',function()local a,p=babftFixture();local original=p.place;p.place=function(self,e,yaw)eq(e.material,'WoodBlock');eq(e.size[1],2);eq(yaw,0);return original(self)end;assert(a:testBuild().ok);eq(p.calls,1);assert(a.capabilities.build);eq(a.capabilities.mechanics,false)end)
+test('BABFT observes one new object per sequential placement and commits exact total',function()local a,p=babftFixture();assert(a:testBuild().ok);assert(a:beginBuild('a',sample,0).ok);eq(a:placeChunk('a',2,1).ok,false);eq(a:placeChunk('a',1,2).ok,false);eq(a:commitBuild('a').ok,false);eq(a:placeChunk('a',1,1).ids[1],sample.elements[1].id);eq(a:placeChunk('a',2,1).ids[1],sample.elements[2].id);local r=a:commitBuild('a');assert(r.ok);eq(r.count,2);eq(p.calls,3)end)
+test('BABFT cannot silently build the mechanical WORM as disconnected parts',function()local a,p=babftFixture();assert(a:testBuild().ok);eq(a:beginBuild('a',Worm(),0).ok,false);eq(p.calls,1)end)
+test('BABFT missing placed object prevents completion',function()local a,p=babftFixture();a:testBuild();a:beginBuild('a',sample,0);a:placeChunk('a',1,1);a:placeChunk('a',2,1);p.aliveObjects[a.transactions.a.objects[1]]=nil;eq(a:commitBuild('a').ok,false)end)
+test('BABFT cancellation preserves partial real placement count and sends nothing further',function()local a,p=babftFixture();a:testBuild();a:beginBuild('a',sample,0);a:placeChunk('a',1,1);a:cancel('a');local r=a:buildStatus('a',true);eq(r.state,'cancelled');eq(r.count,1);eq(a:placeChunk('a',2,1).ok,false);eq(p.calls,2)end)
+test('BABFT cancellation during a sent placement still records that returned object',function()local a,p=babftFixture();a:testBuild();a:beginBuild('a',sample,0);local original=p.place;p.place=function(self) a:cancel('a');return original(self)end;assert(a:placeChunk('a',1,1).ok);eq(a:buildStatus('a',true).count,1);eq(a:commitBuild('a').ok,false)end)
+test('BABFT STOP during a probe cannot grant build access from a late result',function()local a,p=babftFixture();p.place=function()a:cancel('all');return {ok=true,object={}}end;eq(a:testBuild().ok,false);eq(a.capabilities.build,false)end)
+test('BABFT timeout holds the pending guard and cannot duplicate a remote request',function()local a=babftFixture();a.context.spawn=spawn;queue={};local remote={InvokeServer=function()return nil end};eq(a:invoke(remote,{}).ok,false);assert(a.pending);local n=#queue;eq(a:invoke(remote,{}).ok,false);eq(#queue,n);flush();eq(a.pending,nil)end)
+test('BABFT receipt history is bounded across completed builds',function()local a=babftFixture();a:testBuild();for i=1,8 do local id='b'..i;assert(a:beginBuild(id,sample,0).ok);a:placeChunk(id,1,1);a:placeChunk(id,2,1);a:commitBuild(id)end;local n=0;for _ in pairs(a.transactions)do n+=1 end;eq(n,3)end)
 print(string.format('RESULT %d passed / %d failed / %d total',total-failed,failed,total));assert(failed==0,'Test failures')

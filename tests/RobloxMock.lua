@@ -15,7 +15,7 @@ vm.__add=function(a,b)return Vector3.new(a.X+b.X,a.Y+b.Y,a.Z+b.Z)end;vm.__sub=fu
 vm.__mul=function(a,b)if type(a)=='number'then a,b=b,a end;return Vector3.new(a.X*b,a.Y*b,a.Z*b)end;vm.__div=function(a,b)return Vector3.new(a.X/b,a.Y/b,a.Z/b)end
 Vector3={new=function(x,y,z)return setmetatable({X=x or 0,Y=y or 0,Z=z or 0},vm)end};Vector3.zero=Vector3.new();Vector3.yAxis=Vector3.new(0,1,0)
 Vector2={new=function(x,y)return {X=x or 0,Y=y or 0}end};Vector2.zero=Vector2.new()
-local cm={};cm.__index=function(c,k)if k=='Position'then return c.pos elseif k=='Rotation'then return c elseif k=='LookVector'then return Vector3.new(0,0,-1)end end;cm.__mul=function(a,b)return CFrame.new(a.pos+b.pos)end
+local cm={};cm.__index=function(c,k)if k=='Position'then return c.pos elseif k=='Rotation'then return c elseif k=='LookVector'then return Vector3.new(0,0,-1)elseif k=='ToObjectSpace' then return function(a,b)return CFrame.new(b.pos-a.pos)end elseif k=='ToAxisAngle'then return function()return Vector3.yAxis,0 end end end;cm.__mul=function(a,b)return CFrame.new(a.pos+b.pos)end
 CFrame={new=function(x,y,z)return setmetatable({pos=type(x)=='table' and x or Vector3.new(x,y,z)},cm)end,Angles=function()return CFrame.new()end,lookAt=function(p)return CFrame.new(p)end}
 Color3={new=function(r,g,b)return {R=r,G=g,B=b}end,fromRGB=function(r,g,b)return {R=r/255,G=g/255,B=b/255}end,fromHSV=function()return {}end}
 UDim={new=function(s,o)return {Scale=s or 0,Offset=o or 0}end};UDim2={new=function(a,b,c,d)return {X=UDim.new(a,b),Y=UDim.new(c,d)}end};UDim2.fromOffset=function(x,y)return UDim2.new(0,x,0,y)end;UDim2.fromScale=function(x,y)return UDim2.new(x,0,y,0)end
@@ -25,7 +25,7 @@ im.__index=function(o,k)
  if methods[k] then return methods[k]end
  if o.props[k]~=nil then return o.props[k]end
  if events[k] then local s=signal();o.props[k]=s;return s end
- if k=='AbsoluteSize' then return Vector2.new(800,500)elseif k=='AbsolutePosition'then return Vector2.new(30,30)end
+ if k=='AbsoluteSize' then return Vector2.new(800,500)elseif k=='AbsolutePosition'then return Vector2.new(30,30)elseif k=='Position' and o.props.CFrame then return o.props.CFrame.Position end
  for _,c in ipairs(o.children)do if c.Parent==o and c.Name==k then return c end end
 end
 im.__newindex=function(o,k,v)
@@ -39,6 +39,9 @@ function methods:GetChildren()local out={};for _,c in ipairs(self.children)do if
 function methods:GetDescendants()local out={};local function walk(o)for _,c in ipairs(o:GetChildren())do out[#out+1]=c;walk(c)end end;walk(self);return out end
 function methods:FindFirstChild(name)for _,c in ipairs(self:GetChildren())do if c.Name==name then return c end end end
 function methods:FindFirstChildOfClass(name)for _,c in ipairs(self:GetChildren())do if c:IsA(name)then return c end end end
+function methods:FindFirstChildWhichIsA(name,recursive)for _,c in ipairs(recursive and self:GetDescendants()or self:GetChildren())do if c:IsA(name)then return c end end end
+function methods:IsDescendantOf(parent)local p=self.Parent;while p do if p==parent then return true end;p=p.Parent end;return false end
+function methods:EquipTool(tool)tool.Parent=self.Parent end
 function methods:WaitForChild(name)return self:FindFirstChild(name)end
 function methods:GetPropertyChangedSignal(name)if not self.signals[name]then self.signals[name]=signal()end;return self.signals[name]end
 function methods:Destroy()for _,c in ipairs(self:GetChildren())do c:Destroy()end;self.Parent=nil;self.Destroyed=true end

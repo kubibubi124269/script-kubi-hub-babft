@@ -1,12 +1,12 @@
 {
-  "version": "5.1.1",
-  "releaseDate": "2026-10-29",
+  "version": "5.2.0",
+  "releaseDate": "2026-10-30",
   "changes": [
-    "Wszystkie sześć zakładek widoczne w siatce w wąskim oknie",
-    "Opisy i statystyki dopasowują wysokość do tekstu",
-    "Pełna treść komunikatu po kliknięciu dolnego paska",
-    "Skróty diagnostyki rozwijają właściwą sekcję Settings",
-    "Bez dostępu do budowania przycisk otwiera instrukcję ręczną"
+    "Tryb narzędzi BABFT zamiast zależności wyłącznie od mostu Studio",
+    "TEST 1 BLOKU odblokowuje BUILD dopiero po odczytaniu nowego bloku",
+    "Kolejka statycznej geometrii sprawdza pozycję, obrót, rozmiar i kolor",
+    "STOP pozostawia już postawione części i zatrzymuje dalsze żądania",
+    "Odczyt materiałów z podfolderów i dokładnych aliasów bez mieszania metalu i tytanu"
   ],
-  "compatibility": "W publicznym BABFT: podgląd, generatory i asystent. Automatyzacja i mechanika wymagają uprawnionego adaptera we własnej grze. Fizyka WORM-a wymaga testu w Studio."
+  "compatibility": "BABFT: nowy tryb narzędzi wymaga sprawdzenia przez TEST 1 BLOKU w grze. Obsługa statycznych planów; WORM z zawiasami i autofarm BABFT nie są włączone. Most własnej gry Studio pozostaje dostępny."
 }

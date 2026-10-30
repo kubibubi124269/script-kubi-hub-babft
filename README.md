@@ -1,8 +1,10 @@
-# KUBI HUB ULTIMATE V5.1.1
+# KUBI HUB ULTIMATE V5.2.0
 
 Sześć głównych zakładek: **PRO, Builder, Autofarm, Shapes, Circle Maker, Settings**. Sekcje są zwijane, a wyszukiwarka u góry znajduje funkcje i ustawienia. Prawy Ctrl lub pływający przycisk **K** pokazuje okno.
 
-W wąskim oknie wszystkie zakładki mieszczą się w dwóch lub trzech rzędach. Opisy i statystyki rosną razem z tekstem. Kliknięcie dolnego paska otwiera pełny komunikat w Settings. Bez dostępu do budowania przycisk **ASYSTENT** otwiera instrukcję ręczną; V5.1.1 nie dodaje automatycznego budowania w publicznym BABFT.
+W wąskim oknie wszystkie zakładki mieszczą się w dwóch lub trzech rzędach. Opisy i statystyki rosną razem z tekstem. Kliknięcie dolnego paska otwiera pełny komunikat w Settings.
+
+V5.2 dodaje tryb korzystający z własnych narzędzi BABFT. **Nie potwierdzono go jeszcze w aktualnej grze.** Wejdź do drużyny, otwórz Builder i uruchom **TEST 1 BLOKU**. Dopiero wykrycie nowego drewnianego bloku w folderze Twojej budowli odblokuje BUILD dla planów statycznych. Samo otwarcie huba niczego nie buduje. Testowy blok pozostaje na działce. Narzędzia skalowania i malowania są potrzebne odpowiednim projektom. Siedzenia zachowują rozmiar natywnego modelu gry. STOP pozostawia już postawione części.
 
 Stały loader pozostaje bez zmian:
 
@@ -14,9 +16,9 @@ loadstring(game:HttpGet("https://raw.githubusercontent.com/kubibubi124269/script
 
 ## Zgodność z BABFT
 
-W publicznym BABFT dostępne są podgląd 3D, biblioteka 53 planów, wyszukiwanie, ulubione, Circle Maker, generatory brył, ręczny asystent elementów, odczyt materiałów, import/eksport JSON, profile oraz lokalne efekty. **Automatyczna budowa, farmienie i zmiany ruchu wymagają uprawnionego adaptera we własnej grze.** Projekt nie ma potwierdzonego publicznego API BABFT. V5 nie zgaduje jego prywatnych żądań i nie przedstawia podglądu jako serwerowej budowli ani nie obiecuje złota.
+W publicznym BABFT dostępne są podgląd 3D, biblioteka 53 planów, wyszukiwanie, ulubione, Circle Maker, generatory brył, ręczny asystent elementów, odczyt materiałów, import/eksport JSON, profile oraz lokalne efekty. V5.2 usuwa zależność budowania wyłącznie od własnego mostu Studio. Tryb BABFT używa protokołu narzędzi zachowanego w V4.1 i wymaga testu w grze. Nie jest oficjalnym publicznym API ani gwarancją zgodności z obecną wersją BABFT. Brak potwierdzenia zatrzymuje kolejkę bez ponowienia. **Autofarm BABFT, zmiany ruchu i odtwarzanie mechaniki WORM-a pozostają niedostępne w tym wydaniu.** Własny most Studio nadal obsługuje funkcje testowe. Podgląd nie jest przedstawiany jako budowla serwerowa.
 
-Materiały są odczytywane z dokładnych nazw `LocalPlayer.Data`, jeśli istnieją. Metal i tytan są osobne. Brak danych oznacza **NIE ODCZYTANO**, nie zero. Koszt objętościowy `ceil(objętość/8)` jest modelem projektu i zestawu Studio, nie zweryfikowanym cennikiem aktualnego BABFT.
+Materiały są odczytywane z dokładnych nazw `LocalPlayer.Data` i podfolderów Inventory/Blocks/BlockInventory. Jawny alias Wood odpowiada WoodBlock; Metal i Titanium pozostają osobne. Brak danych oznacza **NIE ODCZYTANO**, nie zero. Koszt objętościowy `ceil(objętość/8)` jest modelem projektu i zestawu Studio, nie zweryfikowanym cennikiem aktualnego BABFT.
 
 ## Zmiany
 
@@ -38,14 +40,14 @@ Serwer domyślnie działa wyłącznie w Studio. Użycie we własnej opublikowane
 
 ## Testy
 
-Wykonano kompilację oficjalnym Luau 0.744, **63 testy logiki i 45 sprawdzeń kontraktu GUI w mocku**. Mock nie renderuje Roblox i nie symuluje fizyki. **Testów Studio ani nowej wersji w BABFT nie wykonano.**
+Wykonano kompilację oficjalnym Luau 0.744, **74 testy logiki i 58 sprawdzeń kontraktu klienta w mocku** oraz oba importy modeli. Mock nie renderuje Roblox i nie symuluje fizyki ani prawdziwego serwera BABFT. **Nowego trybu narzędzi nie testowano w grze.**
 
 ```text
 node tools/build.cjs
 LUAU_BIN=/path/to/luau LUAU_COMPILE=/path/to/luau-compile node tools/test.cjs
 ```
 
-[Raport poprawki GUI](docs/V5.1.1-REPORT.md) · [Raport V5.1 i ograniczenia](docs/V5.1-REPORT.md) · [Testy i oczekiwane wyniki](docs/TESTING.md) · [Historia zmian](CHANGELOG.md) · [Układ funkcji](FEATURES.md).
+[Raport trybu BABFT](docs/V5.2-REPORT.md) · [Raport poprawki GUI](docs/V5.1.1-REPORT.md) · [Testy i oczekiwane wyniki](docs/TESTING.md) · [Historia zmian](CHANGELOG.md) · [Układ funkcji](FEATURES.md).
 
 ## Modele społeczności
 
