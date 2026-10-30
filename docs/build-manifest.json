@@ -1,5 +1,5 @@
 {
-  "version": "5.2.0",
+  "version": "5.2.1",
   "modules": [
     {
       "name": "Util",
@@ -19,7 +19,7 @@
     {
       "name": "Inventory",
       "file": "src/modules/inventory/Inventory.lua",
-      "sha256": "ad722d49384925bd7f44b14e0068b54218de3883df983d6c6c0979eefa9323e2"
+      "sha256": "0549cd0bab78d3bdbd7c861e91f62c290b7512eb2d8d11b8241e750247d7385f"
     },
     {
       "name": "Config",
@@ -84,7 +84,7 @@
     {
       "name": "Version",
       "file": "src/modules/tools/Version.lua",
-      "sha256": "1fe75cee7dd6d702dd64aa35f39138c2429fd6c6e02f2aa9f93b4bb5733e2cc1"
+      "sha256": "c0a5e16a1c746b4b1c1f586f0496efbd67992daa7f458bb4b34962dbc0cf67b6"
     },
     {
       "name": "Performance",
@@ -127,5 +127,5 @@
       "sha256": "ea0eb7043cc38992e82a46edf63af0d050de0495126d46444c19be1acac7d458"
     }
   ],
-  "mainSha256": "5a9da2757a401d95186d4bdd973fc6a472a736233ddfbf7185e6fe3a4b68e90a"
+  "mainSha256": "c63b57514eb983d08e86be113192bf6acb417fc36a97c8d7903a8f9ad04832a5"
 }

@@ -137,4 +137,22 @@ test('BABFT cancellation during a sent placement still records that returned obj
 test('BABFT STOP during a probe cannot grant build access from a late result',function()local a,p=babftFixture();p.place=function()a:cancel('all');return {ok=true,object={}}end;eq(a:testBuild().ok,false);eq(a.capabilities.build,false)end)
 test('BABFT timeout holds the pending guard and cannot duplicate a remote request',function()local a=babftFixture();a.context.spawn=spawn;queue={};local remote={InvokeServer=function()return nil end};eq(a:invoke(remote,{}).ok,false);assert(a.pending);local n=#queue;eq(a:invoke(remote,{}).ok,false);eq(#queue,n);flush();eq(a.pending,nil)end)
 test('BABFT receipt history is bounded across completed builds',function()local a=babftFixture();a:testBuild();for i=1,8 do local id='b'..i;assert(a:beginBuild(id,sample,0).ok);a:placeChunk(id,1,1);a:placeChunk(id,2,1);a:commitBuild(id)end;local n=0;for _ in pairs(a.transactions)do n+=1 end;eq(n,3)end)
+local function strictInventoryNode(children,value)
+ local node={Value=value}
+ function node:FindFirstChild(name,recursive)assert(type(name)=='string');assert(recursive==nil or type(recursive)=='boolean','FindFirstChild recursive must be boolean');return (children or {})[name]end
+ function node:IsA(class)return value~=nil and class=='IntValue' end
+ return node
+end
+test('missing material aliases never pass the gsub count as a Roblox boolean',function()
+ local p=strictInventoryNode({Data=strictInventoryNode({WoodBlock=strictInventoryNode(nil,30)})})
+ local values=Inventory.readPlayer(p);eq(values.WoodBlock,30);eq(values.PlasticBlock,nil);eq(values.TitaniumBlock,nil)
+end)
+test('nested wood alias uses one argument and remains distinct from metal',function()
+ local p=strictInventoryNode({Data=strictInventoryNode({Inventory=strictInventoryNode({Wood=strictInventoryNode(nil,27),Metal=strictInventoryNode(nil,3000),Titanium=strictInventoryNode(nil,20)})})})
+ local values=Inventory.readPlayer(p);eq(values.WoodBlock,27);eq(values.MetalBlock,3000);eq(values.TitaniumBlock,20)
+end)
+test('exact inventory name has priority over a conflicting short alias',function()
+ local p=strictInventoryNode({Data=strictInventoryNode({Wood=strictInventoryNode(nil,1),Inventory=strictInventoryNode({WoodBlock=strictInventoryNode(nil,42)})})})
+ local values=Inventory.readPlayer(p);eq(values.WoodBlock,42)
+end)
 print(string.format('RESULT %d passed / %d failed / %d total',total-failed,failed,total));assert(failed==0,'Test failures')

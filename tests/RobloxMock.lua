@@ -37,7 +37,11 @@ Instance={new=function(class)return setmetatable({props={Name=class,ClassName=cl
 function methods:IsA(c)return self.ClassName==c or c=='GuiObject'and ({Frame=true,TextButton=true,TextLabel=true,TextBox=true,ScrollingFrame=true,ViewportFrame=true})[self.ClassName]==true or c=='BasePart'and(self.ClassName=='Part'or self.ClassName=='WedgePart')end
 function methods:GetChildren()local out={};for _,c in ipairs(self.children)do if c.Parent==self then out[#out+1]=c end end;return out end
 function methods:GetDescendants()local out={};local function walk(o)for _,c in ipairs(o:GetChildren())do out[#out+1]=c;walk(c)end end;walk(self);return out end
-function methods:FindFirstChild(name)for _,c in ipairs(self:GetChildren())do if c.Name==name then return c end end end
+function methods:FindFirstChild(name,recursive)
+ assert(type(name)=='string','FindFirstChild name must be a string')
+ assert(recursive==nil or type(recursive)=='boolean','FindFirstChild recursive must be a boolean')
+ for _,c in ipairs(recursive and self:GetDescendants()or self:GetChildren())do if c.Name==name then return c end end
+end
 function methods:FindFirstChildOfClass(name)for _,c in ipairs(self:GetChildren())do if c:IsA(name)then return c end end end
 function methods:FindFirstChildWhichIsA(name,recursive)for _,c in ipairs(recursive and self:GetDescendants()or self:GetChildren())do if c:IsA(name)then return c end end end
 function methods:IsDescendantOf(parent)local p=self.Parent;while p do if p==parent then return true end;p=p.Parent end;return false end

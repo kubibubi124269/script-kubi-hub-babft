@@ -44,7 +44,11 @@ return function(Util)
   for id in pairs(Inventory.definitions) do
    local found
    for _,root in ipairs(roots) do local v=root:FindFirstChild(id);if v and (v:IsA('IntValue') or v:IsA('NumberValue')) then found=v;break end end
-   if not found and id:match('Block$') then for _,root in ipairs(roots) do local v=root:FindFirstChild(id:gsub('Block$',''));if v and (v:IsA('IntValue') or v:IsA('NumberValue')) then found=v;break end end end
+   if not found and id:match('Block$') then
+    -- gsub also returns a replacement count; only its string belongs in the Roblox call.
+    local alias=id:gsub('Block$','')
+    for _,root in ipairs(roots) do local v=root:FindFirstChild(alias);if v and (v:IsA('IntValue') or v:IsA('NumberValue')) then found=v;break end end
+   end
    if found then records[id]=found;values[id]=found.Value end
   end
   return values,records,roots
