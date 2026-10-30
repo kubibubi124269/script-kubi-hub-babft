@@ -38,20 +38,31 @@ return function(Util)
   for _,r in ipairs(comparison.rows) do lines[#lines+1]=string.format('%s: posiadane %s / wymagane %d%s',r.label,r.known and tostring(r.have) or 'NIE ODCZYTANO',r.required,r.known and (' / brakuje '..r.missing) or ' / stan nieznany') end
   return table.concat(lines,'\n')
  end
+ function Inventory.readPlayer(player)
+  local data=player:FindFirstChild('Data');local roots={};local records={};local values={}
+  if data then roots[#roots+1]=data;for _,name in ipairs({'Inventory','Blocks','BlockInventory'}) do local folder=data:FindFirstChild(name);if folder then roots[#roots+1]=folder end end end
+  for id in pairs(Inventory.definitions) do
+   local found
+   for _,root in ipairs(roots) do local v=root:FindFirstChild(id);if v and (v:IsA('IntValue') or v:IsA('NumberValue')) then found=v;break end end
+   if not found and id:match('Block$') then for _,root in ipairs(roots) do local v=root:FindFirstChild(id:gsub('Block$',''));if v and (v:IsA('IntValue') or v:IsA('NumberValue')) then found=v;break end end end
+   if found then records[id]=found;values[id]=found.Value end
+  end
+  return values,records,roots
+ end
  function Inventory.observePlayer(player,runtime,changed)
-  local data,records=nil,{};local folderConnections={};local valueConnections={};local snapshot=Inventory.snapshot(nil,'player.Data (nieodczytane)')
+  local folderConnections={};local valueConnections={};local snapshot=Inventory.snapshot(nil,'player.Data (nieodczytane)')
   local function clear(list)for _,c in ipairs(list) do runtime:disconnect(c) end;table.clear(list)end
   local function bind()
-   clear(valueConnections);records={}
-   if data then for id in pairs(Inventory.definitions) do
-    local v=data:FindFirstChild(id)
-    if v and (v:IsA('IntValue') or v:IsA('NumberValue')) then records[id]=v.Value;valueConnections[#valueConnections+1]=runtime:connect(v.Changed,function()records[id]=v.Value;snapshot=Inventory.snapshot(records,'player.Data / dokładne identyfikatory');changed(snapshot)end,'Inventory') end
-   end end
-   snapshot=Inventory.snapshot(records,data and 'player.Data / dokładne identyfikatory' or 'player.Data (brak)');changed(snapshot)
+   clear(valueConnections)
+   local values,records=Inventory.readPlayer(player)
+   local function publish()local current=Inventory.readPlayer(player);snapshot=Inventory.snapshot(current,'player.Data / dokładne identyfikatory i jawne aliasy');changed(snapshot)end
+   for _,v in pairs(records) do valueConnections[#valueConnections+1]=runtime:connect(v.Changed,publish,'Inventory') end
+   snapshot=Inventory.snapshot(values,'player.Data / dokładne identyfikatory i jawne aliasy');changed(snapshot)
   end
-  local function attach()
-   local nextData=player:FindFirstChild('Data');if nextData==data then return end;clear(folderConnections);data=nextData
-   if data then folderConnections[#folderConnections+1]=runtime:connect(data.ChildAdded,bind,'Inventory');folderConnections[#folderConnections+1]=runtime:connect(data.ChildRemoved,bind,'Inventory') end;bind()
+  local attach
+  attach=function()
+   clear(folderConnections);local _,_,roots=Inventory.readPlayer(player)
+   for _,root in ipairs(roots) do folderConnections[#folderConnections+1]=runtime:connect(root.ChildAdded,attach,'Inventory');folderConnections[#folderConnections+1]=runtime:connect(root.ChildRemoved,attach,'Inventory') end;bind()
   end
   runtime:connect(player.ChildAdded,attach,'Inventory');runtime:connect(player.ChildRemoved,attach,'Inventory');attach()
   return function()return snapshot end
