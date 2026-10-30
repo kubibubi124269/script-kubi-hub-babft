@@ -10,14 +10,16 @@ return function(M)
   self.storage=self:storageAdapter();self.config=M.Config.new(self.codec,self.storage,self.log)
   local saved=_G.KubiHubV5Settings;if type(saved)=='table' then local value=M.Config.validate(saved);if value then self.config.data=value end end
   self.library=M.Library.new();for _,err in ipairs(self.library.errors) do self.log:error('Schematics',err) end
-  self.adapter=M.Adapter.new({userId=self.player.UserId,placeId=game.PlaceId,clock=self.clock,spawn=task.spawn,wait=task.wait,alive=function()return self.alive end})
+  self.adapterContext={userId=self.player.UserId,placeId=game.PlaceId,clock=self.clock,spawn=task.spawn,wait=task.wait,alive=function()return self.alive end}
+  self.adapter=M.Adapter.new(self.adapterContext)
+  if game.PlaceId==537413528 then self.babft=M.BabftAdapter.new(self.adapterContext,M.BabftEnvironment.new(self.player,workspace,task.wait,self.clock,function()return self.alive end)) end
   self.farm=M.Farm.new(self.runtime,self.adapter,self.config.data.farm,self.log,task.spawn)
   self.builder=M.Builder.new(self.runtime,self.adapter,self.log,task.spawn)
   self.movement=M.Movement.new(self.runtime,self.adapter,self.player,self.input,self.log,self.config.data.movement)
   self.effects=M.Effects.new(self.clock);self.inventorySnapshot=M.Inventory.snapshot(nil,'Oczekiwanie na dane')
   self.readInventory=M.Inventory.observePlayer(self.player,self.runtime,function(snapshot)if not self.serverInventory then self.inventorySnapshot=snapshot;self.previewDirty=true end end)
   self.ui=M.UI.new(self);self:pages();self:select('WORM_MK2');self.ui:show('HOME');self.ui:theme()
-  self.runtime:connect(self.player.CharacterAdded,function()self.farm:stop('Respawn — uruchom ponownie ręcznie.');self.movement:reset();if self.builder:isBusy() then self.builder:cancel('Respawn — anulowanie własnej budowy.') end;self.effects:clear()end,'Character')
+  self.runtime:connect(self.player.CharacterAdded,function()self.farm:stop('Respawn — uruchom ponownie ręcznie.');self.movement:reset();if self.builder:isBusy() then self.builder:cancel('Respawn — anulowanie własnej budowy.') end;if self.babft then self.babft.buildVerified=false;self.babft.capabilities.build=false end;self.effects:clear()end,'Character')
   self.runtime:connect(self.runService.Heartbeat,function(dt)
    self.fps=self.fps==0 and 1/math.max(dt,.001) or self.fps*.94+math.min(240,1/math.max(dt,.001))*.06
    self.runtime:tick(dt)
@@ -27,7 +29,11 @@ return function(M)
   self.runtime:schedule('Dashboard',1,function()self:updateDashboard()end)
   self.runtime:schedule('InventoryRefresh',2,function()if self.adapter.capabilities.inventory and not self.adapter.pending and not self.builder:isBusy() and self.farm.state=='STOPPED' then self:refreshInventory() end end)
   self.runtime:schedule('PreviewRefresh',.2,function()if self.previewDirty and self.ui.current=='BUILDER' then self:refreshPreview() end end)
-  self.runtime:job('Adapter',function()local ok,err=self.adapter:connect(game:GetService('ReplicatedStorage'));if ok then self.log:add('Adapter',self.adapter.label);self:refreshInventory() else self.log:add('Adapter',err,'WARN') end;return true end,task.spawn)
+  self.runtime:job('Adapter',function()
+   local ok,err=self.adapter:connect(game:GetService('ReplicatedStorage'))
+   if not ok and self.babft then self.adapter=self.babft;self.farm.adapter=self.adapter;self.builder.adapter=self.adapter;self.movement.adapter=self.adapter;ok,err=self.adapter:connect();self:select('legacy_RAFT',true);self.builder:center();self.config.data.builder=M.Util.copy(self.builder.options);self:refreshPreview() end
+   if ok then self.log:add('Adapter',self.adapter.label) else self.log:add('Adapter',err,'WARN') end;self:refreshInventory();return true
+  end,task.spawn)
   self.log:add('Core','KUBI HUB ULTIMATE V'..M.Version.current..' uruchomiony.');self:updateDashboard();return self
  end
  function App:storageAdapter()
@@ -64,6 +70,17 @@ return function(M)
  function App:refreshInventory()
   if not self.adapter.capabilities.inventory then self.inventorySnapshot=self.readInventory();return end
   local reply=self.adapter:inventory();if reply.ok and type(reply.values)=='table' then self.serverInventory=true;self.inventorySnapshot=M.Inventory.snapshot(reply.values,reply.source or self.adapter.label);self.previewDirty=true else self.log:add('Inventory',reply.error or 'Brak danych adaptera.','WARN') end
+ end
+ function App:testBabftBuild()
+  if self.adapter.mode~='BABFT' then return false,'Ten test jest dostępny w BABFT.' end
+  if self.runtime.lock or self.adapter.pending or self.probeJob and not self.probeJob.done then return false,'Najpierw zatrzymaj aktywny moduł lub poczekaj na odpowiedź narzędzia.' end
+  local ok,err=self.runtime:acquire('BuildTest');if not ok then return false,err end
+  self.probeJob=self.runtime:job('BuildTest',function()
+   local worked,result=xpcall(function()return self.adapter:testBuild()end,tostring);self.runtime:release('BuildTest')
+   if not self.alive then return end
+   if not worked then self:notify('Builder','Test nie powiódł się: '..tostring(result));return false end
+   self.log:add('Builder',result.message or result.error,result.ok and 'INFO' or 'WARN');self.ui:toast('Builder',result.message or result.error,not result.ok);self:updateDashboard();return result.ok
+  end,task.spawn);return true
  end
  function App:select(id,reset)
   local item=self.library.items[id];if not item then return false,'Nie znaleziono schematu.' end
@@ -123,6 +140,8 @@ return function(M)
   self.materialInfo=ui:label(b,'',180)
   ui:button(b,'Kopiuj listę materiałów',function()local text=M.Inventory.describe(M.Inventory.compare(self.builder.schema,self.inventorySnapshot));self:copy(text,self.schemaBox);self:notify('Builder','Lista materiałów znajduje się też w polu importu / eksportu.')end)
   self.buildAvailability=ui:label(b,'')
+  self.buildTestButton=ui:button(b,'TEST 1 BLOKU — sprawdź narzędzie BABFT',function()return self:testBabftBuild()end,'Stawia jeden drewniany blok na własnej działce. Pozostawia go w grze i sprawdza jego obecność. Nie uruchamia pełnego schematu.')
+  self.babftRefresh=ui:button(b,'Odśwież narzędzia i działkę BABFT',function()if self.adapter.mode~='BABFT' then return false,'Ten przycisk jest dostępny w BABFT.' end;if self.builder:isBusy() or self.adapter.pending or self.farm.state~='STOPPED' then return false,'Najpierw zatrzymaj aktywny moduł.' end;self.adapter:connect();self:refreshInventory();self:refreshPreview();self:updateDashboard();self:notify('BABFT',self.adapter.diagnostics);return true end)
   self.buildButton=ui:button(b,'ASYSTENT — pokaż kroki budowania',function()
    if not self.adapter.capabilities.build then ui:reveal(self.assistantBody);return true end
    self:refreshPreview();return self.builder:start(self.inventorySnapshot)
@@ -237,7 +256,7 @@ return function(M)
   local id;repeat self.schemaSerial=(self.schemaSerial or 0)+1;id=prefix..'_'..math.floor(self.clock()*1000)..'_'..self.schemaSerial until not self.library.items[id];return id
  end
  function App:report()
-  local count=self.runtime:counts();local lines={self.log:text(),'','Środowisko: '..self.adapter.label,'Adapter: '..tostring(self.adapter.session~=nil),'Zadania klienta: '..count.jobs,'Połączenia klienta: '..count.connections,'Harmonogramy: '..count.schedules,'Otwarte RF adaptera: '..tostring(self.adapter.pending~=nil),'Źródło materiałów: '..self.inventorySnapshot.source}
+  local count=self.runtime:counts();local lines={self.log:text(),'','Środowisko: '..self.adapter.label,'Tryb BABFT: '..tostring(self.adapter.mode=='BABFT'),'Test bloku BABFT: '..tostring(self.adapter.buildVerified==true),'Most serwera KUBI: '..tostring(self.adapter.session~=nil),'Zadania klienta: '..count.jobs,'Połączenia klienta: '..count.connections,'Harmonogramy: '..count.schedules,'Otwarte RF adaptera: '..tostring(self.adapter.pending~=nil),'Źródło materiałów: '..self.inventorySnapshot.source,self.adapter.diagnostics or ''}
   if self.builder.schema then lines[#lines+1]=M.Inventory.describe(M.Inventory.compare(self.builder.schema,self.inventorySnapshot)) end
   return table.concat(lines,'\n')
  end
@@ -246,10 +265,11 @@ return function(M)
   local fs=self.farm:summary();local counts=self.runtime:counts();local _,hum,root=self.movement:character();local speed=root and root.AssemblyLinearVelocity.Magnitude;local active=(self.farm.state=='RUNNING' and 1 or 0)+(self.builder:isBusy() and 1 or 0)+(self.movement.fly and 1 or 0)+(#self.effects.objects>0 and 1 or 0)
   local p=M.Performance.get(self.config.data.performance.profile,self.fps);self.runtime.schedules.Dashboard.interval=p.statsInterval
   self.homeInfo.Text=string.format('Wersja %s • %s\nAktywne moduły: %d\nFarm: %s • Builder: %s\nSchematy: %d • błędy walidacji biblioteki: %d',M.Version.current,self.adapter.label,active,self.farm.state,self.builder.state,#self.library:list(),#self.library.errors)
-  local canBuild=self.adapter.capabilities.build==true
+  local canBuild=self.adapter.capabilities.build==true;local native=self.adapter.mode=='BABFT'
+  self.buildTestButton.Visible=native;self.babftRefresh.Visible=native
   self.ui.subtitle.Text='V'..M.Version.current..'  •  '..(canBuild and 'BUDOWANIE POŁĄCZONE' or 'TRYB ASYSTENTA')
-  self.buildAvailability.Text=canBuild and 'Serwer potwierdził dostęp do budowania na własnej działce.' or 'W tej sesji budowanie w grze jest niedostępne. Możesz używać podglądu, generatorów, listy materiałów i instrukcji ręcznej. Kod PRO nie odblokowuje dostępu do serwera.'
-  self.buildButton.Text=canBuild and 'BUILD — sprawdź i zbuduj przez adapter' or 'ASYSTENT — pokaż kroki budowania'
+  self.buildAvailability.Text=native and (canBuild and 'BABFT: test narzędzia potwierdzony. BUILD obsługuje statyczną geometrię. Mechanika WORM-a pozostaje niedostępna. STOP zatrzymuje kolejne żądania; już postawione bloki pozostają.' or 'BABFT: najpierw TEST 1 BLOKU. Wymaga własnej działki, narzędzia budowania i drewna. Narzędzia skalowania / malowania są potrzebne tylko planom, które ich wymagają.') or (canBuild and 'Serwer potwierdził dostęp do budowania na własnej działce.' or 'W tej sesji budowanie w grze jest niedostępne. Możesz używać podglądu, generatorów, listy materiałów i instrukcji ręcznej.')
+  self.buildButton.Text=canBuild and (native and 'BUILD — zbuduj statyczny plan w BABFT' or 'BUILD — sprawdź i zbuduj przez adapter') or 'ASYSTENT — pokaż kroki budowania'
   for _,button in ipairs(self.buildControls) do button.Visible=canBuild end
   self.farmInfo.Text=string.format('Stan: %s • etap: %d\nCykle potwierdzone %d • nieudane %d\nŚredni cykl: %s s • cykle/h: %s\nOstatni błąd: %s',fs.state,fs.stage,fs.completed,fs.failed,fs.average and string.format('%.2f',fs.average) or '—',fs.cyclesPerHour and string.format('%.1f',fs.cyclesPerHour) or '—',fs.lastError~='' and fs.lastError or '—')
   self.buildInfo.Text=string.format('Stan: %s\nCzęści potwierdzone przez serwer: %d / %d\n%s',self.builder.state,self.builder.placed,self.builder.total,self.builder.error or '')
