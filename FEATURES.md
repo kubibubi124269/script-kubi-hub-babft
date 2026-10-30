@@ -1,5 +1,7 @@
 # Nawigacja V5
 
+V5.2: w BABFT Builder udostępnia TEST 1 BLOKU oraz odświeżenie narzędzi i działki. Po potwierdzeniu testu BUILD korzysta z własnych narzędzi gry dla statycznych planów. Zgodność protokołu wymaga sprawdzenia w grze. Dawne ogólne wymaganie mostu Studio nie dotyczy tego trybu. Mechanika WORM-a i autofarm BABFT pozostają niedostępne w tym wydaniu.
+
 - **PRO**: status, skróty, STOP, wersja, własny ruch w dozwolonym środowisku, lokalne efekty, paszcza WORM-a i klucz.
 - **Builder**: podgląd, kamera, warstwy od pierwszej, materiały z kopią listy, uprawniona budowa, pauza/anulowanie, obrót zachowany w eksporcie, materiał, lustra statycznych planów, UNDO/REDO i przejście do elementu. V5.1 dodaje przesunięcia X/Y/Z, wyśrodkowanie i dopasowanie do wymiarów. Skala zwykłych planów: 10–200%; mechaniki nie zmniejszamy.
 - **Autofarm**: sterowanie cyklami, profil, limit, rzeczywiste statystyki i błąd. Wymaga adaptera.

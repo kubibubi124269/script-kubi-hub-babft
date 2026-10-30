@@ -1,5 +1,11 @@
 # Historia zmian
 
+## 5.2.0 — 2026-10-30
+
+Zgłoszenie: GUI otwiera się, lecz budowanie i autofarm nie działają. Przyczyna V5: klient obsługiwał tylko KubiHubAuthorizedBridgeV1, dostępny we własnej grze Studio. Dodano osobny tryb BABFT wykorzystujący własne narzędzia gracza według protokołu zachowanego w V4.1. Jednorazowy test drewna musi odczytać nowy blok we własnym folderze, zanim BUILD będzie dostępny. Następnie statyczna geometria jest wysyłana pojedynczo, z kontrolą pozycji, obrotu, rozmiaru bloków i kolorów. Niepotwierdzone żądanie nie jest ponawiane. Anulowanie zachowuje liczbę odczytanych części i pozostawia je na działce. Test jest unieważniany po respawnie. Siedzenia zachowują natywny rozmiar. Nie dodano odtwarzania zawiasów ani klina.
+
+Odczyt materiałów obejmuje teraz podfoldery i jawne aliasy, bez łączenia metalu z tytanem. Dodano raport wykrytych narzędzi i działki oraz ograniczenie historii zakończonych budów. Autofarm BABFT nie został włączony: przywrócenie wcześniejszego sposobu wymaga wyjaśnienia zakresu z użytkownikiem. Weryfikacja offline: 74 testy logiki, 58 sprawdzeń klienta w mocku i dwa importy. Protokół narzędzi oraz zachowanie w aktualnym BABFT wymagają testu w grze; nie deklarujemy ich potwierdzenia.
+
 ## 5.1.1 — 2026-10-29
 
 Poprawka problemów widocznych na zrzucie ekranu: sześć zakładek w siatce w wąskim oknie, automatyczna wysokość tekstu bez pustych obszarów i uciętych opisów oraz zwykłe znaki [+]/[-] w nagłówkach. Kliknięcie dolnego paska otwiera pełny komunikat. Skróty DEBUG/STATS/PERFORMANCE rozwijają właściwą sekcję Settings; raport odświeża się w tej zakładce.
