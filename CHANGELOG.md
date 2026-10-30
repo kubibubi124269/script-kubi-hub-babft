@@ -1,5 +1,9 @@
 # Historia zmian
 
+## 5.2.1 — 2026-10-30
+
+Naprawiono awarię przed utworzeniem GUI. Przy braku dokładnej nazwy materiału wywołanie FindFirstChild otrzymywało dwa wyniki gsub: alias oraz liczbę zamian. Drugi argument API wymaga boolean, więc Roblox przerywał start. Alias jest teraz przypisany do osobnej zmiennej przed wywołaniem. Mock weryfikuje typ drugiego argumentu; na V5.2.0 odtworzył błąd podczas inicjalizacji odczytu materiałów. Dodano trzy regresje brakujących materiałów, zagnieżdżonych aliasów i pierwszeństwa dokładnych nazw. Po poprawce: 77 testów logiki, 58 sprawdzeń klienta i oba importy przechodzą. Nie zmieniano zakresu budowania ani autofarmy; test w rzeczywistej grze nadal jest potrzebny.
+
 ## 5.2.0 — 2026-10-30
 
 Zgłoszenie: GUI otwiera się, lecz budowanie i autofarm nie działają. Przyczyna V5: klient obsługiwał tylko KubiHubAuthorizedBridgeV1, dostępny we własnej grze Studio. Dodano osobny tryb BABFT wykorzystujący własne narzędzia gracza według protokołu zachowanego w V4.1. Jednorazowy test drewna musi odczytać nowy blok we własnym folderze, zanim BUILD będzie dostępny. Następnie statyczna geometria jest wysyłana pojedynczo, z kontrolą pozycji, obrotu, rozmiaru bloków i kolorów. Niepotwierdzone żądanie nie jest ponawiane. Anulowanie zachowuje liczbę odczytanych części i pozostawia je na działce. Test jest unieważniany po respawnie. Siedzenia zachowują natywny rozmiar. Nie dodano odtwarzania zawiasów ani klina.

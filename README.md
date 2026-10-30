@@ -1,4 +1,6 @@
-# KUBI HUB ULTIMATE V5.2.0
+# KUBI HUB ULTIMATE V5.2.1
+
+V5.2.1 naprawia przerwanie uruchamiania przy odczycie brakujących materiałów. Przyczyną był dodatkowy wynik gsub przekazywany jako drugi argument FindFirstChild. Test kontraktu tej metody został zaostrzony; błąd odtworzono przed poprawką i usunięto.
 
 Sześć głównych zakładek: **PRO, Builder, Autofarm, Shapes, Circle Maker, Settings**. Sekcje są zwijane, a wyszukiwarka u góry znajduje funkcje i ustawienia. Prawy Ctrl lub pływający przycisk **K** pokazuje okno.
 
@@ -40,7 +42,7 @@ Serwer domyślnie działa wyłącznie w Studio. Użycie we własnej opublikowane
 
 ## Testy
 
-Wykonano kompilację oficjalnym Luau 0.744, **74 testy logiki i 58 sprawdzeń kontraktu klienta w mocku** oraz oba importy modeli. Mock nie renderuje Roblox i nie symuluje fizyki ani prawdziwego serwera BABFT. **Nowego trybu narzędzi nie testowano w grze.**
+Wykonano kompilację oficjalnym Luau 0.744, **77 testów logiki i 58 sprawdzeń kontraktu klienta w mocku** oraz oba importy modeli. Mock nie renderuje Roblox i nie symuluje fizyki ani prawdziwego serwera BABFT. **Nowego trybu narzędzi nie testowano w grze.**
 
 ```text
 node tools/build.cjs
