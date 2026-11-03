@@ -1,12 +1,12 @@
 return function(Util,Inventory)
- local Schema={version=2,limit=6000}
+ local Schema={version=2,limit=10000}
  function Schema.validate(raw)
   local errors={};local function bad(s)errors[#errors+1]=s end
   if type(raw)~='table' then return nil,{'Schemat musi być obiektem.'} end
   if raw.schemaVersion~=2 then return nil,{'Nieobsługiwana wersja schematu.'} end
   for _,flag in ipairs({'mechanical','assistantOnly','intentionalOverlap','importedMechanics'}) do if raw[flag]~=nil and type(raw[flag])~='boolean' then bad('Pole '..flag..' wymaga wartości boolean.') end end
   if not Util.id(raw.id) or type(raw.name)~='string' or #raw.name<1 or #raw.name>120 then bad('Nieprawidłowy identyfikator lub nazwa.') end
-  if type(raw.elements)~='table' or #raw.elements<1 or #raw.elements>Schema.limit then return nil,{'Schemat wymaga 1–6000 elementów.'} end
+  if type(raw.elements)~='table' or #raw.elements<1 or #raw.elements>Schema.limit then return nil,{'Schemat wymaga 1–'..Schema.limit..' elementów.'} end
   if type(raw.connections)~='table' or #raw.connections>12000 then return nil,{'Nieprawidłowa lista połączeń.'} end
   local ids,adj={},{ }
   for i,e in ipairs(raw.elements) do
