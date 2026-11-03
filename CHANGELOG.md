@@ -1,5 +1,9 @@
 # Historia zmian
 
+## 5.2.2 — 2026-11-03
+
+Powiadomienia i dolny pasek pokazują przyczynę zamiast samego „Nowy komunikat”. Kliknięcie okienka otwiera pełną treść i przywraca ukryty hub. Zachowano kompletne wyjątki, poprawny UTF-8, obsługę chwilowego braku kamery i sprzątanie zdarzeń. Panel Autofarm pokazuje rzeczywistą dostępność przed START; odmowa trafia do ostatniego błędu bez naliczania cyklu. Autofarma publicznego BABFT pozostaje wyłączona; to poprawka diagnostyki. Testy offline: 79 logiki, 69 kontraktu klienta i dwa importy. Test nowego komunikatu odtwarza zgłoszenie na V5.2.1 przed poprawką. [Raport zakresu](docs/V5.2.2-REPORT.md).
+
 ## 5.2.1 — 2026-10-30
 
 Naprawiono awarię przed utworzeniem GUI. Przy braku dokładnej nazwy materiału wywołanie FindFirstChild otrzymywało dwa wyniki gsub: alias oraz liczbę zamian. Drugi argument API wymaga boolean, więc Roblox przerywał start. Alias jest teraz przypisany do osobnej zmiennej przed wywołaniem. Mock weryfikuje typ drugiego argumentu; na V5.2.0 odtworzył błąd podczas inicjalizacji odczytu materiałów. Dodano trzy regresje brakujących materiałów, zagnieżdżonych aliasów i pierwszeństwa dokładnych nazw. Po poprawce: 77 testów logiki, 58 sprawdzeń klienta i oba importy przechodzą. Nie zmieniano zakresu budowania ani autofarmy; test w rzeczywistej grze nadal jest potrzebny.
