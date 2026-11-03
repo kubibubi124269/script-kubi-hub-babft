@@ -1,5 +1,5 @@
 {
-  "version": "5.2.2",
+  "version": "6.0.0",
   "modules": [
     {
       "name": "Util",
@@ -19,7 +19,7 @@
     {
       "name": "Inventory",
       "file": "src/modules/inventory/Inventory.lua",
-      "sha256": "0549cd0bab78d3bdbd7c861e91f62c290b7512eb2d8d11b8241e750247d7385f"
+      "sha256": "3eabe52e6dced7d47f8a932b2cfc117d197e07099ec297c5d16658f1cdf22a2b"
     },
     {
       "name": "Config",
@@ -29,7 +29,7 @@
     {
       "name": "Schema",
       "file": "src/schematics/Schema.lua",
-      "sha256": "1dc66d8cdc6f02c5b612eed0c71266073299b997be02dd2a41502e22ff54cd22"
+      "sha256": "0588703e60f5626a0f274c35134663cef74071d271352d8f74475c50092b4b18"
     },
     {
       "name": "LegacyShapes",
@@ -40,6 +40,11 @@
       "name": "LegacyPlans",
       "file": "src/schematics/LegacyPlans.lua",
       "sha256": "2d9ac97d9e4a9ca2caf240265dd63a168b911681336a4ddce4520810d0d901af"
+    },
+    {
+      "name": "Community",
+      "file": "src/schematics/Community.lua",
+      "sha256": "552f043fdb1762fe4ffbd93c6e8abb4a96f52880bb4117e27672e5d1b8d0677c"
     },
     {
       "name": "WormMK2",
@@ -64,17 +69,22 @@
     {
       "name": "BabftAdapter",
       "file": "src/core/BabftAdapter.lua",
-      "sha256": "06572972c0eb3b0930d3931501f5e528cf7b3d87203b2d3edb763ad146273cfd"
+      "sha256": "c34a2ca5a4fcbcac33f3ef1e2f873ee76dbcc40d8352c5db2fa860a688d90897"
+    },
+    {
+      "name": "BabftFarmRoute",
+      "file": "src/modules/babft/FarmRoute.lua",
+      "sha256": "fb6feab07fe24b7e8ade160ad62998d2b14e89dbf5b388a9478463df6d9379d9"
     },
     {
       "name": "BabftEnvironment",
       "file": "src/modules/babft/Environment.lua",
-      "sha256": "48c94b58c112d5fabe161caa21ba0c920528d54db725e2e5e22648d31f300361"
+      "sha256": "b94634cac93dd7aaca1e3528964d288662403a6bda40d4103d712cc4742392ab"
     },
     {
       "name": "Farm",
       "file": "src/modules/farm/Controller.lua",
-      "sha256": "474d5821d64d7301b15d143f0c14a56c2a3d25c82b98a877d1750fdd21b2f4f9"
+      "sha256": "b4071b7ee35dc2aa4a1fd740d16a26da55d1a59eaedb395cf43dc6e6a18036d9"
     },
     {
       "name": "Builder",
@@ -84,7 +94,7 @@
     {
       "name": "Version",
       "file": "src/modules/tools/Version.lua",
-      "sha256": "491c008f64216df0a35f1665d92f3109d7ee2517b28f07a93492d6180a4cb563"
+      "sha256": "63f56655e3b4c01f6111823cab9ad4cb43370900e65c00e542b923a3f987d3a8"
     },
     {
       "name": "Performance",
@@ -104,12 +114,32 @@
     {
       "name": "Layout",
       "file": "src/ui/Layout.lua",
-      "sha256": "2b758264a60f5957ec73e23de643e6eae4c2cf3f0c1ea9b8131e30815e04eb0e"
+      "sha256": "2737134f9a55debe630640b7b191536a2e8a8141abe81e0ad643a96748392eec"
     },
     {
       "name": "Navigation",
       "file": "src/ui/Navigation.lua",
-      "sha256": "5c88f989ab40813011bccba6e42098e42757e18782569ace29b749ca94bd38ce"
+      "sha256": "2a53c6bc9e2ca3a51b314eae192099a6a0559cfff7caed09f4b04708adc2767a"
+    },
+    {
+      "name": "MM2Navigation",
+      "file": "src/ui/MM2Navigation.lua",
+      "sha256": "6fe3ae95e5ecea48bca44105996ba364193af758692dee330b58d03c3430a865"
+    },
+    {
+      "name": "Games",
+      "file": "src/core/Games.lua",
+      "sha256": "d0d83f43211eccf6c95f7a552936eed5a9b26955ffec8634ad10ec416d18a658"
+    },
+    {
+      "name": "MM2Platform",
+      "file": "src/modules/mm2/Platform.lua",
+      "sha256": "c254358dd2f9da60e9dc82d41657c4cf641d928db7d4a945b6aea9f830412304"
+    },
+    {
+      "name": "MM2Controller",
+      "file": "src/modules/mm2/Controller.lua",
+      "sha256": "079808a78792405a45824bddf904562516d04d8b6ecf96835885faecd9293dd2"
     },
     {
       "name": "Preview",
@@ -119,13 +149,23 @@
     {
       "name": "UI",
       "file": "src/ui/Window.lua",
-      "sha256": "c86374f44369304d2cb4cb0df67da702e3386913c2428935d9a1688e2f713a3c"
+      "sha256": "50d82058b7348e1fe5001acf703fd1389d81ab80db8aa90f00d59f2705f554d4"
     },
     {
       "name": "Application",
       "file": "src/core/Application.lua",
-      "sha256": "ea683a616d13da2d00b04f1d69feb3c8e7d07eb16762e0fd97e39a5e339ea65c"
+      "sha256": "fd532db575b714710285d6c8365414e1b3250e1b3417ecd57d6b7a6973dec39d"
+    },
+    {
+      "name": "MM2App",
+      "file": "src/modules/mm2/Application.lua",
+      "sha256": "e787adef0345e441ce35ca997f78b0ad7ff2735cfa2acd81c47e8f240c9ffe6b"
+    },
+    {
+      "name": "Launcher",
+      "file": "src/core/Launcher.lua",
+      "sha256": "43911b7cd4df5e445bbb1bf2c685875006f4bd4ec596a92274e19b9cac395f3f"
     }
   ],
-  "mainSha256": "a084c8fe1d83751abfd2d61ec6f424cfe34c56a7eabca5c2fa5e42e7b9e6fa6c"
+  "mainSha256": "beca1a6e688f2242540295e3c5c31432ea4f34e8ee2611612b267f30e02b2fca"
 }
