@@ -1,14 +1,21 @@
-# Nawigacja V5
+# Nawigacja V6
 
-V5.2: w BABFT Builder udostępnia TEST 1 BLOKU oraz odświeżenie narzędzi i działki. Po potwierdzeniu testu BUILD korzysta z własnych narzędzi gry dla statycznych planów. Zgodność protokołu wymaga sprawdzenia w grze. Dawne ogólne wymaganie mostu Studio nie dotyczy tego trybu. Mechanika WORM-a i autofarm BABFT pozostają niedostępne w tym wydaniu.
+Na starcie: wybór BABFT / MM2, wykrycie gry i zamknięcie wyboru. Moduły zaczynają wyłączone.
 
-- **PRO**: status, skróty, STOP, wersja, własny ruch w dozwolonym środowisku, lokalne efekty, paszcza WORM-a i klucz.
-- **Builder**: podgląd, kamera, warstwy od pierwszej, materiały z kopią listy, uprawniona budowa, pauza/anulowanie, obrót zachowany w eksporcie, materiał, lustra statycznych planów, UNDO/REDO i przejście do elementu. V5.1 dodaje przesunięcia X/Y/Z, wyśrodkowanie i dopasowanie do wymiarów. Skala zwykłych planów: 10–200%; mechaniki nie zmniejszamy.
-- **Autofarm**: sterowanie cyklami, profil, limit, rzeczywiste statystyki i błąd. Wymaga adaptera.
-- **Shapes**: 53 plany, kategorie, sortowanie, ulubione i szukanie; podglądy modeli społeczności; Shape Lab (kula, kopuła, spirala, ściana); plan stosu.
-- **Circle Maker**: koło/łuk/dysk, środek X/Y/Z, materiał, promień, segmenty, warstwy, odstęp, grubość i płaszczyzna.
-- **Settings**: profile i JSON, cofnięcie konfiguracji, motyw, układ kompaktowy, statystyki, ostatnia sesja, pełny raport błędów, wydajność i wyłączenie huba.
+## BABFT
 
-Górna wyszukiwarka indeksuje nagłówki, opisy, przyciski i pola. Wynik otwiera właściwą zakładkę i rozwija sekcję. Nazwy wszystkich konstrukcji można przeszukać wewnątrz biblioteki Shapes. Nagłówki zwijają sekcje. Statystyki i diagnostyka nie zajmują oddzielnych zakładek.
+- PRO: status, skróty, STOP, powrót do wyboru, lokalne efekty, klucz i narzędzia własnego środowiska.
+- Builder: podgląd, statyczna budowa, materiały, edytor i historia, biblioteka 53 planów, ulubione, import/eksport, modele społeczności, nowy dom i zamek oraz generatory brył. Zastępuje osobną zakładkę Shapes.
+- Autofarm: przywrócona trasa 10 etapów, skrzynia i zaobserwowany respawn; profile, STOP, pauza, limit i statystyki.
+- Circle Maker: koła, łuki i dyski, materiał, pozycja, promień, segmenty, warstwy i płaszczyzna.
+- Settings: profile, wygląd, statystyki, pełne komunikaty, raport i wydajność.
 
-V5.1.1: w wąskim oknie nawigacja ma trzy kolumny, a poniżej szerokości 420 px dwie. Wszystkie sześć zakładek pozostaje widoczne. Kliknięcie dolnego paska rozwija **Settings / Ostatni komunikat** z pełnym tekstem. Bez dostępu do budowania przycisk **ASYSTENT** rozwija instrukcję ręczną; BUILD oraz pauza/anulowanie pojawiają się po potwierdzeniu uprawnienia serwera.
+## MM2
+
+- MM2: wykryta gra, własne wyposażenie, skróty, STOP i powrót do wyboru.
+- Autofarm: monety/cukierki, trzy prędkości, filtry, oczekiwanie na przedmioty / postać / wolną torbę.
+- Combat: Aimbot, Auto Shot, wybór celu, kontrola ścian, Kill all, Murder Fling i Knife Aura.
+- Player: ESP widocznych ról, podnoszenie pistoletu, Auto Gun, własny ruch / Fly oraz efekty lokalne.
+- Settings: wygląd, pełny komunikat, raport i wyłączenie.
+
+Powiadomienie pokazuje przyczynę i po kliknięciu otwiera szczegóły. Prawy Ctrl lub K pokazuje okno. Wynik wyszukiwania otwiera zakładkę i sekcję. Fling jest eksperymentem fizyki; statystyki aktywacji broni nie są liczbą trafień. Stan testów i ograniczenia opisano w README oraz docs/TESTING.md.
