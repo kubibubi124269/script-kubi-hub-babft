@@ -1,10 +1,12 @@
 {
-  "version": "5.2.2",
+  "version": "6.0.0",
   "releaseDate": "2026-11-03",
   "changes": [
-    "Powiadomienia pokazują konkretną przyczynę i otwierają pełną treść po kliknięciu",
-    "Panel Autofarm pokazuje dostępność przed START i zachowuje przyczynę odmowy",
-    "Pełne błędy przycisków i zdarzeń; poprawione sprzątanie powiadomień"
+    "Wybór BABFT / MM2 na starcie i osobne kontrolery obu hubów",
+    "Przywrócona trasa autofarmy BABFT z pauzą, STOP i oczekiwaniem na respawn",
+    "Shapes przeniesione do Buildera; dom i architektura zamku z katalogu społeczności",
+    "MM2: monety / cukierki, Aimbot, Auto Shot, ESP, Auto Gun, Knife Aura, Kill all i ograniczony Fling",
+    "Duże plany do 10000 części przy ograniczonej liczbie obiektów podglądu"
   ],
-  "compatibility": "BABFT: nowy tryb narzędzi wymaga sprawdzenia przez TEST 1 BLOKU w grze. Obsługa statycznych planów; WORM z zawiasami i autofarm BABFT nie są włączone. Most własnej gry Studio pozostaje dostępny."
+  "compatibility": "Trasa BABFT oraz nowy hub MM2 wymagają testu w rzeczywistej grze. Strzały i ciosy używają własnych narzędzi; Fling jest eksperymentem fizyki. Nagrody i zabójstwa nie są symulowane. Budowanie statyczne nadal wymaga TEST 1 BLOKU. Mechanika WORM-a nie została dodana do BABFT."
 }

@@ -1,7 +1,7 @@
 return function(M)
  local UI={};UI.__index=UI
  function UI.new(app)
-  local self=setmetatable({app=app,pages={},buttons={},order=0,listConnections={},accentItems={},cards={},cardBodies={},firstCard={},refreshers={},routes={}},UI)
+  local self=setmetatable({app=app,navigation=app.navigation or M.Navigation,pages={},buttons={},order=0,listConnections={},accentItems={},cards={},cardBodies={},firstCard={},refreshers={},routes={}},UI)
   self.palette={bg=Color3.fromRGB(12,15,24),panel=Color3.fromRGB(20,25,38),card=Color3.fromRGB(27,33,49),text=Color3.fromRGB(235,239,250),muted=Color3.fromRGB(150,165,190),accent=Color3.fromRGB(83,133,247),red=Color3.fromRGB(244,95,120)}
   local old=app.player.PlayerGui:FindFirstChild('KubiHubUltimateV5');if old then old:Destroy() end
   self.gui=self:create('ScreenGui',{Name='KubiHubUltimateV5',ResetOnSpawn=false,DisplayOrder=95,ZIndexBehavior=Enum.ZIndexBehavior.Sibling},app.player.PlayerGui);app.runtime:own(self.gui)
@@ -33,7 +33,7 @@ return function(M)
    elseif self.previewDrag then local d=input.Position-self.previewDrag;self.previewDrag=input.Position;app.preview:orbit(d.X*.5,-d.Y*.5) end
   end)
   self:bind(app.input.InputEnded,function(input)if self.drag and input==self.drag.input or self.dragSize and input==self.dragSize.input then self.drag=nil;self.dragSize=nil;self:rememberPosition();self:fit() end;if self:isPress(input) then self.sliderDrag=nil;self.previewDrag=nil end end)
-  self:bind(app.input.InputBegan,function(input,processed)if input.KeyCode==Enum.KeyCode.RightControl and not app.input:GetFocusedTextBox() then self.frame.Visible=not self.frame.Visible;self.bubble.Visible=not self.frame.Visible end;if not processed and input.KeyCode==Enum.KeyCode.E then app:run('WORM',function()return app.adapter:rig('mouth')end) end end)
+  self:bind(app.input.InputBegan,function(input,processed)if input.KeyCode==Enum.KeyCode.RightControl and not app.input:GetFocusedTextBox() then self.frame.Visible=not self.frame.Visible;self.bubble.Visible=not self.frame.Visible end;if not processed and input.KeyCode==Enum.KeyCode.E and app.adapter and app.adapter.mode~='MM2' then app:run('WORM',function()return app.adapter:rig('mouth')end) end end)
   local camera=workspace.CurrentCamera;if camera then self:bind(camera:GetPropertyChangedSignal('ViewportSize'),function()self:fit()end) end
   self:fit();return self
  end
@@ -49,7 +49,7 @@ return function(M)
   local c=workspace.CurrentCamera;if c then self.app.config.data.ui.x=math.clamp(self.frame.AbsolutePosition.X/c.ViewportSize.X,0,.95);self.app.config.data.ui.y=math.clamp(self.frame.AbsolutePosition.Y/c.ViewportSize.Y,0,.95) end
  end
  function UI:fit()
-  local c=workspace.CurrentCamera;if not c then return end;local v=c.ViewportSize;local s=self.app.config.data.ui;local b=M.Layout.compute(v.X,v.Y,s.width,s.height,s.compact);self.layout=b
+  local c=workspace.CurrentCamera;if not c then return end;local v=c.ViewportSize;local s=self.app.config.data.ui;local b=M.Layout.compute(v.X,v.Y,s.width,s.height,s.compact,#self.navigation.order);self.layout=b
   self.frame.Size=UDim2.fromOffset(b.width,b.height);self.frame.Position=UDim2.fromOffset(math.clamp(s.x*v.X,4,math.max(4,v.X-b.width-4)),math.clamp(s.y*v.Y,4,math.max(4,v.Y-b.height-4)))
   self.title.TextSize=b.width<420 and 13 or 19;self.subtitle.TextSize=b.width<420 and 9 or 11
   self.nav.Position=UDim2.fromOffset(12,b.narrow and 76 or 80);self.nav.Size=UDim2.fromOffset(b.navWidth,b.navHeight)
@@ -60,14 +60,14 @@ return function(M)
   self.content.Position=UDim2.fromOffset(b.contentX,b.contentY+42);self.content.Size=UDim2.fromOffset(b.contentWidth,math.max(40,b.contentHeight-42))
  end
  function UI:page(id,title)
-  id=M.Navigation.resolve(id);title=M.Navigation.titles[id] or title
+  id=self.navigation.resolve(id);title=self.navigation.titles[id] or title
   if self.pages[id] then return self.pages[id] end
   local page=self:create('ScrollingFrame',{Name=id,Size=UDim2.fromScale(1,1),BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=3,CanvasSize=UDim2.new(),AutomaticCanvasSize=Enum.AutomaticSize.Y,Visible=false},self.content)
   self:create('UIListLayout',{Padding=UDim.new(0,12),SortOrder=Enum.SortOrder.LayoutOrder},page)
-  self.pages[id]=page;self.buttons[id]=self:button(self.nav,title,function()self:show(id)end,nil,false);self.buttons[id].LayoutOrder=M.Navigation.rank(id);self:fit();return page
+  self.pages[id]=page;self.buttons[id]=self:button(self.nav,title,function()self:show(id)end,nil,false);self.buttons[id].LayoutOrder=self.navigation.rank(id);self:fit();return page
  end
  function UI:show(id)
-  local target=self.routes[id];id=M.Navigation.resolve(id)
+  local target=self.routes[id];id=self.navigation.resolve(id)
   if not self.pages[id] then return end
   if self.search.Text~='' then self.search.Text='' end;self.results.Visible=false
   self.scrollTarget=nil;self.current=id;for name,page in pairs(self.pages) do page.Visible=name==id;self.buttons[name].BackgroundColor3=name==id and self.palette.accent or self.palette.panel end
@@ -94,14 +94,14 @@ return function(M)
   self:bind(heading.Activated,function()open(not body.Visible)end)
   open(not self.firstCard[page.Name]);self.firstCard[page.Name]=true
   if description then self:label(body,description,72) end
-  record.result=self:button(self.results,(M.Navigation.titles[page.Name] or page.Name)..'  /  '..title,function()self:reveal(body)end)
+  record.result=self:button(self.results,(self.navigation.titles[page.Name] or page.Name)..'  /  '..title,function()self:reveal(body)end)
   return body
  end
  function UI:searchCards()
   if not self.search then return end;local query=self.search.Text
   if query:match('^%s*$') then self.results.Visible=false;for id,page in pairs(self.pages) do page.Visible=id==self.current end;return end
   for _,page in pairs(self.pages) do page.Visible=false end;self.results.Visible=true
-  for _,record in ipairs(self.cards) do record.result.Visible=M.Navigation.matches(query,record.terms) end
+  for _,record in ipairs(self.cards) do record.result.Visible=self.navigation.matches(query,record.terms) end
  end
  function UI:rememberTerm(parent,text)
   local at=parent;while at and at~=self.content do local r=self.cardBodies[at];if r then r.terms=r.terms..' '..tostring(text);return end;at=at.Parent end

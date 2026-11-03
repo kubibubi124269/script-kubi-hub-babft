@@ -1,5 +1,21 @@
 # Testy i oczekiwane wyniki
 
+## V6.0.0 — 2026-11-03
+
+Offline: 85 testów logiki, 110 sprawdzeń klienta i cztery importy — bez błędów. Sprawdzono również dopasowanie obu nowych modeli do obszaru 120 × 200 × 120, nie tylko liczbę elementów. Rzeczywiste działanie gry nadal nie zostało potwierdzone.
+
+W grze — DO WYKONANIA:
+
+1. Ten sam loader ma otworzyć wybór V6.0.0. Wybranie niewłaściwej gry ma zostawić czytelny powód i nie uruchamiać jej modułów.
+2. BABFT: wybierz drużynę, Autofarm, NORMAL, limit 1, START. Oczekuj dziesięciu etapów, skrzyni i jednego powrotu postaci. Sprawdź PAUZA / WZNÓW i STOP w środku trasy; STOP ma usunąć podparcie oraz wrócić żywą postacią na start. Sprawdź też STOP przy skrzyni. Nie używaj samego licznika jako dowodu otrzymania nagród.
+3. BABFT: pięć zakładek, brak Shapes. W Builderze wyszukaj dom i zamek, wczytaj podgląd, sprawdź materiały i dopasowanie. TEST 1 BLOKU i mały plan z dwóch części powinny poprzedzać kosztowny model. Skalowanie, malowanie i widoczność z drugiego klienta pozostają do osobnego potwierdzenia.
+4. MM2: START zbierania w aktywnej rundzie; zacznij od NORMAL, następnie FAST / TURBO. Sprawdź przejście do rzeczywistego przedmiotu, zmianę stanu torby i faktyczny przyrost waluty w grze. Porównaj monety i przedmioty sezonowe oraz PAUZA / STOP. Przedmiot bez typu może pasować do obu filtrów.
+5. MM2: Aimbot i Auto Shot sprawdź z własnym pistoletem i widocznym celem. Sprawdź kontrolę ścian i zwykłe odnowienie broni. Aktywacje w raporcie nie są dowodem trafienia.
+6. Kill all / Knife Aura sprawdzaj wyłącznie z nożem dostarczonym graczowi w rundzie. Fling jest eksperymentalny; sprawdź przede wszystkim STOP, ograniczenie 1,5 s i przywrócenie własnej postaci. Nie deklaruj skutku na podstawie samego ruchu kamery lub licznika prób.
+7. ESP, GunDrop i Auto Gun: sprawdź oznaczenia widocznego wyposażenia i odbiór upuszczonego pistoletu w grze. Następnie STOP WSZYSTKO, powrót do wyboru, ponowny loader i wyłączenie. Mają zniknąć stare GUI, ESP, wsparcie farmy i dodatkowe sterowanie kamerą.
+
+W razie problemu kliknij powiadomienie i skopiuj pełny raport z Settings. Zanotuj grę, wersję, funkcję i stan modułu.
+
 ## Czytelność błędów V5.2.2 — 2026-11-03
 
 Regresja powiadomienia odtwarza problem w opublikowanym V5.2.1: test wymaga przyczyny w dolnym pasku i okienku, lecz stary klient pokazuje tylko ogólne ogłoszenie. Po poprawce 79 testów logiki, 69 sprawdzeń klienta i dwa importy przechodzą. Sprawdzono pełne błędy przycisków i zdarzeń, Unicode, kliknięcie okienka przy ukrytym hubie, brak kamery oraz odłączanie zastąpionych i wygasłych okienek.

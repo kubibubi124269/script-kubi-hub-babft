@@ -1,5 +1,11 @@
 # Historia zmian
 
+## 6.0.0 — 2026-11-03
+
+Ekran wyboru BABFT / MM2 z osobnymi hubami, kontrolą gry i sprzątaniem przełączenia. Przywrócona trasa autofarmy BABFT: dziesięć etapów, skrzynia, pauza, oczekiwany respawn i STOP z powrotem żywej postaci. Shapes przeniesione do Buildera. Limit 10000 części, dom z katalogu (568) i statyczna architektura zamku (8149); oryginalne pliki i opis pominiętej mechaniki zachowano.
+
+MM2: zbieranie monet / cukierków z trzema przerwami, pełna torba, Aimbot, Auto Shot, wybór celu i ściany, Kill all z własnym nożem, ograniczony eksperymentalny Murder Fling, Knife Aura, ESP widocznych ról, GunDrop / Auto Gun, własny ruch i wspólny STOP. Statystyki pokazują obserwacje i aktywacje, bez wymyślonych nagród lub trafień. Testy offline: 85 logiki, 110 klienta, cztery importy i kompilacja 33 modułów. Rzeczywisty serwer, obecne bronie i fizyka wymagają testów w grze. [Raport](docs/V6-REPORT.md).
+
 ## 5.2.2 — 2026-11-03
 
 Powiadomienia i dolny pasek pokazują przyczynę zamiast samego „Nowy komunikat”. Kliknięcie okienka otwiera pełną treść i przywraca ukryty hub. Zachowano kompletne wyjątki, poprawny UTF-8, obsługę chwilowego braku kamery i sprzątanie zdarzeń. Panel Autofarm pokazuje rzeczywistą dostępność przed START; odmowa trafia do ostatniego błędu bez naliczania cyklu. Autofarma publicznego BABFT pozostaje wyłączona; to poprawka diagnostyki. Testy offline: 79 logiki, 69 kontraktu klienta i dwa importy. Test nowego komunikatu odtwarza zgłoszenie na V5.2.1 przed poprawką. [Raport zakresu](docs/V5.2.2-REPORT.md).

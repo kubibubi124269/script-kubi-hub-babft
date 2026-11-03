@@ -23,4 +23,4 @@ jobs:
           LUAU_COMPILE: ./.tools/luau-compile
         run: node tools/test.cjs
       - name: Generated files must match source
-        run: git diff --exit-code -- main.lua studio/Server.bundle.lua studio/KubiHubTestKit.rbxmx docs/build-manifest.json
+        run: git diff --exit-code -- main.lua studio/Server.bundle.lua studio/KubiHubTestKit.rbxmx docs/build-manifest.json src/schematics/Community.lua assets/community

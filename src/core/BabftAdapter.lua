@@ -5,8 +5,9 @@ return function(Util,Schema,Inventory)
  end
  function B:newId(prefix)self.serial+=1;return prefix..'_'..self.context.userId..'_'..self.serial end
  function B:connect()
-  local info=self.platform:inspect();self.zone=info.zone;self.diagnostics=info.text
+  local info=self.platform:inspect();self.zone=info.zone;self.diagnostics=info.text;self.farmReason=info.farmReason
   self.capabilities={build=self.buildVerified and info.build,inventory=true,mechanics=false,movement=false,farm=info.farm==true}
+  self.label=self.buildVerified and 'BABFT — test bloku potwierdzony' or info.farm and 'BABFT — trasa autofarmy dostępna' or 'BABFT — sprawdź działkę i trasę'
   self.toolAvailable=info.build==true;return self.toolAvailable or self.capabilities.farm,self.diagnostics
  end
  function B:invoke(remote,args)
@@ -67,10 +68,11 @@ return function(Util,Schema,Inventory)
   if not tx then return {ok=false,error='Nie znaleziono budowy.'} end
   return {ok=true,state=tx.state,count=#tx.objects}
  end
- function B:farmStep(stage)
+ function B:expectingRespawn()return self.platform.expectingRespawn and self.platform:expectingRespawn() or false end
+ function B:farmStep(stage,paused)
   if not self.platform.farmStep then return {ok=false,error='Brak obsługi farmy w tym środowisku.'} end
   local generation=self.farmGeneration or 0
-  return self.platform:farmStep(stage,function()return not self.context.alive() or generation~=(self.farmGeneration or 0) end)
+  return self.platform:farmStep(stage,function()return not self.context.alive() or generation~=(self.farmGeneration or 0) end,paused)
  end
  function B:rig()return {ok=false,error='Mechanika WORM-a nie jest obsługiwana przez narzędzia zgodności BABFT.'} end
  function B:movement()return {ok=false,error='Ten tryb nie zmienia ustawień ruchu.'} end

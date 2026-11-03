@@ -12,6 +12,7 @@ local Builder=require('../src/modules/builder/Controller')(U,Schema,Inventory)
 local Adapter=require('../src/core/Adapter')(U)
 local BabftAdapter=require('../src/core/BabftAdapter')(U,Schema,Inventory)
 local Layout=require('../src/ui/Layout');local Nav=require('../src/ui/Navigation')
+local Games=require('../src/core/Games');local MM2Controller=require('../src/modules/mm2/Controller')(U)
 local total=0;local failed=0
 local function test(name,fn)local ok,e=pcall(fn);total+=1;if not ok then failed+=1;print('FAIL '..name..': '..tostring(e)) else print('PASS '..name) end end
 local function eq(a,b)assert(a==b,tostring(a)..' ~= '..tostring(b))end
@@ -20,7 +21,17 @@ local log={add=function()end,error=function()end};local now=0;local queue={}
 local function spawn(fn)table.insert(queue,fn)end
 local function flush()local q=queue;queue={};for _,fn in ipairs(q) do fn() end end
 local function runtime()return Runtime.new(function()return now end,function(_,e)error(e)end)end
+test('game routing isolates BABFT and MM2 and rejects unknown choices',function()
+ eq(Games.detect(537413528,0),'BABFT');eq(Games.detect(142823291,0),'MM2');eq(Games.detect(1,66654135),'MM2');eq(Games.canLaunch('MM2',537413528,0,false),false);eq(Games.canLaunch('BABFT',142823291,66654135,false),false);eq(Games.canLaunch('bad',1,0,true),false);eq(Games.canLaunch('BABFT',1,0,true),true)
+end)
+test('MM2 farm acquires one movement owner and releases it on STOP',function()
+ local rt=runtime();local c=MM2Controller.new(rt,{allowed=true},function()return now end);assert(c:startFarm());eq(c:startFarm(),false);eq(rt.lock,'MM2Farm');eq(rt:acquire('Fly'),false);c:stopFarm();eq(rt.lock,nil);assert(rt:acquire('Fly'));eq(c:startFarm(),false)
+end)
+test('MM2 wrong-game farm never starts or holds a lock',function()local rt=runtime();local c=MM2Controller.new(rt,{allowed=false},function()return now end);eq(c:startFarm(),false);eq(c.farming,false);eq(rt.lock,nil)end)
+test('MM2 filters reject unknown values and invalidate stale candidates',function()local c=MM2Controller.new(runtime(),{},function()return now end);c.current={};c.coins={{}};eq(c:setFilter('bad'),false);eq(c.kind,'BOTH');assert(c:setFilter('CANDY'));eq(c.current,nil);eq(#c.coins,0);eq(c.scannedAt,-math.huge)end)
 local sample=assert(Schema.fromLegacy('sample','Example',{{kind='WoodBlock',x=0,y=0,z=0},{kind='WoodBlock',x=2,y=0,z=0}}))
+test('large plans are bounded at ten thousand parts before deep validation',function()local s=U.copy(sample);s.elements=table.create(10001,{});local value,errors=Schema.validate(s);eq(value,nil);assert(errors[1]:find('10000',1,true));eq(Schema.limit,10000)end)
+test('community grass and fabric inventory remain separate exact material IDs',function()local s=Inventory.snapshot({GrassBlock=23,FabricBlock=7,WoodBlock=99});eq(s.items.GrassBlock.count,23);eq(s.items.FabricBlock.count,7);eq(Inventory.cost({material='GrassBlock',size={2,2,2}}),1)end)
 test('inventory separates titanium from 3000 metal',function()
  local s=U.copy(sample);s.elements[1].material='TitaniumBlock';s.elements[1].size={2,2,80};s.elements[2].material='MetalBlock'
  local c=Inventory.compare(s,Inventory.snapshot({MetalBlock=3000,TitaniumBlock=20},'fixture'));eq(c.enough,false);eq(c.rows[2].id,'TitaniumBlock');eq(c.rows[2].missing,20)
@@ -48,22 +59,22 @@ test('config invalid import is atomic and backup restores',function()
  local stored={};local codec={encode=function(v)stored.good=U.copy(v);return 'good'end,decode=function(s)if s=='bad' then error('invalid JSON')end;return U.copy(stored.good)end}
  local c=Config.new(codec,{label='test',write=function()end,read=function()return 'bad'end,backup=function()return 'good'end},log);c.data.ui.theme='PURPLE';c:export();assert(not c:import('bad'));eq(c.data.ui.theme,'PURPLE');c.data.ui.theme='BLUE';assert(c:load('a'));eq(c.data.ui.theme,'PURPLE');assert(c:rollback());eq(c.data.ui.theme,'BLUE')
 end)
-test('six tabs preserve all routes and search uses every word',function()eq(#Nav.order,6);eq(Nav.resolve('DEBUG'),'SETTINGS');eq(Nav.resolve('MOVEMENT'),'PRO');eq(Nav.resolve('SCHEMATICS'),'SHAPES');assert(Nav.matches(' circle  warstwy ','Circle Maker warstwy materiał'));assert(not Nav.matches('circle fly','Circle Maker warstwy'))end)
+test('five tabs preserve Shapes content in Builder and all other routes',function()eq(#Nav.order,5);eq(Nav.resolve('DEBUG'),'SETTINGS');eq(Nav.resolve('MOVEMENT'),'PRO');eq(Nav.resolve('SCHEMATICS'),'BUILDER');eq(Nav.resolve('SHAPES'),'BUILDER');assert(Nav.matches(' circle  warstwy ','Circle Maker warstwy materiał'));assert(not Nav.matches('circle fly','Circle Maker warstwy'))end)
 test('layout remains within 320, 760 and 1280 pixel screens',function()for _,w in ipairs({320,760,1280})do local l=Layout.compute(w,600,960,650,false);assert(l.width<=w-8);assert(l.contentX+l.contentWidth<=l.width);assert(l.contentHeight>100);assert(l.contentWidth>=250 or w==320)end end)
-test('all six tabs fit narrow windows without horizontal scrolling',function()
- for _,w in ipairs({300,320,419,420,580,699})do local l=Layout.compute(w+16,600,w,475,false);assert(l.narrow);eq(l.navColumns*l.navRows,6);assert(l.navCellWidth>=100)
+test('all five tabs fit narrow windows without horizontal scrolling',function()
+ for _,w in ipairs({300,320,419,420,580,699})do local l=Layout.compute(w+16,600,w,475,false);assert(l.narrow);assert(l.navColumns*l.navRows>=5);assert(l.navCellWidth>=100)
   assert(l.navColumns*l.navCellWidth+(l.navColumns-1)*6<=l.navWidth);assert(l.navRows*l.navCellHeight+(l.navRows-1)*6<=l.navHeight);assert(l.contentY>=76+l.navHeight+10)
  end
 end)
-test('compact mode keeps all six tabs and preserves space for content',function()for _,w in ipairs({320,580,960})do local l=Layout.compute(w+16,600,w,475,true);assert(l.narrow);eq(l.navColumns*l.navRows,6);assert(l.contentHeight-42>=60);assert(l.contentY+l.contentHeight<=l.height-40)end end)
+test('compact mode keeps all five tabs and preserves space for content',function()for _,w in ipairs({320,580,960})do local l=Layout.compute(w+16,600,w,475,true);assert(l.narrow);assert(l.navColumns*l.navRows>=5);assert(l.contentHeight-42>=60);assert(l.contentY+l.contentHeight<=l.height-40)end end)
 test('runtime closes real mock connections and prevents later events',function()local callbacks={};local signal={Connect=function(_,fn)local c={Connected=true};function c:Disconnect()self.Connected=false end;table.insert(callbacks,{c,fn});return c end};local rt=runtime();local n=0;rt:connect(signal,function()n+=1 end);callbacks[1][2]();eq(n,1);rt:close();eq(callbacks[1][1].Connected,false);callbacks[1][2]();eq(n,1);eq(rt:counts().connections,0)end)
 test('runtime does not release another owner or race outstanding jobs',function()local rt=runtime();assert(rt:acquire('Builder'));eq(rt:acquire('Farm'),false);rt:release('Farm');eq(rt.lock,'Builder');rt:job('Builder',function()return true end,spawn);rt:release('Builder');eq(rt:acquire('Farm'),false);flush();assert(rt:acquire('Farm'))end)
 local function farmFixture()
- now=0;queue={};local rt=runtime();local ad={capabilities={farm=true},minFarmInterval=.3,cancel=function()end,farmStep=function(_,stage)return {ok=true,stage=stage,completed=stage==2}end};local settings={profile='SONIC',retryLimit=1,stopAfter=0};return Farm.new(rt,ad,settings,log,spawn),ad,rt
+ now=0;queue={};local rt=runtime();local ad={capabilities={farm=true},minFarmInterval=.3,connect=function()end,cancel=function()end,farmStep=function(_,stage)return {ok=true,stage=stage,completed=stage==2}end};local settings={profile='SONIC',retryLimit=1,stopAfter=0};return Farm.new(rt,ad,settings,log,spawn),ad,rt
 end
 test('unavailable BABFT farm reports its actual limitation without dispatch or fake failed cycles',function()
  local f,ad,rt=farmFixture();ad.mode='BABFT';ad.capabilities.farm=false
- local ok,reason=f:start();eq(ok,false);assert(reason:find('wyłączona',1,true));eq(f.stats.lastError,reason);eq(f.state,'STOPPED');eq(f.stats.failed,0);eq(rt.lock,nil);eq(#queue,0)
+ local ok,reason=f:start();eq(ok,false);assert(reason:find('Brak kompletnej trasy',1,true));eq(f.stats.lastError,reason);eq(f.state,'STOPPED');eq(f.stats.failed,0);eq(rt.lock,nil);eq(#queue,0)
 end)
 test('farm availability follows an actual capability change',function()
  local f,ad=farmFixture();ad.capabilities.farm=false;eq(f:availability(),false);ad.capabilities.farm=true;eq(f:availability(),true);assert(f:start())

@@ -1,11 +1,12 @@
 return function(M)
  local App={};App.__index=App
- function App.new()
+ function App.new(onCreating)
   local self=setmetatable({alive=true,clock=os.clock,pro=_G.KubiHubPremiumKey=='6969',schemaQuery='',schemaCategory='Wszystkie',schemaSort='Nazwa',manualStep=1,fps=0,lastInventoryAt=0},App)
   self.player=game:GetService('Players').LocalPlayer;assert(self.player,'V5 wymaga klienta / LocalScript.');self.player:WaitForChild('PlayerGui',10)
   self.input=game:GetService('UserInputService');self.runService=game:GetService('RunService');self.http=game:GetService('HttpService')
   self.log=M.Log.new(function()return os.date('%Y-%m-%d %H:%M:%S')end)
   self.runtime=M.Runtime.new(self.clock,function(module,err)self.log:error(module,err);if self.ui then self.ui:toast(module,err,true) end end)
+  if onCreating then onCreating(self) end
   self.codec={encode=function(v)return self.http:JSONEncode(v)end,decode=function(s)return self.http:JSONDecode(s)end}
   self.storage=self:storageAdapter();self.config=M.Config.new(self.codec,self.storage,self.log)
   local saved=_G.KubiHubV5Settings;if type(saved)=='table' then local value=M.Config.validate(saved);if value then self.config.data=value end end
@@ -19,7 +20,7 @@ return function(M)
   self.effects=M.Effects.new(self.clock);self.inventorySnapshot=M.Inventory.snapshot(nil,'Oczekiwanie na dane')
   self.readInventory=M.Inventory.observePlayer(self.player,self.runtime,function(snapshot)if not self.serverInventory then self.inventorySnapshot=snapshot;self.previewDirty=true end end)
   self.ui=M.UI.new(self);self:pages();self:select('WORM_MK2');self.ui:show('HOME');self.ui:theme()
-  self.runtime:connect(self.player.CharacterAdded,function()self.farm:stop('Respawn — uruchom ponownie ręcznie.');self.movement:reset();if self.builder:isBusy() then self.builder:cancel('Respawn — anulowanie własnej budowy.') end;if self.babft then self.babft.buildVerified=false;self.babft.capabilities.build=false end;self.effects:clear()end,'Character')
+  self.runtime:connect(self.player.CharacterAdded,function()if not (self.adapter.mode=='BABFT' and self.adapter:expectingRespawn() and (self.farm.state=='RUNNING' or self.farm.state=='PAUSED')) then self.farm:stop('Respawn — uruchom ponownie ręcznie.') end;self.movement:reset();if self.builder:isBusy() then self.builder:cancel('Respawn — anulowanie własnej budowy.') end;if self.babft then self.babft.buildVerified=false;self.babft.capabilities.build=false end;self.effects:clear()end,'Character')
   self.runtime:connect(self.runService.Heartbeat,function(dt)
    self.fps=self.fps==0 and 1/math.max(dt,.001) or self.fps*.94+math.min(240,1/math.max(dt,.001))*.06
    self.runtime:tick(dt)
@@ -113,10 +114,26 @@ return function(M)
   self.schemaCount.Text=#list..' pasujących projektów. Wbudowane modele pojazdów zachowują geometrię; sterowanie potwierdzamy osobno.'
   for _,item in ipairs(list) do local schema=item;self.ui:button(self.schemaList,(self.config.data.favorites[item.id] and '★ ' or '')..item.name..'  ·  '..#item.elements,function()local ok,err=self:select(schema.id);if ok then self.ui:show('BUILDER') end;return ok,err end,'Kategoria: '..item.category..'. Otwórz podgląd, materiały i kroki.',true) end
  end
+ function App:loadCommunity(asset)
+  if self.builder:isBusy() then return false,'Najpierw zakończ budowanie.' end
+  if self.communityJob and not self.communityJob.done then return false,'Trwa wczytywanie modelu.' end
+  self.communityJob=self.runtime:job('Community',function()
+   local text=game:HttpGet('https://raw.githubusercontent.com/kubibubi124269/script-kubi-hub-babft/main/assets/community/'..asset.file)
+   if not self.alive then return false end;if type(text)~='string' or #text>2000000 then error('Nieprawidłowy plik modelu / limit 2 MB.') end
+   local schema,errors=M.Schema.import(self.codec.decode(text));if not schema then error(table.concat(errors,'; ')) end
+   if #schema.elements~=asset.parts or schema.importedMechanics then error('Model nie zgadza się z katalogiem geometrii statycznej.') end
+   schema.id='community_'..asset.id;schema.name=asset.name;schema.source=asset.url;schema.geometryOnly=true
+   local ok,err=self.library:save(schema);if not ok then error(err) end
+   ok,err=self:select(schema.id,true);if not ok then error(err) end;self.builder:center()
+   if self.adapter.zone then local fitted,fitError=self.builder:fit(self.adapter.zone);if not fitted then self.log:add('Community',fitError,'WARN') end end
+   self.config.data.builder=M.Util.copy(self.builder.options);self:renderSchematics();self:refreshPreview();self.ui:show('BUILDER');self:notify('Community',asset.name..': '..asset.parts..' części. '..asset.adaptation);return true
+  end,task.spawn);return true
+ end
  function App:pages()
   local ui=self.ui
   local home=ui:page('HOME','HOME');local h=ui:card(home,'KUBI HUB ULTIMATE V'..M.Version.current,'Nowy warsztat z walidowanymi schematami, profilem ustawień i jawnym stanem zgodności. Brak adaptera oznacza tryb asystenta.')
   self.homeInfo=ui:label(h,'',125);ui:button(h,'WORM MK2 — otwórz warsztat',function()local ok,err=self:select('WORM_MK2');ui:show('BUILDER');return ok,err end)
+  ui:button(h,'Wróć do wyboru BABFT / MM2',function()self:unload();_G.KubiHubRuntime=M.Launcher.new()end)
   ui:button(h,'Biblioteka schematów',function()ui:show('SCHEMATICS')end);ui:button(h,'STOP WSZYSTKIE MODUŁY',function()self:stopAll()end)
   local news=ui:card(home,'Ostatnie zmiany','Materiały z osobnymi identyfikatorami. WORM z grafem połączeń. Stos: 1 laska dynamitu, 1 siedzenie, 3000 drewna. Nowy podgląd i profile. Uprawnione budowanie wymaga adaptera.')
   self.versionInfo=ui:label(news,'V'..M.Version.current..' • wydanie '..M.Version.releaseDate..'. Najnowsza wersja: jeszcze nie sprawdzono.',85)
@@ -124,8 +141,9 @@ return function(M)
    if self.versionJob and not self.versionJob.done then return false,'Trwa sprawdzanie wersji.' end
    self.versionJob=self.runtime:job('Version',function()local value,err=M.Version.fetch(function(url)return game:HttpGet(url)end,self.codec.decode);if not value then self.log:add('Version',err,'WARN');self.versionInfo.Text=err;return false end;self.versionInfo.Text='Obecna '..M.Version.current..' • najnowsza '..value.version..' • '..value.releaseDate..'\n'..value.compatibility..'\n'..table.concat(value.changes,'; ');self:notify('Version',value.update and 'Dostępna jest aktualizacja. Kod nie został podmieniony.' or 'Brak nowszej wersji.');return true end,task.spawn)
   end)
-  local farm=ui:page('FARM','FARM');local f=ui:card(farm,'Kontroler cykli','Wymaga autoryzowanego serwera. Zestaw Studio ma trasę testową bez nagród BABFT. Profile zmieniają przerwę między potwierdzonymi etapami i respektują minimum serwera.')
+  local farm=ui:page('FARM','FARM');local f=ui:card(farm,'Kontroler cykli','BABFT: trasa dziesięciu etapów, skrzynia i oczekiwanie na powrót postaci. Profile zmieniają przerwę między etapami. Licznik mierzy zakończone przejazdy i respawn; nie potwierdza przyznania nagród.')
   self.farmAvailability=ui:label(f,'');self.farmInfo=ui:label(f,'',155)
+  ui:button(f,'Odśwież trasę BABFT',function()if self.adapter.mode~='BABFT' then return false,'Odświeżanie tej trasy jest dostępne w BABFT.' end;if self.farm.state~='STOPPED' then return false,'Najpierw zatrzymaj autofarmę.' end;self.adapter:connect();self:updateDashboard();return self.farm:availability()end)
   for _,a in ipairs({{'START',function()return self.farm:start()end},{'STOP',function()return self.farm:stop()end},{'PAUZA',function()return self.farm:pause()end},{'WZNÓW',function()return self.farm:resume()end},{'RESET SESJI',function()return self.farm:reset()end}}) do ui:button(f,a[1],a[2]) end
   ui:cycle(f,'Profil',{'NORMAL','FAST','TURBO','HYPER','LIGHTNING','SONIC'},function()return self.config.data.farm.profile end,function(v)self.config.data.farm.profile=v end)
   ui:field(f,'Stop po potwierdzonych cyklach • 0 bez limitu',0,function(v)self.config.data.farm.stopAfter=M.Util.number(tonumber(v),0,0,10000,true);return self.config.data.farm.stopAfter end,false,function()return self.config.data.farm.stopAfter end)
@@ -168,6 +186,7 @@ return function(M)
   self.stepInfo=ui:label(assistant,'',140);ui:button(assistant,'Poprzedni element',function()self.manualStep=self.manualStep-1;self:updateStep()end);ui:button(assistant,'Następny element',function()self.manualStep=self.manualStep+1;self:updateStep()end)
   ui:field(assistant,'Przejdź do elementu',1,function(v)self.manualStep=M.Util.number(tonumber(v),self.manualStep,1,#self.builder.schema.elements,true);self:updateStep();return self.manualStep end,false,function()return self.manualStep end)
   local schematics=ui:page('SCHEMATICS','SCHEMATICS');local sc=ui:card(schematics,'Biblioteka konstrukcji','Zachowana geometria poprzednich projektów, WORM MK2 oraz własne projekty. Stan mechaniki jest oddzielony od samego planu.')
+  ui.routes.SCHEMATICS=sc;ui.routes.SHAPES=sc
   ui:field(sc,'Szukaj schematu','',function(v)self.schemaQuery=v;self:renderSchematics();return v end)
   ui:cycle(sc,'Kategoria',{'Wszystkie','Pojazdy','Łodzie','Samoloty','Konstrukcje mechaniczne','WORMS','Proste budowle','Własne projekty'},function()return self.schemaCategory end,function(v)self.schemaCategory=v;self:renderSchematics()end)
   ui:cycle(sc,'Sortuj',{'Nazwa','Bloki'},function()return self.schemaSort end,function(v)self.schemaSort=v;self:renderSchematics()end)
@@ -180,6 +199,8 @@ return function(M)
    local schema,errors=M.Schema.import(self.codec.decode(text));if not schema then return false,table.concat(errors,'; ') end;schema.id='asset_'..a[2]:gsub('[^%w]','_');schema.name=a[1]..' — podgląd';schema.assistantOnly=true;schema.importedMechanics=true
    local ok,err=self.library:save(schema);if not ok then return false,err end;ok,err=self:select(schema.id,true);if ok then self:renderSchematics();ui:show('BUILDER') end;return ok,err
   end) end
+  local community=ui:card(builder,'Modele z internetu — dom i zamek','Przystosowane wersje statyczne: budynek oraz architektura zamku, z kolorami i rozmiarami bloków. Wyposażenie i mechanizmy oryginału są pominięte. Oryginalne pliki i źródła zachowano w repozytorium. BUILD wymaga testu narzędzia, materiałów oraz narzędzi skalowania i malowania.')
+  for _,row in ipairs(M.Community) do local asset=row;ui:button(community,'Wczytaj: '..asset.name..' / '..asset.parts..' części',function()return self:loadCommunity(asset)end);ui:button(community,'Źródło: '..asset.name,function()self:copy(asset.url,self.schemaBox);self:notify('Community',asset.credit..' '..asset.url)end) end
   local movement=ui:page('MOVEMENT','MOVEMENT');local mv=ui:card(movement,'Ruch własnej postaci','W dozwolonym środowisku testowym: WASD / joystick, Spacja w górę, lewy Ctrl w dół. Respawn zatrzymuje moduł i wymaga ręcznego wznowienia.')
   self.movementInfo=ui:label(mv,'',75)
   for _,a in ipairs({{'WalkSpeed','walk',8,60},{'Siła skoku','jump',20,120},{'Prędkość Fly','flySpeed',10,100}}) do local field=a;ui:slider(mv,field[1],function()return self.config.data.movement[field[2]]end,function(v)self.config.data.movement[field[2]]=v end,field[3],field[4],1) end
@@ -229,7 +250,7 @@ return function(M)
   ui:cycle(circle,'Płaszczyzna',{'XZ','XY','YZ'},function()return self.circle.axis end,function(v)self.circle.axis=v end);ui:toggle(circle,'Wypełniony dysk',function()return self.circle.filled end,function(v)self.circle.filled=v end)
   ui:button(circle,'GENERUJ KOŁO — podgląd i materiały',function()
    local o=self.circle;local estimated=o.filled and (2*math.floor(o.radius/2)+1)^2*o.layers or (o.segments+1)*o.layers*o.thickness
-   if estimated>M.Schema.limit then return false,'Plan może przekroczyć 6000 części. Zmniejsz promień, warstwy albo grubość.' end
+   if estimated>M.Schema.limit then return false,'Plan może przekroczyć '..M.Schema.limit..' części. Zmniejsz promień, warstwy albo grubość.' end
    local parts=M.LegacyShapes.circle(o);for _,p in ipairs(parts) do p.x=p.x+o.x;p.y=p.y+o.y;p.z=p.z+o.z end
    local schema,errors=M.Schema.fromLegacy(self:newSchemaId('circle'),'Koło / łuk '..o.radius,parts,'Własne projekty');if not schema then return false,table.concat(errors,'; ') end
    local ok,err=self.library:save(schema);if not ok then return false,err end;ok,err=self:select(schema.id,true);if ok then self:renderSchematics();ui:show('BUILDER') end;return ok,err

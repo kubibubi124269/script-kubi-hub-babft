@@ -4,6 +4,7 @@ return function(Util)
  for _,id in ipairs({'WoodBlock','PlasticBlock','MetalBlock','TitaniumBlock','GlassBlock','ConcreteBlock','StoneBlock','MarbleBlock','GoldBlock','IceBlock','NeonBlock','Seat','CarSeat','PilotSeat','Servo','Piston','FrontWheel','BackWheel','Cannon','Thruster','TNT','Dynamite','HarpoonDragon','Bar','Motor','JetPack','Switch','CameraDome','Rope','SpikeTrap'}) do Inventory.definitions[id]={id=id,label=id,volume=id:match('Block$')~=nil} end
  local labels={WoodBlock='Drewno',PlasticBlock='Plastik',MetalBlock='Metal',TitaniumBlock='Tytan',GlassBlock='Szkło',ConcreteBlock='Beton',StoneBlock='Kamień',Seat='Siedzenie',CarSeat='Fotel kierowcy',PilotSeat='Fotel pilota',Servo='Serwo',Dynamite='Laska dynamitu',TNT='TNT'}
  for id,label in pairs(labels) do Inventory.definitions[id].label=label end
+ for id,label in pairs({GrassBlock='Trawa',FabricBlock='Tkanina'}) do Inventory.definitions[id]={id=id,label=label,volume=true} end
  function Inventory.cost(element)
   local d=Inventory.definitions[element.material];if not d then return nil end
   if not d.volume then return 1 end

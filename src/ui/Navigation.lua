@@ -1,7 +1,7 @@
 local N={}
-N.order={'PRO','BUILDER','FARM','SHAPES','CIRCLE','SETTINGS'}
-N.titles={PRO='PRO',BUILDER='Builder',FARM='Autofarm',SHAPES='Shapes',CIRCLE='Circle Maker',SETTINGS='Settings'}
-N.aliases={HOME='PRO',MOVEMENT='PRO',PLAYER='PRO',TOOLS='BUILDER',SCHEMATICS='SHAPES',STATS='SETTINGS',DEBUG='SETTINGS',PERFORMANCE='SETTINGS'}
+N.order={'PRO','BUILDER','FARM','CIRCLE','SETTINGS'}
+N.titles={PRO='PRO',BUILDER='Builder',FARM='Autofarm',CIRCLE='Circle Maker',SETTINGS='Settings'}
+N.aliases={HOME='PRO',MOVEMENT='PRO',PLAYER='PRO',TOOLS='BUILDER',SCHEMATICS='BUILDER',SHAPES='BUILDER',STATS='SETTINGS',DEBUG='SETTINGS',PERFORMANCE='SETTINGS'}
 function N.resolve(id)return N.aliases[id] or id end
 function N.rank(id)for i,v in ipairs(N.order) do if id==v then return i end end;return 99 end
 function N.matches(query,text)
