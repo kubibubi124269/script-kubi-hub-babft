@@ -1,7 +1,7 @@
-return function(Util,Schema,Inventory)
+return function(Util,Schema,Inventory,FarmRoute)
  local E={};E.__index=E
  function E.new(player,world,wait,clock,alive)
-  return setmetatable({player=player,world=world,wait=wait,clock=clock,alive=alive,used=setmetatable({},{__mode='k'})},E)
+  return setmetatable({player=player,world=world,wait=wait,clock=clock,alive=alive,route=FarmRoute.new(player,world,wait,clock,alive),used=setmetatable({},{__mode='k'})},E)
  end
  function E:findTool(name)
   local aliases=({BuildingTool={'BuildingTool','BuildTool'},ScalingTool={'ScalingTool','ScaleTool'},PaintingTool={'PaintingTool','PaintTool'}})[name] or {name}
@@ -34,8 +34,12 @@ return function(Util,Schema,Inventory)
   local zone=self:plot();local build=self:remote(self:findTool('BuildingTool'))~=nil
   local stages=self.world:FindFirstChild('BoatStages');stages=stages and stages:FindFirstChild('NormalStages')
   local lines={'Tryb: BABFT','Działka drużyny: '..(zone and zone.Name or 'BRAK'),'BuildingTool.RF: '..(build and 'wykryto' or 'BRAK'),'ScalingTool.RF: '..(self:remote(self:findTool('ScalingTool')) and 'wykryto' or 'BRAK'),'PaintingTool.RF: '..(self:remote(self:findTool('PaintingTool')) and 'wykryto' or 'BRAK'),'Etapy trasy: '..(stages and 'wykryto' or 'BRAK'),'Mechanika WORM: nieobsługiwana przez ten tryb'}
-  return {build=build and zone~=nil,farm=false,zone=zone and {size={zone.Size.X,200,zone.Size.Z},min={-zone.Size.X/2+1,-6,-zone.Size.Z/2+1},max={zone.Size.X/2-1,200,zone.Size.Z/2-1}},text=table.concat(lines,'\n')}
+  local farm,farmReason=self.route:inspect();lines[#lines+1]=farmReason
+  return {build=build and zone~=nil,farm=farm,farmReason=farmReason,zone=zone and {size={zone.Size.X,200,zone.Size.Z},min={-zone.Size.X/2+1,-6,-zone.Size.Z/2+1},max={zone.Size.X/2-1,200,zone.Size.Z/2-1}},text=table.concat(lines,'\n')}
  end
+ function E:farmStep(stage,cancelled,paused)return self.route:step(stage,cancelled,paused)end
+ function E:stopFarm()self.route:stop()end
+ function E:expectingRespawn()return self.route:expectingRespawn()end
  function E:preflight(schema,yaw)
   local info=self:inspect();if not info.build then return false,info.text..'\nDołącz do drużyny i sprawdź, czy masz narzędzie budowania.' end
   local bounds=Schema.bounds(schema,yaw);for i=1,3 do if bounds.min[i]<info.zone.min[i] or bounds.max[i]>info.zone.max[i] then return false,'Plan wychodzi poza działkę. Użyj Dopasuj do obszaru.' end end
