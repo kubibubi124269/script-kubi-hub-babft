@@ -151,16 +151,27 @@ return function(M)
   self.palette.accent=self.app.config.data.ui.theme=='PURPLE' and Color3.fromRGB(156,103,247) or Color3.fromRGB(83,133,247);self.bubble.BackgroundColor3=self.palette.accent;self:show(self.current or 'HOME')
  end
  function UI:refreshControls()for _,fn in ipairs(self.refreshers) do fn()end end
+ function UI:clearNotification()
+  if self.notificationConnection then self.app.runtime:disconnect(self.notificationConnection);self.notificationConnection=nil end
+  if self.notification then self.notification:Destroy();self.notification=nil end
+ end
  function UI:toast(module,message,bad)
   local full='['..module..'] '..tostring(message)
   if self.statusInfo then self.statusInfo.Text=full end
-  self.footer.Text='['..module..'] Komunikat — kliknij, aby przeczytać.';self.footer.TextColor3=bad and self.palette.red or self.palette.muted
-  if self.notification then self.notification:Destroy() end
-  self.notification=self:create('TextLabel',{AnchorPoint=Vector2.new(1,1),Size=UDim2.new(0,math.min(310,workspace.CurrentCamera.ViewportSize.X-24),0,0),AutomaticSize=Enum.AutomaticSize.Y,Position=UDim2.new(1,-12,1,-18),BackgroundColor3=self.palette.panel,Text='['..module..'] Nowy komunikat.\nPełna treść: kliknij pasek u dołu huba.',TextColor3=bad and self.palette.red or self.palette.text,TextWrapped=true,TextSize=12,Font=Enum.Font.Gotham,ZIndex=80},self.gui);self:corner(self.notification,10)
+  local compact=full:gsub('%s+',' ')
+  self.footer.Text=compact;self.footer.TextColor3=bad and self.palette.red or self.palette.muted
+  local preview=compact
+  -- Keep the notification bounded without cutting a Polish UTF-8 character in half.
+  local valid,cut=pcall(utf8.offset,compact,221)
+  if valid and cut then preview=compact:sub(1,cut-1)..'…' elseif not valid then preview='['..module..'] Kliknij, aby odczytać pełną treść.' end
+  self:clearNotification()
+  local camera=workspace.CurrentCamera;local width=math.max(120,math.min(340,(camera and camera.ViewportSize.X or 364)-24))
+  self.notification=self:create('TextButton',{Name='Notification',AnchorPoint=Vector2.new(1,1),Size=UDim2.new(0,width,0,0),AutomaticSize=Enum.AutomaticSize.Y,Position=UDim2.new(1,-12,1,-18),BackgroundColor3=self.palette.panel,Text=preview..'\nKliknij po szczegóły.',TextColor3=bad and self.palette.red or self.palette.text,TextWrapped=true,TextSize=13,Font=Enum.Font.Gotham,TextXAlignment=Enum.TextXAlignment.Left,BorderSizePixel=0,ZIndex=80},self.gui);self:corner(self.notification,10)
+  self.notificationConnection=self:bind(self.notification.Activated,function()self.frame.Visible=true;self.bubble.Visible=false;if self.statusBody then self:reveal(self.statusBody) else self:show('DEBUG') end end)
   self:create('UIPadding',{PaddingLeft=UDim.new(0,12),PaddingRight=UDim.new(0,12),PaddingTop=UDim.new(0,10),PaddingBottom=UDim.new(0,10)},self.notification);self.notifyUntil=self.app.clock()+5
  end
  function UI:tick()
-  if self.notification and self.app.clock()>=self.notifyUntil then self.notification:Destroy();self.notification=nil end
+  if self.notification and self.app.clock()>=self.notifyUntil then self:clearNotification() end
   if self.scrollTarget then local r=self.scrollTarget;self.scrollTarget=nil;local page=self.pages[r.page];page.CanvasPosition=Vector2.new(0,math.max(0,r.outer.AbsolutePosition.Y-page.AbsolutePosition.Y+page.CanvasPosition.Y)) end
  end
  return UI
