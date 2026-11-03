@@ -1,6 +1,10 @@
-# KUBI HUB ULTIMATE V5.2.1
+# KUBI HUB ULTIMATE V5.2.2
 
-V5.2.1 naprawia przerwanie uruchamiania przy odczycie brakujących materiałów. Przyczyną był dodatkowy wynik gsub przekazywany jako drugi argument FindFirstChild. Test kontraktu tej metody został zaostrzony; błąd odtworzono przed poprawką i usunięto.
+V5.2.2 naprawia ukrywanie przyczyny błędów pod napisem „Nowy komunikat”. Okienko i dolny pasek pokazują teraz treść; kliknięcie okienka otwiera pełny komunikat, także po ukryciu huba. Długie polskie opisy są skracane bez uszkadzania UTF-8, a pełna treść pozostaje dostępna. Powiadomienia działają również przy chwilowym braku kamery.
+
+Panel Autofarm pokazuje dostępność przed START i zapisuje przyczynę odmowy w „Ostatni błąd”. **To poprawka diagnostyki, nie przywrócenie autofarmy BABFT.** Poprzednia metoda przenosiła postać między etapami; jej przywrócenie wymaga rozstrzygnięcia przez użytkownika wcześniejszego wymagania zgodności z zasadami gry. Kod V5 nadal obsługuje kontroler własnego środowiska Studio.
+
+Zachowano poprawkę startu V5.2.1: brakujące materiały nie przekazują już dodatkowego wyniku gsub jako drugiego argumentu FindFirstChild.
 
 Sześć głównych zakładek: **PRO, Builder, Autofarm, Shapes, Circle Maker, Settings**. Sekcje są zwijane, a wyszukiwarka u góry znajduje funkcje i ustawienia. Prawy Ctrl lub pływający przycisk **K** pokazuje okno.
 
@@ -42,7 +46,7 @@ Serwer domyślnie działa wyłącznie w Studio. Użycie we własnej opublikowane
 
 ## Testy
 
-Wykonano kompilację oficjalnym Luau 0.744, **77 testów logiki i 58 sprawdzeń kontraktu klienta w mocku** oraz oba importy modeli. Mock nie renderuje Roblox i nie symuluje fizyki ani prawdziwego serwera BABFT. **Nowego trybu narzędzi nie testowano w grze.**
+Wykonano kompilację oficjalnym Luau 0.744, **79 testów logiki i 69 sprawdzeń kontraktu klienta w mocku** oraz oba importy modeli. Mock nie renderuje Roblox i nie symuluje fizyki ani prawdziwego serwera BABFT. **Nowego trybu narzędzi nie testowano w grze.**
 
 ```text
 node tools/build.cjs

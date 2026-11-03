@@ -4,10 +4,15 @@ return function(Util)
  function Farm.new(runtime,adapter,settings,log,spawn)
   return setmetatable({runtime=runtime,adapter=adapter,settings=settings,log=log,spawn=spawn,state='STOPPED',generation=0,stage=0,retries=0,nextAt=0,stats={started=runtime.clock(),completed=0,failed=0,totalCycleTime=0,lastError='',lastCycleTime=nil},pending=nil},Farm)
  end
+ function Farm:availability()
+  if self.adapter.capabilities.farm then return true,'Autofarma: dostępna w połączonym środowisku.' end
+  if self.adapter.mode=='BABFT' then return false,'Autofarma w publicznym BABFT jest wyłączona w tej wersji. Kontroler V5 wymaga dodatku do własnej gry w Roblox Studio.' end
+  return false,'Ten serwer nie udostępnia kontrolera autofarmy. Kontroler V5 działa z dodatkiem do własnej gry w Roblox Studio.'
+ end
  function Farm:start()
   if self.state~='STOPPED' and self.state~='ERROR' then return false,'Farm już działa lub jest wstrzymana.' end
   if self.pending and not self.pending.done or self.adapter.pending then return false,'Oczekiwanie na zakończenie poprzedniego żądania.' end
-  if not self.adapter.capabilities.farm then return false,'Brak uprawnionego kontrolera farmy. W BABFT nie używam nieudokumentowanych żądań ani fałszowania nagród.' end
+  local available,reason=self:availability();if not available then self.stats.lastError=reason;return false,reason end
   local ok,err=self.runtime:acquire('Farm');if not ok then return false,err end
   self.generation=self.generation+1;self.stage=0;self.retries=0;self.cycleStarted=self.runtime.clock();self.nextAt=self.runtime.clock();self.state='RUNNING';self.log:add('Farm','START');return true
  end
