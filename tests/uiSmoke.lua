@@ -1,13 +1,17 @@
 local function check(condition,message)assert(condition,message);print('PASS UI '..message)end
 local first=startHub();check(first and first.alive,'full client starts in assistant mode')
 check(first.adapter.capabilities.build~=true,'absent adapter cannot report build authorization')
-local n=0;for _ in pairs(first.ui.pages)do n+=1 end;check(n==6,'exactly six navigation pages')
+local n=0;for _ in pairs(first.ui.pages)do n+=1 end;check(n==5 and first.ui.pages.SHAPES==nil,'five navigation pages without a separate Shapes tab')
+first.ui:show('SHAPES');check(first.ui.current=='BUILDER','legacy Shapes route opens Builder')
 first.ui:show('CIRCLE');check(first.ui.current=='CIRCLE','dedicated Circle Maker page is reachable')
 first.ui.search.Text='promień';check(first.ui.results.Visible,'global search shows results')
 local found=false;for _,r in ipairs(first.ui.cards)do if r.result.Visible and r.title:find('Circle Maker',1,true)then found=true end end;check(found,'search indexes function settings')
 for _,r in ipairs(first.ui.cards)do if r.title:find('Circle Maker',1,true)then r.result.Activated:Fire();check(r.body.Visible,'search expands matching section');check(first.ui.current=='CIRCLE','search opens matching tab')end end
 first.ui:show('BUILDER');check(first.preview.shown>0 and first.preview.shown<=350,'viewport has bounded sampled geometry')
 local function button(app,text)for _,o in ipairs(app.ui.gui:GetDescendants())do if o:IsA('TextButton') and o.Text==text then return o end end;error('Missing button: '..text)end
+button(first,'Wczytaj: Classic House — dom / 568 części').Activated:Fire()
+check(first.builder.source.id=='community_classic_house' and #first.builder.source.elements==568 and first.builder.source.geometryOnly,'Builder loads actual downloaded community house geometry through the JSON path')
+check(first.builder.placed==0 and first.preview.shown<=350 and not first.builder.source.importedMechanics,'community loading remains a bounded preview until explicit BUILD')
 button(first,'ASYSTENT — pokaż kroki budowania').Activated:Fire()
 check(first.ui.current=='BUILDER' and first.assistantBody.Visible,'unavailable server build opens the usable manual assistant')
 check(first.builder.placed==0 and not first.builder:isBusy(),'manual assistant never starts a server build or fake progress')
@@ -75,10 +79,10 @@ rf.InvokeServer=function(_,material,amount,plot,relative,anchored,cf,flag)
  local model=child(own,'Model',material);local part=child(model,'Part','PPart');part.Size=material=='Seat' and Vector3.new(2,1,2) or Vector3.new(2,2,2);part.CFrame=cf;return model
 end
 local native=startHub();check(native.adapter.mode=='BABFT','actual BABFT place selects native compatibility instead of the Studio-only bridge')
-check(native.farmAvailability.Text:find('wyłączona',1,true)~=nil,'BABFT farm limitation is visible before pressing START')
+check(native.farmAvailability.Text==native.adapter.farmReason,'missing BABFT route has a precise status before START')
 native.ui:show('FARM');button(native,'START').Activated:Fire();native:updateDashboard()
-check(native.farm.state=='STOPPED' and native.farm.stats.failed==0 and native.farmInfo.Text:find('wyłączona',1,true)~=nil,'unsupported START records the precise reason without inventing a failed farming cycle')
-check(native.ui.notification.Text:find('Autofarma w publicznym BABFT jest wyłączona',1,true)~=nil,'the exact blocked START reason is readable in the popup from the reported screenshot')
+check(native.farm.state=='STOPPED' and native.farm.stats.failed==0 and native.farm.stats.lastError==native.adapter.farmReason,'missing route START records the precise reason without inventing a failed farming cycle')
+check(native.ui.notification.Text:find(native.adapter.farmReason,1,true)~=nil,'the exact blocked START reason is readable in the popup from the reported screenshot')
 check(sent==0 and not native.adapter.capabilities.build,'loading the hub never places a probe or authorizes untested tools')
 check(native.buildTestButton.Visible and native.babftRefresh.Visible,'BABFT has visible tool test and refresh actions')
 native.buildTestButton.Activated:Fire();check(sent==1 and #own:GetChildren()==1,'explicit probe sends one placement and observes the resulting own block')
