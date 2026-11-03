@@ -5,7 +5,7 @@ return function(M)
   self.player=game:GetService('Players').LocalPlayer;assert(self.player,'V5 wymaga klienta / LocalScript.');self.player:WaitForChild('PlayerGui',10)
   self.input=game:GetService('UserInputService');self.runService=game:GetService('RunService');self.http=game:GetService('HttpService')
   self.log=M.Log.new(function()return os.date('%Y-%m-%d %H:%M:%S')end)
-  self.runtime=M.Runtime.new(self.clock,function(module,err)self.log:error(module,err);if self.ui then self.ui:toast(module,'Wystąpił błąd. Szczegóły: Settings / Raport błędów.',true) end end)
+  self.runtime=M.Runtime.new(self.clock,function(module,err)self.log:error(module,err);if self.ui then self.ui:toast(module,err,true) end end)
   self.codec={encode=function(v)return self.http:JSONEncode(v)end,decode=function(s)return self.http:JSONDecode(s)end}
   self.storage=self:storageAdapter();self.config=M.Config.new(self.codec,self.storage,self.log)
   local saved=_G.KubiHubV5Settings;if type(saved)=='table' then local value=M.Config.validate(saved);if value then self.config.data=value end end
@@ -48,7 +48,7 @@ return function(M)
  function App:run(module,fn)
   if not self.alive then return false end
   local ok,a,b=xpcall(fn,function(e)return tostring(e)..'\n'..debug.traceback()end)
-  if not ok then self.log:error(module,a);self.ui:toast(module,tostring(a):sub(1,170),true);return false end
+  if not ok then self.log:error(module,a);self.ui:toast(module,a,true);return false end
   if type(a)=='table' and a.ok~=nil then b=a.error;a=a.ok end
   if a==false then self.log:add(module,tostring(b or 'Funkcja niedostępna.'),'WARN');self.ui:toast(module,b or 'Funkcja niedostępna.',true);return false end
   if self.builder and self.builder.revision~=self.previewRevision then self.previewDirty=true;self.ui:refreshControls() end;return true
@@ -125,7 +125,7 @@ return function(M)
    self.versionJob=self.runtime:job('Version',function()local value,err=M.Version.fetch(function(url)return game:HttpGet(url)end,self.codec.decode);if not value then self.log:add('Version',err,'WARN');self.versionInfo.Text=err;return false end;self.versionInfo.Text='Obecna '..M.Version.current..' • najnowsza '..value.version..' • '..value.releaseDate..'\n'..value.compatibility..'\n'..table.concat(value.changes,'; ');self:notify('Version',value.update and 'Dostępna jest aktualizacja. Kod nie został podmieniony.' or 'Brak nowszej wersji.');return true end,task.spawn)
   end)
   local farm=ui:page('FARM','FARM');local f=ui:card(farm,'Kontroler cykli','Wymaga autoryzowanego serwera. Zestaw Studio ma trasę testową bez nagród BABFT. Profile zmieniają przerwę między potwierdzonymi etapami i respektują minimum serwera.')
-  self.farmInfo=ui:label(f,'',155)
+  self.farmAvailability=ui:label(f,'');self.farmInfo=ui:label(f,'',155)
   for _,a in ipairs({{'START',function()return self.farm:start()end},{'STOP',function()return self.farm:stop()end},{'PAUZA',function()return self.farm:pause()end},{'WZNÓW',function()return self.farm:resume()end},{'RESET SESJI',function()return self.farm:reset()end}}) do ui:button(f,a[1],a[2]) end
   ui:cycle(f,'Profil',{'NORMAL','FAST','TURBO','HYPER','LIGHTNING','SONIC'},function()return self.config.data.farm.profile end,function(v)self.config.data.farm.profile=v end)
   ui:field(f,'Stop po potwierdzonych cyklach • 0 bez limitu',0,function(v)self.config.data.farm.stopAfter=M.Util.number(tonumber(v),0,0,10000,true);return self.config.data.farm.stopAfter end,false,function()return self.config.data.farm.stopAfter end)
@@ -271,6 +271,7 @@ return function(M)
   self.buildAvailability.Text=native and (canBuild and 'BABFT: test narzędzia potwierdzony. BUILD obsługuje statyczną geometrię. Mechanika WORM-a pozostaje niedostępna. STOP zatrzymuje kolejne żądania; już postawione bloki pozostają.' or 'BABFT: najpierw TEST 1 BLOKU. Wymaga własnej działki, narzędzia budowania i drewna. Narzędzia skalowania / malowania są potrzebne tylko planom, które ich wymagają.') or (canBuild and 'Serwer potwierdził dostęp do budowania na własnej działce.' or 'W tej sesji budowanie w grze jest niedostępne. Możesz używać podglądu, generatorów, listy materiałów i instrukcji ręcznej.')
   self.buildButton.Text=canBuild and (native and 'BUILD — zbuduj statyczny plan w BABFT' or 'BUILD — sprawdź i zbuduj przez adapter') or 'ASYSTENT — pokaż kroki budowania'
   for _,button in ipairs(self.buildControls) do button.Visible=canBuild end
+  local farmAvailable,farmReason=self.farm:availability();self.farmAvailability.Text=farmReason;self.farmAvailability.TextColor3=farmAvailable and self.ui.palette.text or self.ui.palette.red
   self.farmInfo.Text=string.format('Stan: %s • etap: %d\nCykle potwierdzone %d • nieudane %d\nŚredni cykl: %s s • cykle/h: %s\nOstatni błąd: %s',fs.state,fs.stage,fs.completed,fs.failed,fs.average and string.format('%.2f',fs.average) or '—',fs.cyclesPerHour and string.format('%.1f',fs.cyclesPerHour) or '—',fs.lastError~='' and fs.lastError or '—')
   self.buildInfo.Text=string.format('Stan: %s\nCzęści potwierdzone przez serwer: %d / %d\n%s',self.builder.state,self.builder.placed,self.builder.total,self.builder.error or '')
   self.movementInfo.Text=string.format('Prędkość rzeczywista: %s stud/s\nFly: %s • uprawnienie: %s',speed and string.format('%.1f',speed) or '—',self.movement.fly and 'ON' or 'OFF',self.adapter.capabilities.movement and 'potwierdzone' or 'brak adaptera')
