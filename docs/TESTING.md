@@ -1,5 +1,11 @@
 # Testy i oczekiwane wyniki
 
+## Czytelność błędów V5.2.2 — 2026-11-03
+
+Regresja powiadomienia odtwarza problem w opublikowanym V5.2.1: test wymaga przyczyny w dolnym pasku i okienku, lecz stary klient pokazuje tylko ogólne ogłoszenie. Po poprawce 79 testów logiki, 69 sprawdzeń klienta i dwa importy przechodzą. Sprawdzono pełne błędy przycisków i zdarzeń, Unicode, kliknięcie okienka przy ukrytym hubie, brak kamery oraz odłączanie zastąpionych i wygasłych okienek.
+
+W grze — NIE WYKONANO: uruchom ten sam loader, potwierdź V5.2.2, otwórz Autofarm i odczytaj dostępność przed START. Gdy START jest niedostępny, okienko ma pokazać konkretną przyczynę. Kliknięcie go powinno otworzyć Settings / Ostatni komunikat z pełną treścią; ostatni błąd farmy powinien zawierać tę samą przyczynę. To nie jest test ukończenia cyklu BABFT; publiczna autofarma pozostaje wyłączona.
+
 ## Awaria startu V5.2.1 — 2026-10-30
 
 Przed naprawą zaostrzony mock FindFirstChild(name, recursive) kończył pełny start V5.2.0 komunikatem „FindFirstChild recursive must be a boolean”; stos prowadził przez Inventory.readPlayer i observePlayer do Application.new, przed tworzeniem GUI. Poprzedni mock ignorował dodatkowy argument i nie odtwarzał tej awarii. [Kontrakt API Roblox](https://create.roblox.com/docs/reference/engine/classes/Instance#FindFirstChild) wymaga boolean jako opcjonalnego drugiego argumentu. gsub zwraca także liczbę zamian, dlatego zapisano sam alias w zmiennej przed wywołaniem.
