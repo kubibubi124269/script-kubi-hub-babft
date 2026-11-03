@@ -61,6 +61,13 @@ test('runtime does not release another owner or race outstanding jobs',function(
 local function farmFixture()
  now=0;queue={};local rt=runtime();local ad={capabilities={farm=true},minFarmInterval=.3,cancel=function()end,farmStep=function(_,stage)return {ok=true,stage=stage,completed=stage==2}end};local settings={profile='SONIC',retryLimit=1,stopAfter=0};return Farm.new(rt,ad,settings,log,spawn),ad,rt
 end
+test('unavailable BABFT farm reports its actual limitation without dispatch or fake failed cycles',function()
+ local f,ad,rt=farmFixture();ad.mode='BABFT';ad.capabilities.farm=false
+ local ok,reason=f:start();eq(ok,false);assert(reason:find('wyłączona',1,true));eq(f.stats.lastError,reason);eq(f.state,'STOPPED');eq(f.stats.failed,0);eq(rt.lock,nil);eq(#queue,0)
+end)
+test('farm availability follows an actual capability change',function()
+ local f,ad=farmFixture();ad.capabilities.farm=false;eq(f:availability(),false);ad.capabilities.farm=true;eq(f:availability(),true);assert(f:start())
+end)
 test('farm has one controller and pause blocks further dispatch',function()local f= farmFixture();assert(f:start());eq(f:start(),false);f:tick();assert(f:pause());flush();f:tick();eq(f.state,'PAUSED');eq(#queue,0);assert(f:resume());now=1;f:tick();eq(#queue,1)end)
 test('farm STOP ignores delayed server receipt',function()local f=farmFixture();f:start();f:tick();f:stop();flush();f:tick();eq(f.stage,0);eq(f.stats.completed,0);eq(f.state,'STOPPED')end)
 test('farm counts confirmed cycles and measured duration',function()local f=farmFixture();eq(f:summary().average,nil);f:start();f:tick();flush();now=.2;f:tick();now=.6;f:tick();flush();now=.8;f:tick();eq(f.stats.completed,1);near(f:summary().average,.8)end)

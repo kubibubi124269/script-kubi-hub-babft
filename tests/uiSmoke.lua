@@ -17,6 +17,22 @@ first.ui:toast('BUILDER',longMessage,true);first.ui.footer.Activated:Fire()
 check(first.ui.current=='SETTINGS' and first.ui.statusBody.Visible,'status bar expands the actual message section')
 check(first.ui.statusInfo.Text=='[BUILDER] '..longMessage,'full status message is preserved beyond the toast limit')
 check(first.ui.statusInfo.AutomaticSize==Enum.AutomaticSize.Y and first.ui.statusInfo.TextYAlignment==Enum.TextYAlignment.Top,'message text grows vertically and aligns to the top')
+check(first.ui.footer.Text:find('Pełna treść komunikatu.',1,true)~=nil and first.ui.notification.Text:find('Pełna treść komunikatu.',1,true)~=nil,'footer and popup show the actual error instead of a generic announcement')
+check(utf8.len(first.ui.notification.Text)~=nil and utf8.len(first.ui.notification.Text)<260,'long Polish messages have a bounded valid UTF-8 notification')
+first.ui:show('FARM');first.ui:hide();first.ui.notification.Activated:Fire()
+check(first.ui.frame.Visible and first.ui.current=='SETTINGS' and first.ui.statusBody.Visible,'clicking the notification reopens the hub at the complete error')
+local oldConnection=first.ui.notificationConnection;local notificationConnections=first.runtime:counts().connections
+for _=1,20 do first.ui:toast('TEST','Żółć — dokładna przyczyna błędu.',true)end
+check(not oldConnection.Connected and first.runtime:counts().connections==notificationConnections,'replacing notifications disconnects old click handlers without growing listeners')
+first.ui.notifyUntil=-math.huge;first.ui:tick()
+check(first.ui.notification==nil and first.ui.notificationConnection==nil and first.runtime:counts().connections==notificationConnections-1,'expired notifications also release their event connection')
+local camera=workspace.CurrentCamera;workspace.CurrentCamera=nil;first.ui:toast('TEST','Brak kamery nie może ukryć błędu.',true);workspace.CurrentCamera=camera
+check(first.ui.notification.Text:find('Brak kamery',1,true)~=nil,'error notification remains available while the game camera is absent')
+local exactError='Kontrolowany błąd przycisku: '..string.rep('ą',180)..' KONIEC'
+first:run('TEST',function()error(exactError)end)
+check(first.ui.statusInfo.Text:find(exactError,1,true)~=nil,'button exceptions keep the entire error for copying instead of truncating at 170 bytes')
+local testSignal=signal();local testConnection=first.runtime:connect(testSignal,function()error('Kontrolowany błąd zdarzenia')end,'TEST');testSignal:Fire();first.runtime:disconnect(testConnection)
+check(first.ui.notification.Text:find('Kontrolowany błąd zdarzenia',1,true)~=nil,'runtime event errors expose their actual cause in the notification')
 first.ui:show('DEBUG');check(first.debugBody.Visible and first.ui.scrollTarget==first.ui.cardBodies[first.debugBody],'debug route expands and targets the report instead of session stats')
 first:updateDashboard();check(first.debugBox.Text:find('Środowisko:',1,true)~=nil,'report refresh runs in the real Settings tab')
 first.adapter.capabilities.build=true;first:updateDashboard()
@@ -59,6 +75,10 @@ rf.InvokeServer=function(_,material,amount,plot,relative,anchored,cf,flag)
  local model=child(own,'Model',material);local part=child(model,'Part','PPart');part.Size=material=='Seat' and Vector3.new(2,1,2) or Vector3.new(2,2,2);part.CFrame=cf;return model
 end
 local native=startHub();check(native.adapter.mode=='BABFT','actual BABFT place selects native compatibility instead of the Studio-only bridge')
+check(native.farmAvailability.Text:find('wyłączona',1,true)~=nil,'BABFT farm limitation is visible before pressing START')
+native.ui:show('FARM');button(native,'START').Activated:Fire();native:updateDashboard()
+check(native.farm.state=='STOPPED' and native.farm.stats.failed==0 and native.farmInfo.Text:find('wyłączona',1,true)~=nil,'unsupported START records the precise reason without inventing a failed farming cycle')
+check(native.ui.notification.Text:find('Autofarma w publicznym BABFT jest wyłączona',1,true)~=nil,'the exact blocked START reason is readable in the popup from the reported screenshot')
 check(sent==0 and not native.adapter.capabilities.build,'loading the hub never places a probe or authorizes untested tools')
 check(native.buildTestButton.Visible and native.babftRefresh.Visible,'BABFT has visible tool test and refresh actions')
 native.buildTestButton.Activated:Fire();check(sent==1 and #own:GetChildren()==1,'explicit probe sends one placement and observes the resulting own block')
