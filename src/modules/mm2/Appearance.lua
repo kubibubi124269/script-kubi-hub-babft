@@ -1,10 +1,37 @@
 return function(Util)
  local A={};A.__index=A
  function A.new(platform,runtime)
-  return setmetatable({p=platform,runtime=runtime,enabled={headless=false,korblox=false,mini=false,hitbox=false},settings={scale=.6,rootFactor=.6,hideHats=false},hidden={}},A)
+  return setmetatable({p=platform,runtime=runtime,enabled={headless=false,korblox=false,mini=false,hitbox=false,noAccessories=false,noFace=false,ghost=false,lamp=false},settings={scale=.6,rootFactor=.6,hideHats=false,lampRange=24,lampBrightness=2},hidden={},headOpacity={}},A)
+ end
+ function A:bind(runService)
+  if self.bound then return end;self.bound=true
+  local name='KubiHubAvatarVisibility'
+  runService:BindToRenderStep(name,Enum.RenderPriority.Last.Value+1,function()
+   if not self.runtime.alive then return end
+   local ok,err=pcall(function()self:render()end);if not ok then self:reset();self.runtime.errors('Postać',err)end
+  end)
+  self.runtime:own({Destroy=function()runService:UnbindFromRenderStep(name)end})
+ end
+ function A:restoreHead()
+  for object,row in pairs(self.headOpacity)do
+   self.runtime:disconnect(row.connection)
+   if object.Parent then pcall(function()object.Transparency=row.value end)end
+  end;self.headOpacity={}
  end
  function A:restoreVisuals()
+  self:restoreHead()
   for object,row in pairs(self.hidden) do if object.Parent then pcall(function()object[row.field]=row.value end)end end;self.hidden={}
+ end
+ function A:hideHead(object)
+  self:hide(object)
+  if not object:IsA('BasePart') then return end
+  if not self.headOpacity[object] then
+   local row={value=object.Transparency};self.headOpacity[object]=row
+   row.connection=self.runtime:connect(object:GetPropertyChangedSignal('Transparency'),function()
+    if self.enabled.headless and self.headOpacity[object]==row and object.Parent and object.Transparency~=1 then object.Transparency=1 end
+   end,'Headless')
+  end
+  object.Transparency=1
  end
  function A:hide(object)
   local field=object:IsA('BasePart') and 'LocalTransparencyModifier' or (object:IsA('Decal') or object:IsA('Texture')) and 'Transparency'
@@ -31,17 +58,24 @@ return function(Util)
   local b=self.base;if not b then return end
   self:restoreVisuals();local c=b.character;local head=c:FindFirstChild('Head')
   if self.enabled.headless and head then
-   self:hide(head);for _,object in ipairs(head:GetDescendants())do self:hide(object)end
+   self:hideHead(head);for _,object in ipairs(head:GetDescendants())do self:hideHead(object)end
    if self.settings.hideHats then for _,accessory in ipairs(c:GetChildren())do if accessory:IsA('Accessory') then local handle=accessory:FindFirstChild('Handle');local attached=false
     if handle then for _,attachment in ipairs(handle:GetChildren())do if attachment:IsA('Attachment') and ({HatAttachment=true,HairAttachment=true,FaceFrontAttachment=true,FaceCenterAttachment=true})[attachment.Name] then attached=true;break end end end
     if attached then for _,object in ipairs(accessory:GetDescendants())do self:hide(object)end end
    end end end
   end
+  if self.enabled.noFace and head then for _,object in ipairs(head:GetDescendants())do if object:IsA('Decal') or object:IsA('Texture') then self:hide(object)end end end
+  if self.enabled.noAccessories then for _,accessory in ipairs(c:GetChildren())do if accessory:IsA('Accessory') then for _,object in ipairs(accessory:GetDescendants())do self:hide(object)end end end end
   if self.enabled.korblox then
    local leg=self:leg(c);if not leg then error('Brak prawej nogi R6 / R15.')end
    for _,name in ipairs({'RightUpperLeg','RightLowerLeg','RightFoot','Right Leg'})do local part=c:FindFirstChild(name);if part then self:hide(part);for _,object in ipairs(part:GetDescendants())do self:hide(object)end end end
    if rebuildLeg or not self.legFolder or not self.legFolder.Parent or self.legPart~=leg then self:makeLeg(c,leg)end
   else self:clearLeg()end
+  if self.enabled.ghost then for _,object in ipairs(c:GetDescendants())do self:hide(object)end end
+  if self.enabled.lamp then
+   if not self.lamp or not self.lamp.Parent then self.lamp=Instance.new('PointLight');self.lamp.Name='KubiHubLocalLamp';self.lamp.Parent=b.root end
+   self.lamp.Range=self.settings.lampRange;self.lamp.Brightness=self.settings.lampBrightness;self.lamp.Shadows=false
+  elseif self.lamp then self.lamp:Destroy();self.lamp=nil end
  end
  function A:apply(resize)
   local b=self.base;local ratio=self.enabled.mini and self.settings.scale or 1;local wanted=b.scale*ratio
@@ -81,6 +115,8 @@ return function(Util)
   if key=='scale' then value=Util.number(value,.6,.35,1);feature='mini'
   elseif key=='rootFactor' then value=Util.number(value,.6,.3,1);feature='hitbox'
   elseif key=='hideHats' and type(value)=='boolean' then feature='headless'
+  elseif key=='lampRange' then value=Util.number(value,24,8,60);feature='lamp'
+  elseif key=='lampBrightness' then value=Util.number(value,2,.5,5);feature='lamp'
   else return false,'Nieznane ustawienie postaci.'end
   local previous=self.settings[key];self.settings[key]=value
   if self.enabled[feature] then local ok,err=self:set(feature,true);if not ok then self.settings[key]=previous;return false,err end end;return true
@@ -93,9 +129,11 @@ return function(Util)
  function A:render()
   -- Camera scripts may change LocalTransparencyModifier; reapply only hidden visuals.
   for object,row in pairs(self.hidden)do if object.Parent and object[row.field]~=1 then object[row.field]=1 end end
+  for object in pairs(self.headOpacity)do if object.Parent and object.Transparency~=1 then object.Transparency=1 end end
  end
  function A:reset()
   self:restoreVisuals();self:clearLeg();local b=self.base;self.base=nil
+  if self.lamp then self.lamp:Destroy();self.lamp=nil end
   for feature in pairs(self.enabled)do self.enabled[feature]=false end
   if b and self.resized then
    pcall(function()if math.abs(b.character:GetScale()-b.scale)>.0001 then b.character:ScaleTo(b.scale)end end)
