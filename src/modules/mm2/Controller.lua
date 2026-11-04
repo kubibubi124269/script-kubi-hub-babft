@@ -46,11 +46,13 @@ return function(Util)
  function C:startFling()
   if not self.p.allowed then return false,'Najpierw dołącz do Murder Mystery 2.' end
   if self.combat then return false,'Akcja walki już trwa.' end
-  local target
-  if self.settings.selected~='' then target=self.p:selected(self.settings.selected) else for _,person in ipairs(self.p:people()) do if person.role=='Murderer' then target=person;break end end end
-  if not target then return false,'Nie wykryto Murderera. Możesz wpisać dokładny nick celu.' end
+  self.flingSettings=self.flingSettings or {target='NEAREST',selected='',duration=1.5}
+  local settings=self.flingSettings;local target;local _,_,root=self.p:character();if not root then return false,'Poczekaj na aktywną postać.'end
+  if settings.target=='SELECTED' then target=self.p:selected(settings.selected)
+  else local distance=math.huge;for _,person in ipairs(self.p:people())do if settings.target=='NEAREST' or settings.target=='MURDERER' and person.role=='Murderer' then local d=(root.Position-person.root.Position).Magnitude;if d<distance then target=person;distance=d end end end end
+  if not target then return false,'Brak aktywnego celu Fling. Wybierz tryb lub dokładny nick pod PPM.' end
   local ok,err=self.runtime:acquire('MM2Combat');if not ok then return false,err end
-  ok,err=self.p:beginFling(target,self.clock());if not ok then self.runtime:release('MM2Combat');return false,err end
+  ok,err=self.p:beginFling(target,self.clock(),settings);if not ok then self.runtime:release('MM2Combat');return false,err end
   self.combat={kind='FLING',started=self.clock()};return true
  end
  function C:stopCombat()
@@ -88,6 +90,6 @@ return function(Util)
    end
   end
  end
- function C:stopAll()self:stopFarm();self:stopCombat();self.aimbot=false;self.autoShot=false;self.autoGun=false;self.aura=false;self.esp=false;self.p:close()end
+ function C:stopAll()self:stopFarm();self:stopCombat();if self.avatar then self.avatar:reset()end;self.aimbot=false;self.autoShot=false;self.autoGun=false;self.aura=false;self.esp=false;self.p:close()end
  return C
 end

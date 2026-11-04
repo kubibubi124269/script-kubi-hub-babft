@@ -33,7 +33,7 @@ return function(M)
    elseif self.previewDrag then local d=input.Position-self.previewDrag;self.previewDrag=input.Position;app.preview:orbit(d.X*.5,-d.Y*.5) end
   end)
   self:bind(app.input.InputEnded,function(input)if self.drag and input==self.drag.input or self.dragSize and input==self.dragSize.input then self.drag=nil;self.dragSize=nil;self:rememberPosition();self:fit() end;if self:isPress(input) then self.sliderDrag=nil;self.previewDrag=nil end end)
-  self:bind(app.input.InputBegan,function(input,processed)if input.KeyCode==Enum.KeyCode.Escape then self:closeSettings() end;if input.KeyCode==Enum.KeyCode.RightControl and not app.input:GetFocusedTextBox() then self.frame.Visible=not self.frame.Visible;self.bubble.Visible=not self.frame.Visible end;if not processed and input.KeyCode==Enum.KeyCode.E and not app.input:GetFocusedTextBox() and app.adapter and app.adapter.mode~='MM2' then app:run('WORM',function()return app.adapter:rig('mouth')end) end end)
+  self:bind(app.input.InputBegan,function(input,processed)if input.KeyCode==Enum.KeyCode.Escape then self:closeSettings() end;if input.KeyCode==Enum.KeyCode.RightControl and not app.input:GetFocusedTextBox() then self.frame.Visible=not self.frame.Visible;self.bubble.Visible=not self.frame.Visible end;if not processed and input.KeyCode==Enum.KeyCode.E and not app.input:GetFocusedTextBox() and app.adapter and type(app.adapter.rig)=='function' and app.adapter.mode~='MM2' then app:run('WORM',function()return app.adapter:rig('mouth')end) end end)
   local camera=workspace.CurrentCamera;if camera then self:bind(camera:GetPropertyChangedSignal('ViewportSize'),function()self:fit()end) end
   self:fit();return self
  end

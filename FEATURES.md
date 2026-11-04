@@ -1,4 +1,13 @@
-# Funkcje V6.1.0
+# Funkcje V6.2.0
+
+## 6.2.0 — 2026-11-04
+
+Universal jest trzecim przyciskiem obok BABFT i MM2 na ekranie wyboru. Ma własne pięć pionowych kategorii: Główne, Postać, Widok, Teleport i Ustawienia. Oferuje FPS, własny ruch / Fly, trzy punkty teleportu, FOV, celownik, lokalny jasny dzień i lokalny wygląd. Gra może przywracać swoją kamerę, oświetlenie, rozmiar i ruch; brak obietnicy działania ruchu we wszystkich grach.
+
+MM2 / Trolling: Fling ma cel NEAREST / MURDERER / SELECTED oraz czas 0,5–3 s. Są osobne przełączniki Fake Headless, nogi w stylu Korblox, małego skina i lokalnego korzenia hitboxa. Ustawienia pod PPM / ⋯; przywracanie po STOP, respawnie i wyłączeniu. Efekty nie nadają płatnych przedmiotów na konto. Lokalny HumanoidRootPart nie jest potwierdzeniem zmniejszenia serwerowego obszaru trafień.
+
+Luau 0.744: **86 testów logiki, 181 sprawdzeń klienta, 4 importy modeli, 38 modułów**. Wszystkie offline; natywna fizyka, wygląd i serwerowe efekty wymagają testu w grze.
+
 
 - Autofarm: osobne kontrolery BABFT i MM2, pauza i STOP, opcje pod PPM.
 - Trolling: Fling w MM2 oraz lokalne efekty; kopia awatara i ślad w BABFT.
