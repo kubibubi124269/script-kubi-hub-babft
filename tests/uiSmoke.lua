@@ -1,19 +1,24 @@
 local function check(condition,message)assert(condition,message);print('PASS UI '..message)end
 local first=startHub();check(first and first.alive,'full client starts in assistant mode')
 check(first.adapter.capabilities.build~=true,'absent adapter cannot report build authorization')
-local n=0;for _ in pairs(first.ui.pages)do n+=1 end;check(n==5 and first.ui.pages.SHAPES==nil,'five navigation pages without a separate Shapes tab')
-first.ui:show('SHAPES');check(first.ui.current=='BUILDER','legacy Shapes route opens Builder')
-first.ui:show('CIRCLE');check(first.ui.current=='CIRCLE','dedicated Circle Maker page is reachable')
+local n=0;for _ in pairs(first.ui.pages)do n+=1 end;check(n==6 and first.ui.pages.SHAPES==nil,'six simple categories without a Shapes tab')
+local farmSettings;for _,entry in ipairs(first.ui.featureSettings)do if entry.title=='Autofarma BABFT' then farmSettings=entry end end;assert(farmSettings)
+farmSettings.button.InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton2});check(first.ui.activeSettings~=nil and first.farm.state=='STOPPED','right click opens feature options without starting the farm')
+local settingsConnections=first.runtime:counts().connections;local panel=farmSettings.panel
+for _=1,12 do farmSettings.open()end;check(first.runtime:counts().connections==settingsConnections and farmSettings.panel==panel,'reopening options reuses controls without leaking listeners')
+first.ui:show('TELEPORT');check(first.ui.activeSettings==nil,'switching categories closes feature options')
+first.ui:show('SHAPES');check(first.ui.current=='MISC','legacy Shapes route opens Builder')
+first.ui:show('CIRCLE');check(first.ui.current=='MISC','dedicated Circle Maker page is reachable')
 first.ui.search.Text='promień';check(first.ui.results.Visible,'global search shows results')
 local found=false;for _,r in ipairs(first.ui.cards)do if r.result.Visible and r.title:find('Circle Maker',1,true)then found=true end end;check(found,'search indexes function settings')
-for _,r in ipairs(first.ui.cards)do if r.title:find('Circle Maker',1,true)then r.result.Activated:Fire();check(r.body.Visible,'search expands matching section');check(first.ui.current=='CIRCLE','search opens matching tab')end end
+for _,r in ipairs(first.ui.cards)do if r.title:find('Circle Maker',1,true)then r.result.Activated:Fire();check(r.body.Visible,'search expands matching section');check(first.ui.current=='MISC','search opens matching tab')end end
 first.ui:show('BUILDER');check(first.preview.shown>0 and first.preview.shown<=350,'viewport has bounded sampled geometry')
 local function button(app,text)for _,o in ipairs(app.ui.gui:GetDescendants())do if o:IsA('TextButton') and o.Text==text then return o end end;error('Missing button: '..text)end
 button(first,'Wczytaj: Classic House — dom / 568 części').Activated:Fire()
 check(first.builder.source.id=='community_classic_house' and #first.builder.source.elements==568 and first.builder.source.geometryOnly,'Builder loads actual downloaded community house geometry through the JSON path')
 check(first.builder.placed==0 and first.preview.shown<=350 and not first.builder.source.importedMechanics,'community loading remains a bounded preview until explicit BUILD')
 button(first,'ASYSTENT — pokaż kroki budowania').Activated:Fire()
-check(first.ui.current=='BUILDER' and first.assistantBody.Visible,'unavailable server build opens the usable manual assistant')
+check(first.ui.current=='MISC' and first.assistantBody.Visible,'unavailable server build opens the usable manual assistant')
 check(first.builder.placed==0 and not first.builder:isBusy(),'manual assistant never starts a server build or fake progress')
 for _,b in ipairs(first.buildControls)do check(not b.Visible,'transaction control is hidden without build access')end
 local longMessage=string.rep('Pełna treść komunikatu. ',40)..'KONIEC'
@@ -51,6 +56,9 @@ check(#libraryCard.terms==termsLength,'rebuilding the catalog does not grow sear
 check(first.runtime:counts().connections==connections,'rebuilding the catalog disconnects old controls')
 first.previewDirty=false;button(first,'Widok z góry').Activated:Fire();check(not first.previewDirty,'camera controls do not rebuild all preview parts')
 first.config.data.farm.stopAfter=7;first.config.data.builder.yaw=90;first.config.data.builder.material='TitaniumBlock';assert(first:applyConfig())
+local circleSettings;for _,entry in ipairs(first.ui.featureSettings)do if entry.title=='GENERUJ KOŁO — podgląd i materiały' then circleSettings=entry end end;assert(circleSettings)
+circleSettings.button.InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton2});check(first.ui.activeSettings==circleSettings.panel and first.generatorKind=='SPHERE','Circle Maker has its own settings without changing the Shape Lab selection')
+local layerField;for _,o in ipairs(circleSettings.body:GetDescendants())do if o:IsA('TextBox')and o.PlaceholderText=='Liczba warstw'then layerField=o end end;assert(layerField);layerField.Text='2';layerField.FocusLost:Fire();check(first.circle.layers==2,'right-click Circle Maker settings update the generator used by the action')
 button(first,'GENERUJ KOŁO — podgląd i materiały').Activated:Fire()
 check(first.builder.options.yaw==0 and first.builder.options.material=='ORIGINAL','new circle uses its own selected material and rotation')
 check(first.builder.schema.elements[1].material=='WoodBlock','circle wood is not silently replaced with previous titanium')
@@ -60,7 +68,7 @@ button(first,'Import i zapisz własny projekt').Activated:Fire();local importedI
 check(first.builder.options.yaw==0,'import does not apply exported rotation twice')
 check(math.abs(first.builder.schema.elements[1].position[1]-exported.elements[1].position[1])<1e-7,'export/import keeps rendered placement')
 first.schemaBox.Text=beforeImport;button(first,'Import i zapisz własny projekt').Activated:Fire();check(first.builder.source.id~=importedId and first.library.items[importedId]~=nil,'rapid consecutive imports never overwrite an earlier project')
-first:needPro('test');check(first.ui.current=='PRO','locked feature points to the actual key page')
+first:needPro('test');check(first.ui.current=='SETTINGS' and first.proBody.Visible,'locked feature points to the actual key page')
 button(first,'Wyśrodkuj schemat X/Z').Activated:Fire();check(math.abs(first.builder.bounds.center[1])<1e-7 and math.abs(first.builder.bounds.center[3])<1e-7,'center button moves the plan to the middle')
 button(first,'Dopasuj do obszaru').Activated:Fire();check(first.builder.state=='PREVIEW','fit button prepares a preview without claiming server build')
 button(first,'Kopiuj listę materiałów').Activated:Fire();check(first.schemaBox.Text:find('wymagane',1,true)~=nil,'copy materials has a usable text fallback without clipboard API')
@@ -68,7 +76,7 @@ local oldSpeed=hum.WalkSpeed;local second=startHub();check(not first.alive,'seco
 n=0;for _,o in ipairs(player.PlayerGui:GetChildren())do if o.Name=='KubiHubUltimateV5'then n+=1 end end;check(n==1,'second execution leaves one GUI')
 check(hum.WalkSpeed==oldSpeed,'startup preserves original character movement')
 for _,size in ipairs({Vector2.new(320,600),Vector2.new(580,527),Vector2.new(760,600),Vector2.new(1280,720)})do workspace.CurrentCamera.ViewportSize=size;second.ui:fit();check(second.ui.layout.width<=size.X-8,'responsive window fits '..size.X)
- if second.ui.layout.narrow then check(not second.ui.nav.ScrollingEnabled and second.ui.navLayout.FillDirectionMaxCells==second.ui.layout.navColumns,'narrow navigation displays the complete tab grid at '..size.X)end
+ check(second.ui.nav.ScrollingEnabled and second.ui.navLayout.FillDirectionMaxCells==1,'vertical navigation remains reachable at '..size.X)
 end
 second:unload();check(second.runtime:counts().connections==0,'unload removes current connections');check(second.ui.gui.Parent==nil,'unload destroys owned GUI')
 -- BABFT compatibility is exercised against a tool/folder fixture, never a live game.
@@ -80,13 +88,19 @@ rf.InvokeServer=function(_,material,amount,plot,relative,anchored,cf,flag)
 end
 local native=startHub();check(native.adapter.mode=='BABFT','actual BABFT place selects native compatibility instead of the Studio-only bridge')
 check(native.farmAvailability.Text==native.adapter.farmReason,'missing BABFT route has a precise status before START')
-native.ui:show('FARM');button(native,'START').Activated:Fire();native:updateDashboard()
+native.ui:show('FARM');button(native,'Autofarma BABFT  OFF').Activated:Fire();native:updateDashboard()
 check(native.farm.state=='STOPPED' and native.farm.stats.failed==0 and native.farm.stats.lastError==native.adapter.farmReason,'missing route START records the precise reason without inventing a failed farming cycle')
 check(native.ui.notification.Text:find(native.adapter.farmReason,1,true)~=nil,'the exact blocked START reason is readable in the popup from the reported screenshot')
 check(sent==0 and not native.adapter.capabilities.build,'loading the hub never places a probe or authorizes untested tools')
 check(native.buildTestButton.Visible and native.babftRefresh.Visible,'BABFT has visible tool test and refresh actions')
 native.buildTestButton.Activated:Fire();check(sent==1 and #own:GetChildren()==1,'explicit probe sends one placement and observes the resulting own block')
 check(native.adapter.capabilities.build and native.buildButton.Text=='BUILD — zbuduj statyczny plan w BABFT','successful native probe enables the actual build action')
+assert(native:select('WORM_MK2',true));native:updateDashboard()
+check(native.staticButton.Visible and not native.buildButton.Visible,'mechanical schema shows an explicit static option instead of the failing native BUILD action')
+native.staticButton.Activated:Fire();check(native.builder.schema.geometryOnly and not native.builder.schema.mechanical and #native.builder.schema.connections==0 and not native.builder:isBusy(),'static option creates a separate labelled draft without starting placement')
+local savedFarmTick=native.farm.tick;native.farm.tick=function()error('Fixture farm failure')end;native.runtime.schedules.Controllers.fn();native.farm.tick=savedFarmTick
+check(native.farm.state=='ERROR' and native.runtime.schedules.Controllers~=nil and native.ui.statusInfo.Text:find('Fixture farm failure',1,true),'BABFT controller errors remain readable without removing all module scheduling')
+native.farm:stop()
 local piece=table.clone(native.builder.schema.elements[1]);piece.material='WoodBlock';piece.position={4,2,0};piece.color=nil;piece.size={2,2,2};piece.class='Part'
 local seat=table.clone(piece);seat.id='native_seat';seat.material='Seat';seat.class='Seat';seat.position={6,2,0}
 assert(native.builder:select({schemaVersion=2,id='native_test',name='Static fixture',elements={piece,seat},connections={}},true))

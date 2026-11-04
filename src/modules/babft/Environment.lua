@@ -37,7 +37,7 @@ return function(Util,Schema,Inventory,FarmRoute)
   local farm,farmReason=self.route:inspect();lines[#lines+1]=farmReason
   return {build=build and zone~=nil,farm=farm,farmReason=farmReason,zone=zone and {size={zone.Size.X,200,zone.Size.Z},min={-zone.Size.X/2+1,-6,-zone.Size.Z/2+1},max={zone.Size.X/2-1,200,zone.Size.Z/2-1}},text=table.concat(lines,'\n')}
  end
- function E:farmStep(stage,cancelled,paused)return self.route:step(stage,cancelled,paused)end
+ function E:farmStep(stage,cancelled,paused,settings)return self.route:step(stage,cancelled,paused,settings)end
  function E:stopFarm()self.route:stop()end
  function E:expectingRespawn()return self.route:expectingRespawn()end
  function E:preflight(schema,yaw)

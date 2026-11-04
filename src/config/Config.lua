@@ -1,6 +1,6 @@
 return function(Util,Inventory)
  local Config={version=2}
- Config.defaults={schemaVersion=2,ui={theme='BLUE',width=960,height=650,x=.08,y=.08,compact=false,tooltips=true},farm={profile='NORMAL',retryLimit=2,stopAfter=0},builder={material='ORIGINAL',yaw=0,mirrorX=false,mirrorZ=false,previewLayer=0,scale=1,offsetX=0,offsetY=0,offsetZ=0},movement={walk=16,jump=50,flySpeed=40},performance={profile='BALANCED'},favorites={},language='PL'}
+ Config.defaults={schemaVersion=2,ui={theme='BLUE',width=960,height=650,x=.08,y=.08,compact=false,tooltips=true},farm={profile='NORMAL',retryLimit=2,stopAfter=0,crossingTime=.8},builder={material='ORIGINAL',yaw=0,mirrorX=false,mirrorZ=false,previewLayer=0,scale=1,offsetX=0,offsetY=0,offsetZ=0},movement={walk=16,jump=50,flySpeed=40},performance={profile='BALANCED'},favorites={},language='PL'}
  function Config.profileName(name)
   if type(name)~='string' or #name<1 or #name>24 or not name:match('^[%a%d][%w_%-]*$') then return false end
   local n=name:upper();return n~='CON' and n~='PRN' and n~='AUX' and n~='NUL' and not n:match('^COM[1-9]$') and not n:match('^LPT[1-9]$')
@@ -15,7 +15,7 @@ return function(Util,Inventory)
   local function number(group,key,lo,hi,integer)
    local v=read(group,key);if v~=nil then if not Util.finite(v) then errors[#errors+1]=group..'.'..key..': nieprawidłowa liczba' else out[group][key]=Util.number(v,out[group][key],lo,hi,integer) end end
   end
-  for _,s in ipairs({{'ui','width',340,1200,true},{'ui','height',400,900,true},{'ui','x',0,.95},{'ui','y',0,.95},{'farm','retryLimit',0,3,true},{'farm','stopAfter',0,10000,true},{'builder','yaw',-360,360},{'builder','previewLayer',0,1000,true},{'movement','walk',8,60},{'movement','jump',20,120},{'movement','flySpeed',10,100}}) do number(table.unpack(s)) end
+  for _,s in ipairs({{'ui','width',340,1200,true},{'ui','height',400,900,true},{'ui','x',0,.95},{'ui','y',0,.95},{'farm','crossingTime',.4,3},{'farm','retryLimit',0,3,true},{'farm','stopAfter',0,10000,true},{'builder','yaw',-360,360},{'builder','previewLayer',0,1000,true},{'movement','walk',8,60},{'movement','jump',20,120},{'movement','flySpeed',10,100}}) do number(table.unpack(s)) end
   for _,s in ipairs({{'builder','scale',.1,2},{'builder','offsetX',-1000,1000},{'builder','offsetY',-1000,1000},{'builder','offsetZ',-1000,1000}}) do number(table.unpack(s)) end
   for _,s in ipairs({{'ui','compact'},{'ui','tooltips'},{'builder','mirrorX'},{'builder','mirrorZ'}}) do local v=read(s[1],s[2]);if v~=nil then if type(v)=='boolean' then out[s[1]][s[2]]=v else errors[#errors+1]=table.concat(s,'.')..': wymagany boolean' end end end
   for _,s in ipairs({{'ui','theme','theme'},{'farm','profile','profile'},{'performance','profile','performance'}}) do local v=read(s[1],s[2]);if v~=nil then if type(v)=='string' and enum[s[3]][v] then out[s[1]][s[2]]=v else errors[#errors+1]=s[1]..'.'..s[2]..': nieznany profil' end end end

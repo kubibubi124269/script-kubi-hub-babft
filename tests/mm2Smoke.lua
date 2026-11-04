@@ -30,6 +30,16 @@ local pausedRoute=true;local waits=0
 task.onWait=function()waits+=1;if waits==1 then tick+=40;pausedRoute=false else task.onWait=nil;player.Character=newCharacter('AfterLongPause') end end
 local pauseReply=route:step(11,function()return false end,function()return pausedRoute end)
 check(pauseReply.ok and pauseReply.completed,'chest wait timeout excludes a long paused interval even across resume')
+local stageTwo=stages:FindFirstChild('CaveStage2');local missingPoint=stageTwo:FindFirstChild('DarknessPart');missingPoint.Parent=nil
+check(route:inspect(),'BABFT availability does not require every distant stage to be loaded at START')
+local restored=false;task.onWait=function()if not restored then restored=true;missingPoint.Parent=stageTwo;task.onWait=nil end end
+local delayed=route:step(2,function()return false end,nil,{crossingTime=.4});check(delayed.ok and restored,'BABFT waits for a stage which arrives after replication')
+local routeChar,routeRoot=route:character();local routeHum=routeChar:FindFirstChildOfClass('Humanoid');routeHum.Sit=true
+local headBefore=routeChar.Head.Position.Z;local movesBefore=routeChar.PivotMoves or 0
+local crossed=route:step(1,function()return false end,nil,{crossingTime=.4})
+check(crossed.ok and routeHum.Sit==false and routeChar.PivotMoves>movesBefore+2 and routeChar.Head.Position.Z~=headBefore,'BABFT unseats and moves the whole character through a stage rather than jumping only the root')
+local cancelCross=false;task.onWait=function()cancelCross=true;task.onWait=nil end
+local stoppedCross=route:step(2,function()return cancelCross end,nil,{crossingTime=.4});check(not stoppedCross.ok and route.floor==nil,'STOP during an active BABFT crossing cancels movement and cleans support')
 routeHub:unload()
 
 game.PlaceId=142823291;game.GameId=66654135
@@ -39,15 +49,28 @@ local mmGun=child(backpack,'Tool','Gun')
 local map=child(workspace,'Model','MM2FixtureMap');local coins=child(map,'Folder','CoinContainer')
 local function coin(name,kind,x)local o=child(coins,'Part',name);o.CFrame=CFrame.new(x,0,0);o:SetAttribute('CoinType',kind);child(o,'TouchTransmitter','TouchInterest');return o end
 local candy=coin('Candy_Server','Candy',20);local money=coin('Coin_Server','Coin',30)
+candy.Transparency=1;local candyVisual=child(candy,'Part','CoinVisual');candyVisual.CFrame=candy.CFrame
+money.Transparency=1;local moneyVisual=child(money,'Part','CoinVisual');moneyVisual.CFrame=money.CFrame
 local mmChooser=openLauncher();check(mmChooser.alive and _G.KubiHubRuntime==mmChooser,'MM2 also starts at the chooser with no automatic farming')
 local ok,mm=mmChooser:choose('MM2');assert(ok,mm)
-check(mm.platform.allowed and mm.ui.pages.COMBAT~=nil and mm.ui.pages.BUILDER==nil and not mm.controller.farming,'MM2 creates its separate Combat hub with all modules initially off')
+check(mm.platform.allowed and mm.ui.pages.FIGHT~=nil and mm.ui.pages.BUILDER==nil and not mm.controller.farming,'MM2 creates its separate Combat hub with all modules initially off')
 local c=mm.controller
+workspace.CurrentCamera.CameraSubject=mmHum;assert(mm.platform:watch('Enemy'));check(workspace.CurrentCamera.CameraSubject==enemyHum,'player spectate uses the selected live humanoid')
+c.aimbot=true;c.autoShot=true;local watchedShots=c.shots;c:aimTick(.05);check(c.shots==watchedShots,'spectating suppresses camera aiming and Auto Shot')
+enemyHum.Health=0;mm.platform:updateWatch();check(mm.platform.spectating==nil and workspace.CurrentCamera.CameraSubject==mmHum,'target death restores the original camera subject');enemyHum.Health=100;c.aimbot=false;c.autoShot=false
+local danger,dangerDistance=mm.platform:nearestMurderer();check(danger and danger.player==enemy and math.abs(dangerDistance-10)<.001,'proximity uses the measured distance to a detected knife holder')
+check(#mm.platform:coins('BOTH')==2,'transparent coin collision roots with a visible CoinVisual remain collectible')
+moneyVisual:SetAttribute('Collected',true);check(#mm.platform:coins('COIN')==0,'collected visual is excluded even while collision root and touch remain');moneyVisual:SetAttribute('Collected',false)
+moneyVisual.Transparency=1;check(#mm.platform:coins('COIN')==0,'hidden visual is not treated as a new pickup');moneyVisual.Transparency=0
+local mmFarmSettings;for _,entry in ipairs(mm.ui.featureSettings)do if entry.title=='Monety / cukierki' then mmFarmSettings=entry end end;assert(mmFarmSettings)
+mmFarmSettings.button.InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton2});check(mm.ui.activeSettings==mmFarmSettings.panel and not c.farming,'MM2 right click opens only collection settings without a teleport')
+local hasFilter=false;for _,o in ipairs(mmFarmSettings.body:GetDescendants())do if o:IsA('TextButton')and o.Text:find('Zbieraj:',1,true)then hasFilter=true end end;check(hasFilter,'MM2 farm settings contain the live currency filter')
+mm.ui:show('FIGHT');check(mm.ui.activeSettings==nil,'MM2 category change dismisses the settings panel')
 local function renderAim()services.RunService.RenderBindings.KubiHubMM2Aim.fn(.05)end
 check(services.RunService.RenderBindings.KubiHubMM2Aim.priority==201,'aim updates are bound immediately after the game camera')
 assert(c:setFilter('CANDY'));assert(c:startFarm());c:tick(.05)
 check(c.current and c.current.object==candy and c.attempts==1,'candy filter selects a typed candy and visits its actual map position')
-check(math.abs(mmRoot.Position.X-20)<.001 and math.abs(mmRoot.Position.Y-1)<.001,'MM2 farm moves its own active character to the selected pickup')
+check(math.abs(mmRoot.Position.X-20)<.001 and math.abs(mmRoot.Position.Y)<.001,'MM2 farm moves its own active character to the selected pickup')
 candy:Destroy();tick+=.2;c:tick(.05)
 check(c.disappeared==1 and c.state=='WAIT_ITEMS','removed pickup updates only the observed disappearance counter')
 assert(c:pauseFarm());local attempts=c.attempts;tick+=1;c:tick(.05);check(c.attempts==attempts and c.state=='PAUSED','MM2 farm pause blocks all later pickup visits');assert(c:pauseFarm())
@@ -75,6 +98,11 @@ local savedTeleport=mm.platform.teleport;mm.platform.teleport=function()error('F
 assert(c:startFarm());tick+=2;mm.runtime.schedules.MM2Controllers.fn(.05);mm.platform.teleport=savedTeleport
 check(not c.farming and mm.runtime.schedules.MM2Controllers~=nil and mm.ui.statusInfo.Text:find('Fixture respawn race',1,true)~=nil,'unexpected movement failure stops the action and preserves the scheduler plus readable error')
 assert(c:startFarm());local seenAttempts=c.attempts;c:stopAll();tick+=2;c:tick(.05);check(not c.farming and not c.aimbot and not c.autoShot and c.attempts==seenAttempts and mm.runtime.lock==nil,'STOP ALL prevents subsequent MM2 farm and combat actions')
+c:stopAll();c.settings.selected='Enemy';button(mm,'Teleport do gracza').Activated:Fire();check(mmRoot.Position.X==enemyRoot.Position.X+3,'manual player teleport uses the selected live player with an offset')
+assert(mm.platform:watch('Enemy'));mm.proximity=true;mm:stopAll();check(mm.platform.spectating==nil and workspace.CurrentCamera.CameraSubject==mmHum and not mm.proximity,'STOP ALL restores spectate camera and disables the proximity warning')
+mmRoot.CFrame=CFrame.new(5,0,5);mm.travel.slot=2;assert(mm.travel:save());mmRoot.CFrame=CFrame.new(90,0,90);assert(mm.travel:go(mm.travel.slots[2]));check(mmRoot.Position.X==5 and mmRoot.Position.Z==5,'Teleport uses the selected saved point')
+assert(mm.runtime:acquire('MM2Farm'));local blockedTravel=mm.travel:go(CFrame.new());check(not blockedTravel and mm.runtime.lock=='MM2Farm','manual teleport cannot race an active farm');mm.runtime:release('MM2Farm')
+assert(mm.travel:back());check(mmRoot.Position.X==90,'Teleport back restores the prior position for the same character')
 mm:unload();check(mm.runtime:counts().connections==0 and mm.ui.gui.Parent==nil and next(mm.platform.highlights)==nil and services.RunService.RenderBindings.KubiHubMM2Aim==nil,'MM2 unload removes GUI, listeners, render binding and its local effects')
 local failedChooser=openLauncher();local savedViewport=workspace.CurrentCamera.ViewportSize;workspace.CurrentCamera.ViewportSize=nil
 local failedOpen=failedChooser:choose('MM2');workspace.CurrentCamera.ViewportSize=savedViewport

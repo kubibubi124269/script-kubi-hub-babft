@@ -1,21 +1,12 @@
-# Nawigacja V6
+# Funkcje V6.1.0
 
-Na starcie: wybór BABFT / MM2, wykrycie gry i zamknięcie wyboru. Moduły zaczynają wyłączone.
+- Autofarm: osobne kontrolery BABFT i MM2, pauza i STOP, opcje pod PPM.
+- Trolling: Fling w MM2 oraz lokalne efekty; kopia awatara i ślad w BABFT.
+- Teleport: trzy punkty sesji, powrót; MM2 również rzeczywisty GunDrop.
+- Fight: MM2 Aimbot, Auto Shot, Knife Aura i obieg z własnym nożem. BABFT wskazuje dostępność walki w MM2.
+- Misc: MM2 ESP, Auto Gun, podgląd gracza, ostrzeżenie o Murdererze i ruch; BABFT Builder, schematy, Circle Maker, generatory i narzędzia.
+- Ustawienia: wygląd, pełny komunikat, raport, powrót do wyboru gry i STOP.
 
-## BABFT
+PPM i ⋯ otwierają opcje funkcji bez jej uruchomienia. Builder oznacza plany statyczne, mechaniczne i podglądy. Konwersja mechaniki tworzy oddzielny nieruchomy model zwykłych bloków. Nie dodaje zawiasów do BABFT.
 
-- PRO: status, skróty, STOP, powrót do wyboru, lokalne efekty, klucz i narzędzia własnego środowiska.
-- Builder: podgląd, statyczna budowa, materiały, edytor i historia, biblioteka 53 planów, ulubione, import/eksport, modele społeczności, nowy dom i zamek oraz generatory brył. Zastępuje osobną zakładkę Shapes.
-- Autofarm: przywrócona trasa 10 etapów, skrzynia i zaobserwowany respawn; profile, STOP, pauza, limit i statystyki.
-- Circle Maker: koła, łuki i dyski, materiał, pozycja, promień, segmenty, warstwy i płaszczyzna.
-- Settings: profile, wygląd, statystyki, pełne komunikaty, raport i wydajność.
-
-## MM2
-
-- MM2: wykryta gra, własne wyposażenie, skróty, STOP i powrót do wyboru.
-- Autofarm: monety/cukierki, trzy prędkości, filtry, oczekiwanie na przedmioty / postać / wolną torbę.
-- Combat: Aimbot, Auto Shot, wybór celu, kontrola ścian, Kill all, Murder Fling i Knife Aura.
-- Player: ESP widocznych ról, podnoszenie pistoletu, Auto Gun, własny ruch / Fly oraz efekty lokalne.
-- Settings: wygląd, pełny komunikat, raport i wyłączenie.
-
-Powiadomienie pokazuje przyczynę i po kliknięciu otwiera szczegóły. Prawy Ctrl lub K pokazuje okno. Wynik wyszukiwania otwiera zakładkę i sekcję. Fling jest eksperymentem fizyki; statystyki aktywacji broni nie są liczbą trafień. Stan testów i ograniczenia opisano w README oraz docs/TESTING.md.
+Status wydania i granice weryfikacji: [raport V6.1](docs/V6.1-REPORT.md). Rzeczywista gra nadal wymaga testu użytkownika.

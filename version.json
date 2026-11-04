@@ -1,12 +1,12 @@
 {
-  "version": "6.0.0",
-  "releaseDate": "2026-11-03",
+  "version": "6.1.0",
+  "releaseDate": "2026-11-04",
   "changes": [
-    "Wybór BABFT / MM2 na starcie i osobne kontrolery obu hubów",
-    "Przywrócona trasa autofarmy BABFT z pauzą, STOP i oczekiwaniem na respawn",
-    "Shapes przeniesione do Buildera; dom i architektura zamku z katalogu społeczności",
-    "MM2: monety / cukierki, Aimbot, Auto Shot, ESP, Auto Gun, Knife Aura, Kill all i ograniczony Fling",
-    "Duże plany do 10000 części przy ograniczonej liczbie obiektów podglądu"
+    "Sześć pionowych kategorii i ustawienia funkcji pod prawym przyciskiem / przyciskiem ⋯",
+    "MM2: wykrywanie widocznej monety przy przezroczystym korzeniu kolizji i oznaczeń Collected",
+    "BABFT: przejście całej postaci przez etapy, wyjście z siedzenia i oczekiwanie na brakujące punkty",
+    "Osobna nieruchoma kopia schematu mechanicznego, z oznaczeniem pominiętego wyposażenia",
+    "Teleport: trzy punkty sesji i powrót, z blokadą konfliktu z farmą"
   ],
-  "compatibility": "Trasa BABFT oraz nowy hub MM2 wymagają testu w rzeczywistej grze. Strzały i ciosy używają własnych narzędzi; Fling jest eksperymentem fizyki. Nagrody i zabójstwa nie są symulowane. Budowanie statyczne nadal wymaga TEST 1 BLOKU. Mechanika WORM-a nie została dodana do BABFT."
+  "compatibility": "Poprawki sprawdzono offline. Odbiór waluty, przejazd BABFT i fizyka wymagają sprawdzenia w aktualnej grze. Mechanika WORM-a nadal nie jest obsługiwana w BABFT. Statyczna kopia jest nieruchoma i nie zawiera wyposażenia."
 }
