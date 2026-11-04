@@ -16,7 +16,7 @@ return function(M)
   self.results=self:create('ScrollingFrame',{Size=UDim2.fromScale(1,1),BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=3,CanvasSize=UDim2.new(),AutomaticCanvasSize=Enum.AutomaticSize.Y,Visible=false},self.content)
   self:create('UIListLayout',{Padding=UDim.new(0,7),SortOrder=Enum.SortOrder.LayoutOrder},self.results)
   self:bind(self.search:GetPropertyChangedSignal('Text'),function()self:searchCards()end)
-  self.footer=self:create('TextButton',{Position=UDim2.new(0,14,1,-32),Size=UDim2.new(1,-28,0,24),Text='Gotowy. Prawy Ctrl: pokaż / ukryj.',TextColor3=self.palette.muted,TextSize=11,TextTruncate=Enum.TextTruncate.AtEnd,TextXAlignment=Enum.TextXAlignment.Left,BackgroundTransparency=1,Font=Enum.Font.Gotham},self.frame)
+  self.footer=self:create('TextButton',{Position=UDim2.new(0,14,1,-32),Size=UDim2.new(1,-28,0,24),Text='LPM: użyj  ·  PPM / ⋯: opcje  ·  Ctrl: ukryj',TextColor3=self.palette.muted,TextSize=11,TextTruncate=Enum.TextTruncate.AtEnd,TextXAlignment=Enum.TextXAlignment.Left,BackgroundTransparency=1,Font=Enum.Font.Gotham},self.frame)
   self:bind(self.footer.Activated,function()if self.statusBody then self:reveal(self.statusBody) else self:show('DEBUG') end end)
   local function headerButton(text,x,fn)local b=self:create('TextButton',{Size=UDim2.fromOffset(28,28),Position=UDim2.new(1,x,0,17),BackgroundColor3=self.palette.card,Text=text,TextColor3=self.palette.text,TextSize=17,Font=Enum.Font.GothamBold,BorderSizePixel=0},self.header);self:corner(b,7);self:bind(b.Activated,fn)end
   headerButton('−',-76,function()self:hide()end);headerButton('×',-40,function()app:stopAll();self:hide()end)
@@ -33,7 +33,7 @@ return function(M)
    elseif self.previewDrag then local d=input.Position-self.previewDrag;self.previewDrag=input.Position;app.preview:orbit(d.X*.5,-d.Y*.5) end
   end)
   self:bind(app.input.InputEnded,function(input)if self.drag and input==self.drag.input or self.dragSize and input==self.dragSize.input then self.drag=nil;self.dragSize=nil;self:rememberPosition();self:fit() end;if self:isPress(input) then self.sliderDrag=nil;self.previewDrag=nil end end)
-  self:bind(app.input.InputBegan,function(input,processed)if input.KeyCode==Enum.KeyCode.RightControl and not app.input:GetFocusedTextBox() then self.frame.Visible=not self.frame.Visible;self.bubble.Visible=not self.frame.Visible end;if not processed and input.KeyCode==Enum.KeyCode.E and app.adapter and app.adapter.mode~='MM2' then app:run('WORM',function()return app.adapter:rig('mouth')end) end end)
+  self:bind(app.input.InputBegan,function(input,processed)if input.KeyCode==Enum.KeyCode.Escape then self:closeSettings() end;if input.KeyCode==Enum.KeyCode.RightControl and not app.input:GetFocusedTextBox() then self.frame.Visible=not self.frame.Visible;self.bubble.Visible=not self.frame.Visible end;if not processed and input.KeyCode==Enum.KeyCode.E and not app.input:GetFocusedTextBox() and app.adapter and app.adapter.mode~='MM2' then app:run('WORM',function()return app.adapter:rig('mouth')end) end end)
   local camera=workspace.CurrentCamera;if camera then self:bind(camera:GetPropertyChangedSignal('ViewportSize'),function()self:fit()end) end
   self:fit();return self
  end
@@ -52,10 +52,10 @@ return function(M)
   local c=workspace.CurrentCamera;if not c then return end;local v=c.ViewportSize;local s=self.app.config.data.ui;local b=M.Layout.compute(v.X,v.Y,s.width,s.height,s.compact,#self.navigation.order);self.layout=b
   self.frame.Size=UDim2.fromOffset(b.width,b.height);self.frame.Position=UDim2.fromOffset(math.clamp(s.x*v.X,4,math.max(4,v.X-b.width-4)),math.clamp(s.y*v.Y,4,math.max(4,v.Y-b.height-4)))
   self.title.TextSize=b.width<420 and 13 or 19;self.subtitle.TextSize=b.width<420 and 9 or 11
-  self.nav.Position=UDim2.fromOffset(12,b.narrow and 76 or 80);self.nav.Size=UDim2.fromOffset(b.navWidth,b.navHeight)
-  self.nav.ScrollingEnabled=not b.narrow;self.nav.AutomaticCanvasSize=b.narrow and Enum.AutomaticSize.None or Enum.AutomaticSize.Y;self.nav.CanvasSize=UDim2.new();self.nav.CanvasPosition=Vector2.zero
+  self.nav.Position=UDim2.fromOffset(12,80);self.nav.Size=UDim2.fromOffset(b.navWidth,b.navHeight)
+  self.nav.ScrollingEnabled=true;self.nav.AutomaticCanvasSize=Enum.AutomaticSize.Y;self.nav.CanvasSize=UDim2.new()
   self.navLayout.FillDirectionMaxCells=b.navColumns;self.navLayout.CellSize=UDim2.fromOffset(b.navCellWidth,b.navCellHeight)
-  for _,button in pairs(self.buttons) do button.Size=UDim2.fromOffset(b.navCellWidth,b.navCellHeight) end
+  for _,button in pairs(self.buttons) do button.Size=UDim2.fromOffset(b.navCellWidth,b.navCellHeight);button.TextSize=b.width<420 and 10 or 12 end
   self.search.Position=UDim2.fromOffset(b.contentX,b.contentY);self.search.Size=UDim2.fromOffset(b.contentWidth,32)
   self.content.Position=UDim2.fromOffset(b.contentX,b.contentY+42);self.content.Size=UDim2.fromOffset(b.contentWidth,math.max(40,b.contentHeight-42))
  end
@@ -67,10 +67,11 @@ return function(M)
   self.pages[id]=page;self.buttons[id]=self:button(self.nav,title,function()self:show(id)end,nil,false);self.buttons[id].LayoutOrder=self.navigation.rank(id);self:fit();return page
  end
  function UI:show(id)
+  self:closeSettings()
   local target=self.routes[id];id=self.navigation.resolve(id)
   if not self.pages[id] then return end
   if self.search.Text~='' then self.search.Text='' end;self.results.Visible=false
-  self.scrollTarget=nil;self.current=id;for name,page in pairs(self.pages) do page.Visible=name==id;self.buttons[name].BackgroundColor3=name==id and self.palette.accent or self.palette.panel end
+  self.scrollTarget=nil;self.current=id;for name,page in pairs(self.pages) do page.Visible=name==id;self.buttons[name].BackgroundColor3=self.palette.bg;self.buttons[name].TextColor3=name==id and self.palette.accent or self.palette.text;local stroke=self.buttons[name]:FindFirstChild('NavStroke');if stroke then stroke.Color=name==id and self.palette.accent or self.palette.card end end
   if target then self:scrollTo(self.cardBodies[target]) end
  end
  function UI:scrollTo(record)
@@ -79,7 +80,7 @@ return function(M)
  function UI:reveal(body)
   local record=self.cardBodies[body];if not record then return end;self:show(record.page);self:scrollTo(record)
  end
- function UI:hide()self.frame.Visible=false;self.bubble.Visible=true;self.tooltip.Visible=false end
+ function UI:hide()self:closeSettings();self.frame.Visible=false;self.bubble.Visible=true;self.tooltip.Visible=false end
  function UI:label(parent,text,height)
   return self:create('TextLabel',{Size=UDim2.new(1,0,0,0),AutomaticSize=Enum.AutomaticSize.Y,BackgroundTransparency=1,Text=text,TextColor3=self.palette.text,TextWrapped=true,Font=Enum.Font.Gotham,TextSize=13,TextXAlignment=Enum.TextXAlignment.Left,TextYAlignment=Enum.TextYAlignment.Top},parent)
  end
@@ -93,11 +94,12 @@ return function(M)
   local function open(value)body.Visible=value;heading.Text=(value and '[-]  ' or '[+]  ')..title end;record.open=open
   self:bind(heading.Activated,function()open(not body.Visible)end)
   open(not self.firstCard[page.Name]);self.firstCard[page.Name]=true
-  if description then self:label(body,description,72) end
+  if description then self:settingsFor(heading,title,function(panel)self:label(panel,description)end) end
   record.result=self:button(self.results,(self.navigation.titles[page.Name] or page.Name)..'  /  '..title,function()self:reveal(body)end)
   return body
  end
  function UI:searchCards()
+  self:closeSettings()
   if not self.search then return end;local query=self.search.Text
   if query:match('^%s*$') then self.results.Visible=false;for id,page in pairs(self.pages) do page.Visible=id==self.current end;return end
   for _,page in pairs(self.pages) do page.Visible=false end;self.results.Visible=true
@@ -109,8 +111,39 @@ return function(M)
  function UI:button(parent,text,fn,tip,list)
   if not list then self:rememberTerm(parent,text) end
   local b=self:create('TextButton',{Size=UDim2.new(1,0,0,38),BackgroundColor3=self.palette.panel,Text=text,TextColor3=self.palette.text,TextSize=12,TextWrapped=true,Font=Enum.Font.GothamBold,BorderSizePixel=0},parent);self:corner(b,8)
+  if parent==self.nav then self:create('UIStroke',{Name='NavStroke',Color=self.palette.card,Thickness=1,ApplyStrokeMode=Enum.ApplyStrokeMode.Border},b) end
   self:bind(b.Activated,function()self.app:run(self.current or 'GUI',fn)end,list)
   if tip then self:bind(b.MouseEnter,function()if self.app.config.data.ui.tooltips then self.tooltip.Text=tip;local p=self.app.input:GetMouseLocation();local v=workspace.CurrentCamera.ViewportSize;self.tooltip.Position=UDim2.fromOffset(math.clamp(p.X,0,math.max(0,v.X-290)),math.clamp(p.Y-82,0,math.max(0,v.Y-80)));self.tooltip.Visible=true end end,list);self:bind(b.MouseLeave,function()self.tooltip.Visible=false end,list) end
+  return b
+ end
+ function UI:closeSettings()
+  if self.activeSettings then self.activeSettings.Visible=false;self.activeSettings=nil end
+  self.sliderDrag=nil
+ end
+ function UI:settingsFor(button,title,build)
+  self.featureSettings=self.featureSettings or {};local entry={button=button,title=title,build=build};self.featureSettings[#self.featureSettings+1]=entry
+  local function open()
+   self:closeSettings();self.tooltip.Visible=false
+   if not entry.panel then
+    local panel=self:create('Frame',{Name='FeatureSettings',Size=UDim2.fromScale(1,1),BackgroundColor3=self.palette.bg,BorderSizePixel=0,Active=true,ZIndex=20},self.content);self:corner(panel,10)
+    local back=self:button(panel,'‹  Wróć',function()self:closeSettings()end);back.Size=UDim2.new(1,0,0,34)
+    local label=self:label(panel,title);label.Position=UDim2.fromOffset(8,43);label.Size=UDim2.new(1,-16,0,0);label.TextSize=15;label.Font=Enum.Font.GothamBold
+    local body=self:create('ScrollingFrame',{Position=UDim2.fromOffset(8,76),Size=UDim2.new(1,-16,1,-84),BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=3,CanvasSize=UDim2.new(),AutomaticCanvasSize=Enum.AutomaticSize.Y},panel)
+    self:create('UIListLayout',{Padding=UDim.new(0,8),SortOrder=Enum.SortOrder.LayoutOrder},body);build(body)
+    entry.panel=panel;entry.body=body
+   end
+   self:refreshControls();entry.panel.Visible=true;self.activeSettings=entry.panel
+  end
+  entry.open=open
+  self:bind(button.InputBegan,function(input)if input.UserInputType==Enum.UserInputType.MouseButton2 then open() end end)
+  return entry
+ end
+ function UI:feature(parent,title,get,action,build)
+  local row=self:create('Frame',{Size=UDim2.new(1,0,0,40),BackgroundTransparency=1},parent)
+  local b=self:button(row,title,action);b.Size=UDim2.new(1,-38,1,0);self:rememberTerm(parent,title)
+  local function refresh()b.Text=title..(get and ('  '..(get() and 'ON' or 'OFF')) or '');b.TextColor3=get and get() and self.palette.accent or self.palette.text end
+  self.featureRefreshers=self.featureRefreshers or {};self.featureRefreshers[#self.featureRefreshers+1]=refresh;self.refreshers[#self.refreshers+1]=refresh;refresh();self:bind(b.Activated,refresh)
+  if build then local entry=self:settingsFor(b,title,build);local gear=self:button(row,'⋯',entry.open);gear.Position=UDim2.new(1,-34,0,0);gear.Size=UDim2.fromOffset(34,40);self:bind(gear.InputBegan,function(input)if input.UserInputType==Enum.UserInputType.MouseButton2 then entry.open() end end) end
   return b
  end
  function UI:field(parent,title,initial,fn,multiline,get)
@@ -150,6 +183,7 @@ return function(M)
  function UI:theme()
   self.palette.accent=self.app.config.data.ui.theme=='PURPLE' and Color3.fromRGB(156,103,247) or Color3.fromRGB(83,133,247);self.bubble.BackgroundColor3=self.palette.accent;self:show(self.current or 'HOME')
  end
+ function UI:refreshFeatures()for _,fn in ipairs(self.featureRefreshers or {}) do fn()end end
  function UI:refreshControls()for _,fn in ipairs(self.refreshers) do fn()end end
  function UI:clearNotification()
   if self.notificationConnection then self.app.runtime:disconnect(self.notificationConnection);self.notificationConnection=nil end
