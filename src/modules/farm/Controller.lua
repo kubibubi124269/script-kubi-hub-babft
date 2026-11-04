@@ -52,7 +52,7 @@ return function(Util)
   if self.state=='RETRY' and self.runtime.clock()>=self.nextAt then self.state='RUNNING' end
   if self.state~='RUNNING' or self.runtime.clock()<self.nextAt then return end
   local generation=self.generation;local stage=self.stage+1
-  self.pending=self.runtime:job('Farm',function()return self.adapter:farmStep(stage,function()return self.state=='PAUSED' end)end,self.spawn);self.pending.generation=generation
+  self.pending=self.runtime:job('Farm',function()return self.adapter:farmStep(stage,function()return self.state=='PAUSED' end,self.settings)end,self.spawn);self.pending.generation=generation
  end
  function Farm:summary()
   local elapsed=math.max(0,self.runtime.clock()-self.stats.started);local count=self.stats.completed
