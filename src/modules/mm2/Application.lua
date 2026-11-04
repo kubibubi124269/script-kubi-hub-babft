@@ -9,22 +9,22 @@ return function(M)
   if onCreating then onCreating(self) end
   self.config={data=M.Util.copy(M.Config.defaults)}
   local saved=_G.KubiHubMM2Settings;if type(saved)=='table' then local data=M.Config.validate({ui=saved.ui});if data then self.config.data.ui=data.ui end end
-  self.platform=M.MM2Platform.new(self.player,self.players,workspace,game.PlaceId,game.GameId);self.controller=M.MM2Controller.new(self.runtime,self.platform,self.clock)
+  self.platform=M.MM2Platform.new(self.player,self.players,workspace,game.PlaceId,game.GameId);self.controller=M.MM2Controller.new(self.runtime,self.platform,self.clock);self.avatar=M.AvatarAppearance.new(self.platform,self.runtime);self.controller.avatar=self.avatar;self.runtime:own(self.avatar)
   self.adapter={mode='MM2',capabilities={movement=self.platform.allowed},cancel=function()end}
   self.adapter.movement=function(_,values)local _,h=self.platform:character();if not self.platform.allowed or not h then return {ok=false,error='Brak aktywnej postaci MM2.'} end;h.WalkSpeed=values.walk;if h.UseJumpPower then h.JumpPower=values.jump else h.JumpHeight=values.jump^2/(2*workspace.Gravity) end;return {ok=true}end
   self.movement=M.Movement.new(self.runtime,self.adapter,self.player,self.input,self.log,self.config.data.movement);self.effects=M.Effects.new(self.clock)
   self.ui=M.UI.new(self);self.ui.title.Text='KUBI HUB  /  MM2';self:pages();self.ui:show('FARM');self.ui:theme();self:updateDashboard()
   self.runtime:connect(self.runService.Heartbeat,function(dt)self.fps=self.fps==0 and 1/math.max(dt,.001) or self.fps*.95+1/math.max(dt,.001)*.05;self.runtime:tick(dt)end,'MM2')
   self.runtime:connect(self.runService.RenderStepped,function()self.movement:tick()end,'Movement')
-  self.runService:BindToRenderStep('KubiHubMM2Aim',Enum.RenderPriority.Camera.Value+1,function(dt)if self.alive then local ok,err=pcall(function()self.controller:aimTick(dt)end);if not ok then self.controller.aimbot=false;self.controller.autoShot=false;self.log:error('Aim',err);self.ui:toast('Aim',err,true);self.ui:refreshControls() end end end)
+  self.runService:BindToRenderStep('KubiHubMM2Aim',Enum.RenderPriority.Camera.Value+1,function(dt)if self.alive then local ok,err=pcall(function()self.avatar:render();self.controller:aimTick(dt)end);if not ok then self.avatar:reset();self.controller.aimbot=false;self.controller.autoShot=false;self.log:error('Aim',err);self.ui:toast('Aim',err,true);self.ui:refreshControls() end end end)
   self.runtime:own({Destroy=function()self.runService:UnbindFromRenderStep('KubiHubMM2Aim')end})
-  self.runtime:connect(self.player.CharacterAdded,function()self.controller:stopCombat();self.controller.current=nil;self.controller.coins={};self.controller.scannedAt=-math.huge;self.movement:reset();self.effects:clear()end,'Respawn')
+  self.runtime:connect(self.player.CharacterAdded,function()self.controller:stopCombat();self.avatar:reset();self.controller.current=nil;self.controller.coins={};self.controller.scannedAt=-math.huge;self.movement:reset();self.effects:clear()end,'Respawn')
   self.runtime:schedule('MM2Controllers',.05,function(dt)
    local ok,err=pcall(function()self.controller:tick(dt)end)
    if not ok then self.controller:stopAll();self.log:error('MM2',err);self.ui:toast('MM2',err,true);self.ui:refreshControls() end
    self.effects:tick();self.ui:tick()
   end)
-  self.runtime:schedule('MM2Status',.5,function()self.platform:updateESP(self.controller.esp);self:updateDashboard()end)
+  self.runtime:schedule('MM2Status',.5,function()self.platform:updateESP(self.controller.esp);local ok,err=self.avatar:refresh();if not ok then self.ui:toast('Postać',err,true)end;self:updateDashboard()end)
   return self
  end
  function A:pages()
@@ -55,8 +55,15 @@ return function(M)
   ui:feature(aim,'Auto Shot',function()return c.autoShot end,function()c.autoShot=not c.autoShot end,function(panel)aimOptions(panel);ui:slider(panel,'Przerwa strzałów (s)',function()return c.settings.shotInterval end,function(v)c.settings.shotInterval=v end,.35,3,.05)end)
   ui:feature(aim,'Kill all',function()return c.combat and c.combat.kind=='KILL_ALL' end,function()if c.combat and c.combat.kind=='KILL_ALL' then return c:stopCombat() else return c:startKillAll() end end,function(panel)ui:label(panel,'Jeden obieg żywych postaci z własnym nożem. STOP przerywa akcję.');ui:button(panel,'STOP walki',function()return c:stopCombat()end)end)
   ui:feature(aim,'Knife Aura',function()return c.aura end,function()c.aura=not c.aura end,function(panel)ui:label(panel,'Własny nóż. Zasięg 6 studów, przerwa 0,45 s.');ui:button(panel,'Wyłącz aurę',function()c.aura=false;ui:refreshControls()end)end)
-  local trolling=ui:page('TROLLING');local tr=ui:card(trolling,'Fling i efekty','Fling trwa do 1,5 s. Efekty są lokalne.')
-  ui:feature(tr,'Murder Fling',function()return c.combat and c.combat.kind=='FLING' end,function()if c.combat and c.combat.kind=='FLING' then return c:stopCombat() else return c:startFling() end end,targets)
+  local trolling=ui:page('TROLLING');local tr=ui:card(trolling,'Fling','Krótka próba fizyki własnej postaci. Skutek zależy od kolizji i serwera.')
+  c.flingSettings={target='NEAREST',selected='',duration=1.5}
+  ui:feature(tr,'Fling',function()return c.combat and c.combat.kind=='FLING' end,function()if c.combat and c.combat.kind=='FLING' then return c:stopCombat() else return c:startFling() end end,function(panel)
+   ui:cycle(panel,'Cel',{'NEAREST','MURDERER','SELECTED'},function()return c.flingSettings.target end,function(v)c.flingSettings.target=v end)
+   ui:field(panel,'Dokładny nick celu','',function(v)c.flingSettings.selected=v;return v end,false,function()return c.flingSettings.selected end)
+   ui:field(panel,'Czas: 0.5–3 s',1.5,function(v)c.flingSettings.duration=M.Util.number(tonumber(v),1.5,.5,3);return c.flingSettings.duration end,false,function()return c.flingSettings.duration end)
+   ui:button(panel,'STOP Fling',function()return c:stopCombat()end)
+  end)
+  M.AppearanceControls(self,trolling,true)
   ui:feature(tr,'Konfetti',nil,function()local _,_,r=self.platform:character();self.effects:confetti(r)end,function(panel)ui:label(panel,'Efekt widoczny u Ciebie.');ui:button(panel,'Wyczyść efekty',function()self.effects:clear()end)end)
   local players=ui:page('MISC');local p=ui:card(players,'Gracze i przedmioty','Czerwony: nóż. Niebieski: pistolet. Żółty: nieznana rola. Oznaczenia są lokalne.')
   self.rolesInfo=ui:label(p,'')

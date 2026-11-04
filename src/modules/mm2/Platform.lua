@@ -121,14 +121,14 @@ return function(Util)
   end end
   for key,row in pairs(self.highlights) do if not keep[key] then row:Destroy();self.highlights[key]=nil end end
  end
- function P:beginFling(person,now)
+ function P:beginFling(person,now,settings)
   if not self.allowed or not person then return false,'Brak celu.' end
   local c,h,r=self:character();if not r then return false,'Brak aktywnej postaci.' end
-  self.fling={character=c,humanoid=h,root=r,target=person.root,started=now,cf=r.CFrame,velocity=r.AssemblyLinearVelocity,angular=r.AssemblyAngularVelocity,rotate=h.AutoRotate};h.AutoRotate=false;return true
+  self.fling={character=c,humanoid=h,root=r,person=person,target=person.root,started=now,duration=Util.number(settings and settings.duration,1.5,.5,3),cf=r.CFrame,velocity=r.AssemblyLinearVelocity,angular=r.AssemblyAngularVelocity,rotate=h.AutoRotate};h.Sit=false;h.AutoRotate=false;return true
  end
  function P:tickFling(now)
   local f=self.fling;if not f then return false end
-  local c,h,r=self:character();if c~=f.character or not f.target.Parent or now-f.started>=1.5 then self:endFling();return false end
+  local c,h,r=self:character();if c~=f.character or not f.target.Parent or f.person.humanoid.Health<=0 or f.person.player.Character~=f.person.character or now-f.started>=f.duration then self:endFling();return false end
   r.CFrame=f.target.CFrame*CFrame.new(math.sin(now*35)*1.5,0,math.cos(now*35)*1.5);r.AssemblyAngularVelocity=Vector3.new(0,1800,0);r.AssemblyLinearVelocity=Vector3.new(0,15,0);return true
  end
  function P:endFling()
