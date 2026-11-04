@@ -1,5 +1,5 @@
 {
-  "version": "6.1.0",
+  "version": "6.2.0",
   "modules": [
     {
       "name": "Util",
@@ -94,7 +94,7 @@
     {
       "name": "Version",
       "file": "src/modules/tools/Version.lua",
-      "sha256": "434b503c5c9240b9f5a7a34323ea12be983c9df7fef6ad9eaca628cd23918e7d"
+      "sha256": "a3e7db37a6c3c0bcf8d9d3761f229e96afeb656da13c09b203dd94426c60ee35"
     },
     {
       "name": "Performance",
@@ -104,7 +104,7 @@
     {
       "name": "Movement",
       "file": "src/modules/movement/Controller.lua",
-      "sha256": "278f3b77bac692b100a911b2dfc6f604588201ab62fa6db270e4bcb74b2f3d12"
+      "sha256": "608dfab82c6bc63d3170195aa213ad1f5957bd3b624ee46b9a2476f8e26a6629"
     },
     {
       "name": "Effects",
@@ -134,17 +134,27 @@
     {
       "name": "Games",
       "file": "src/core/Games.lua",
-      "sha256": "d0d83f43211eccf6c95f7a552936eed5a9b26955ffec8634ad10ec416d18a658"
+      "sha256": "d549c5815031508c55bdb19aa3200ae13a0944afadde4e615acd376731bb7ac5"
     },
     {
       "name": "MM2Platform",
       "file": "src/modules/mm2/Platform.lua",
-      "sha256": "6270f3ead63544fc93074e0b147cf9d202cd3972a720a9431f23f7e0c4d33adc"
+      "sha256": "d5875d51eb47351e531ad65aa220e2da3da441e7ffbbebe614064258577ca0ec"
     },
     {
       "name": "MM2Controller",
       "file": "src/modules/mm2/Controller.lua",
-      "sha256": "200b7735aef1c35ddf0e93a5c87f0f2e362eddf812762234a331d9be7cf87668"
+      "sha256": "c0090e1589e25d047e8c8d0ea663d05db5e0a32579c398d060bbb952fcf21696"
+    },
+    {
+      "name": "AvatarAppearance",
+      "file": "src/modules/mm2/Appearance.lua",
+      "sha256": "f6de70140265384d3420321004d20cdada15723b59e77d04e697b61609db7d86"
+    },
+    {
+      "name": "AppearanceControls",
+      "file": "src/ui/AppearanceControls.lua",
+      "sha256": "a9e7887af0d8e9aff63a2739e71be47c9d42b56fd0708f4194035efad4e705d9"
     },
     {
       "name": "Preview",
@@ -154,28 +164,33 @@
     {
       "name": "UI",
       "file": "src/ui/Window.lua",
-      "sha256": "a7b2b369ccc12421953d0cfb21a00599c2de4e5ffe5ff560b70ab8bd81e828c7"
+      "sha256": "d5451bdc44a82198bae9e8261eead5ad413c477e2a53fe2d0a837cce7eaab3d3"
     },
     {
       "name": "ExtraPages",
       "file": "src/ui/ExtraPages.lua",
-      "sha256": "8592006cb0d2bf41002339a4c2dbdf3856ee7f51b37e3fc11169aa418343aa5e"
+      "sha256": "6616a12e2531d854c758be3821bba34f17ec335a922906aefd535413be6c84d8"
     },
     {
       "name": "Application",
       "file": "src/core/Application.lua",
-      "sha256": "d5e948dd07d9779a778f17bfd3c7eee14a5b2b459fc5a06333152b6695bf712b"
+      "sha256": "2f3caacebb1d04a399a2b32da50dc43323db24a07b98e12642beb3060a40aeee"
     },
     {
       "name": "MM2App",
       "file": "src/modules/mm2/Application.lua",
-      "sha256": "10d02cbedf5db690e5efe473d79bea9ba88aadcc5a15ea6b7d8edff63834d5dc"
+      "sha256": "02a52a7738744dc17d56fe2015764aa3dc77d5e4d97228f6d91d66afa1c4b72a"
+    },
+    {
+      "name": "UniversalApp",
+      "file": "src/modules/tools/Universal.lua",
+      "sha256": "a52014774bfc990f28a8b3a7407ef3f1f4ce22555f8a7e73a62eb26f02bc8198"
     },
     {
       "name": "Launcher",
       "file": "src/core/Launcher.lua",
-      "sha256": "43911b7cd4df5e445bbb1bf2c685875006f4bd4ec596a92274e19b9cac395f3f"
+      "sha256": "e28035afa16226e96cc1bc13d266452fbe3e2223bb16be15a829d4ae2205a9e9"
     }
   ],
-  "mainSha256": "13b8463336be89b0209d83b07b34d1d4c3a0838675876f983999a79c4ca7dc1f"
+  "mainSha256": "41bbd15611de669dedbe1f8bdedede78191e11c58c7c1c872d3d9afb07eeb43a"
 }

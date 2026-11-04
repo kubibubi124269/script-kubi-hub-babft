@@ -1,4 +1,18 @@
-# Testy V6.1.0
+# Testy V6.2.0
+
+Offline: 86 testów logiki, 181 sprawdzeń klienta, 4 importy modeli, 38 modułów — bez błędów. To nie jest potwierdzenie natywnej fizyki ani renderowania.
+
+1. Ten sam loader: nagłówek V6.2.0, trzy przyciski BABFT / MM2 / Universal. Universal powinien otwierać się także w innej grze.
+2. MM2 / Trolling / Fling: PPM wybiera NEAREST, MURDERER albo SELECTED + nick, czas 0,5–3 s. Zatrzymanie, zniknięcie celu i limit czasu powinny zakończyć próbę i oddać sterowanie. Skutek odrzutu zależy od gry.
+3. Fake Headless i noga: sprawdź wygląd w trzeciej osobie. R6 i R15 wymagają osobnego testu. Wyłącz i sprawdź przywrócenie twarzy, głowy, dodatków oraz nogi. To lokalne efekty, bez własności przedmiotów.
+4. Mały skin: zacznij od 0,6. Wyłączenie ma przywrócić rozmiar i wysokość postaci. Sprawdź chodzenie i animacje. Serwer może cofnąć skalę.
+5. Mniejszy hitbox: to wyłącznie lokalny rozmiar HumanoidRootPart. Nie traktuj go jako ochrony przed obrażeniami. Wyłączenie ma przywrócić korzeń także przy aktywnym małym skinie.
+6. Universal / Widok: włącz FOV, celownik i jasny dzień. Wyłącz albo użyj STOP; poprzedni FOV i oświetlenie mają wrócić, a celownik zniknąć.
+7. Universal / Postać i Teleport: sprawdź własny ruch, Fly oraz zapis i powrót do punktu. Niektóre gry korygują pozycję i ruch. Nie uruchamiaj dwóch modułów ruchu jednocześnie.
+8. Respawn i ponowne uruchomienie: wygląd ma zacząć wyłączony; stare nogi, GUI, celownik i zdarzenia mają zniknąć.
+
+Poprzedni plan sprawdzenia autofarm i Buildera:
+
 
 Offline: 86 testów logiki, 139 sprawdzeń klienta, 4 importy modeli, 35 modułów — bez błędów. Mock nie potwierdza renderowania ani serwerowych efektów.
 
