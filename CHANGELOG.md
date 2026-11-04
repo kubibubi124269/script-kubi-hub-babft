@@ -1,5 +1,10 @@
 # Historia zmian
 
+## 6.1.0 — 2026-11-04
+
+Sześć pionowych kategorii, PPM / ⋯ na opcje funkcji, poprawione przezroczyste monety MM2 i przechodzenie całej postaci przez etapy BABFT, trzy punkty teleportu i jawna nieruchoma kopia schematu mechanicznego. 86 testów logiki, 139 sprawdzeń klienta, 4 importy modeli. Nagrody i natywna fizyka wymagają sprawdzenia w grze. [Szczegóły](docs/V6.1-REPORT.md).
+
+
 ## 6.0.0 — 2026-11-03
 
 Ekran wyboru BABFT / MM2 z osobnymi hubami, kontrolą gry i sprzątaniem przełączenia. Przywrócona trasa autofarmy BABFT: dziesięć etapów, skrzynia, pauza, oczekiwany respawn i STOP z powrotem żywej postaci. Shapes przeniesione do Buildera. Limit 10000 części, dom z katalogu (568) i statyczna architektura zamku (8149); oryginalne pliki i opis pominiętej mechaniki zachowano.
