@@ -60,7 +60,7 @@ return function(Util)
  function P:teleport(cf)
   if not self.allowed then return false,'Ten moduł działa w Murder Mystery 2.' end
   local _,_,root=self:character();if not root then return false,'Poczekaj na aktywną postać.' end
-  root.AssemblyLinearVelocity=Vector3.zero;root.AssemblyAngularVelocity=Vector3.zero;root.CFrame=cf;return true
+  local character,h=self:character();h.Sit=false;root.AssemblyLinearVelocity=Vector3.zero;root.AssemblyAngularVelocity=Vector3.zero;character:PivotTo(cf*root.CFrame:ToObjectSpace(character:GetPivot()));return true
  end
  function P:part(object)
   if object:IsA('BasePart') then return object end
@@ -87,10 +87,20 @@ return function(Util)
   for _,container in ipairs(containers) do for _,object in ipairs(container:GetChildren()) do
    if #out>=1000 then break end
    local p=self:part(object);local touch=object:FindFirstChildWhichIsA('TouchTransmitter',true);local currency=self:coinKind(object)
-   if p and p.Transparency<1 and touch and (kind=='BOTH' or currency=='UNKNOWN' or currency==kind) then out[#out+1]={object=object,part=p,touch=touch,kind=currency} end
+   local visual=object:FindFirstChild('CoinVisual',true)
+   local candidate={object=object,part=p,touch=touch,visual=visual,kind=currency}
+   if p and touch and self:present(candidate) and (kind=='BOTH' or currency=='UNKNOWN' or currency==kind) then out[#out+1]=candidate end
   end end;return out
  end
- function P:present(coin)return coin.object.Parent~=nil and coin.part.Parent~=nil and coin.touch.Parent~=nil and coin.part.Transparency<1 end
+ function P:present(coin)
+  if not coin.object.Parent or not coin.part or not coin.part.Parent or not coin.touch or not coin.touch.Parent then return false end
+  if coin.object:GetAttribute('Collected')==true then return false end
+  if coin.visual then
+   if not coin.visual.Parent or not coin.visual:IsDescendantOf(coin.object) or coin.visual:GetAttribute('Collected')==true then return false end
+   local part=self:part(coin.visual);return part~=nil and part.Transparency<1
+  end
+  return coin.part.Transparency<1
+ end
  function P:bagFull()
   local gui=self.player:FindFirstChildOfClass('PlayerGui');local main=gui and gui:FindFirstChild('MainGUI');local screen=main and main:FindFirstChild('Game');local bags=screen and screen:FindFirstChild('CoinBags')
   if bags then for _,o in ipairs(bags:GetDescendants()) do if o.Name=='FullBagIcon' and o:IsA('GuiObject') and o.Visible then
@@ -126,6 +136,26 @@ return function(Util)
   if f.root.Parent then f.root.AssemblyAngularVelocity=f.angular;f.root.AssemblyLinearVelocity=f.velocity;if self.player.Character==f.character then f.root.CFrame=f.cf end end
   if f.humanoid.Parent then f.humanoid.AutoRotate=f.rotate end
  end
- function P:close()self:endFling();self:updateESP(false)end
+ function P:watch(name)
+  if not self.allowed then return false,'Podgląd gracza działa w MM2.' end
+  local person=self:selected(name);local camera=self.world.CurrentCamera
+  if not person or not camera then return false,'Wybierz aktywnego gracza w ustawieniach tej funkcji.' end
+  if not self.spectating then self.savedCamera={camera=camera,subject=camera.CameraSubject} end
+  self.spectating=person;camera.CameraSubject=person.humanoid;return true
+ end
+ function P:stopWatch()
+  local saved=self.savedCamera;self.savedCamera=nil;self.spectating=nil
+  if saved then local _,h=self:character();saved.camera.CameraSubject=saved.subject and saved.subject.Parent and saved.subject or h end
+ end
+ function P:updateWatch()
+  local p=self.spectating;if p and (not p.root.Parent or p.humanoid.Health<=0 or p.player.Character~=p.character) then self:stopWatch()end
+ end
+ function P:nearestMurderer()
+  local _,_,root=self:character();if not root then return end
+  local nearest,distance=nil,math.huge
+  for _,p in ipairs(self:people()) do if p.role=='Murderer' then local d=(root.Position-p.root.Position).Magnitude;if d<distance then nearest=p;distance=d end end end
+  return nearest,distance
+ end
+ function P:close()self:stopWatch();self:endFling();self:updateESP(false)end
  return P
 end

@@ -1,7 +1,7 @@
 return function(Util)
  local C={};C.__index=C
  function C.new(runtime,platform,clock)
-  return setmetatable({runtime=runtime,p=platform,clock=clock,farming=false,paused=false,state='STOPPED',kind='BOTH',speed='TURBO',nextAt=0,coins={},cooldown=setmetatable({},{__mode='k'}),scannedAt=-math.huge,attempts=0,disappeared=0,aimbot=false,autoShot=false,autoGun=false,aura=false,esp=false,lastShot=-math.huge,lastKnife=-math.huge,nextGunAt=0,lastError='',shots=0,stabs=0,settings={target='MURDERER',selected='',fov=200,prediction=.08,smooth=35,wallCheck=true,shotInterval=.7}},C)
+  return setmetatable({runtime=runtime,p=platform,clock=clock,farming=false,paused=false,state='STOPPED',kind='BOTH',speed='TURBO',nextAt=0,coins={},cooldown=setmetatable({},{__mode='k'}),scannedAt=-math.huge,attempts=0,disappeared=0,aimbot=false,autoShot=false,autoGun=false,aura=false,esp=false,lastShot=-math.huge,lastKnife=-math.huge,nextGunAt=0,lastError='',shots=0,stabs=0,pickupTimeout=.8,pickupOffset=0,lastScanCount=0,settings={target='MURDERER',selected='',fov=200,prediction=.08,smooth=35,wallCheck=true,shotInterval=.7}},C)
  end
  C.speeds={NORMAL=.5,FAST=.25,TURBO=.12}
  function C:startFarm()
@@ -25,14 +25,14 @@ return function(Util)
   if self.p:bagFull() then self.current=nil;self.state='BAG_FULL';self.nextAt=now+.5;return end
   if self.current then
    if not self.p:present(self.current) then self.disappeared+=1;self.current=nil
-   elseif now-self.arrivedAt<.65 then self.state='PICKUP';return
+   elseif now-self.arrivedAt<self.pickupTimeout then self.state='PICKUP';return
    else self.cooldown[self.current.object]=now+4;self.current=nil end
   end
-  if now-self.scannedAt>=.75 then self.coins=self.p:coins(self.kind);self.scannedAt=now end
+  if now-self.scannedAt>=.75 then self.coins=self.p:coins(self.kind);self.scannedAt=now;self.lastScanCount=#self.coins end
   local best,distance=nil,math.huge
   for _,coin in ipairs(self.coins) do if self.p:present(coin) and (self.cooldown[coin.object] or 0)<=now then local d=(coin.part.Position-root.Position).Magnitude;if d<distance then best=coin;distance=d end end end
   if not best then self.state='WAIT_ITEMS';self.nextAt=now+.12;return end
-  local ok,err=self.p:teleport(CFrame.new(best.part.Position+Vector3.new(0,1,0)));if not ok then self.lastError=err;self:stopFarm();return end
+  local ok,err=self.p:teleport(CFrame.new(best.part.Position+Vector3.new(0,self.pickupOffset,0)));if not ok then self.lastError=err;self:stopFarm();return end
   self.current=best;self.arrivedAt=now;self.attempts+=1;self.state='PICKUP';self.nextAt=now+(C.speeds[self.speed] or .5)
  end
  function C:startKillAll()
@@ -79,6 +79,7 @@ return function(Util)
   end
  end
  function C:aimTick(dt)
+  if self.p.spectating then return end
   local now=self.clock()
   if self.p.allowed and (self.aimbot or self.autoShot) and not self.combat then
    local target=self.p:target(self.settings)
