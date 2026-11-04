@@ -1,5 +1,5 @@
 {
-  "version": "6.2.0",
+  "version": "6.3.0",
   "modules": [
     {
       "name": "Util",
@@ -94,7 +94,7 @@
     {
       "name": "Version",
       "file": "src/modules/tools/Version.lua",
-      "sha256": "a3e7db37a6c3c0bcf8d9d3761f229e96afeb656da13c09b203dd94426c60ee35"
+      "sha256": "54f4c16f4c66f2af3d2ccef3a45158bab7094f82c1e493001695467305fb2edd"
     },
     {
       "name": "Performance",
@@ -139,22 +139,22 @@
     {
       "name": "MM2Platform",
       "file": "src/modules/mm2/Platform.lua",
-      "sha256": "d5875d51eb47351e531ad65aa220e2da3da441e7ffbbebe614064258577ca0ec"
+      "sha256": "24ff9a3ceb14d3f2964a1c4fb56d4b4e71ade4016ff35c09828ff9ffb0a527a4"
     },
     {
       "name": "MM2Controller",
       "file": "src/modules/mm2/Controller.lua",
-      "sha256": "c0090e1589e25d047e8c8d0ea663d05db5e0a32579c398d060bbb952fcf21696"
+      "sha256": "a38bf7f10affc4bd7ea8f709441d66e5d282bba736abcb2c2e01f057dd9f013e"
     },
     {
       "name": "AvatarAppearance",
       "file": "src/modules/mm2/Appearance.lua",
-      "sha256": "f6de70140265384d3420321004d20cdada15723b59e77d04e697b61609db7d86"
+      "sha256": "7855b6a19ce53baf01b911d97dc85750f0493bba7acd195639372e1c3c3b99a3"
     },
     {
       "name": "AppearanceControls",
       "file": "src/ui/AppearanceControls.lua",
-      "sha256": "a9e7887af0d8e9aff63a2739e71be47c9d42b56fd0708f4194035efad4e705d9"
+      "sha256": "65edf735f138106e7b25d45e32dcdb9f9b4519be4f71e599e0bad31399101ea1"
     },
     {
       "name": "Preview",
@@ -179,12 +179,12 @@
     {
       "name": "MM2App",
       "file": "src/modules/mm2/Application.lua",
-      "sha256": "02a52a7738744dc17d56fe2015764aa3dc77d5e4d97228f6d91d66afa1c4b72a"
+      "sha256": "9b6242893b8884d96596b42ccbcc1c305868c3dc3d41eac645b9dd9cb3aeab20"
     },
     {
       "name": "UniversalApp",
       "file": "src/modules/tools/Universal.lua",
-      "sha256": "a52014774bfc990f28a8b3a7407ef3f1f4ce22555f8a7e73a62eb26f02bc8198"
+      "sha256": "b54c6f9f474e820bc833631e31fbb24f1bc690e1c079fd97e303a3362c426c44"
     },
     {
       "name": "Launcher",
@@ -192,5 +192,5 @@
       "sha256": "e28035afa16226e96cc1bc13d266452fbe3e2223bb16be15a829d4ae2205a9e9"
     }
   ],
-  "mainSha256": "41bbd15611de669dedbe1f8bdedede78191e11c58c7c1c872d3d9afb07eeb43a"
+  "mainSha256": "0d29a8e898ca1f3949c25953ce095904edd1b52d7097277779b26ccd81c2382a"
 }
