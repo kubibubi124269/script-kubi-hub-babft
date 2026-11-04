@@ -19,7 +19,7 @@ return function(Util)
   local _,h=self:character();self:capture(h)
   local response=self.adapter:movement({walk=Util.number(self.settings.walk,16,8,60),jump=Util.number(self.settings.jump,50,20,120)})
   if not response.ok then return false,response.error end
-  self.log:add('Movement','Serwer potwierdził ustawienia własnej postaci.');return true
+  self.log:add('Movement',(self.adapter.mode=='MM2' or self.adapter.mode=='UNIVERSAL') and 'Zastosowano lokalne ustawienia własnej postaci.' or 'Serwer potwierdził ustawienia własnej postaci.');return true
  end
  function Movement:startFly()
   local ok,err=self:available();if not ok then return false,err end
