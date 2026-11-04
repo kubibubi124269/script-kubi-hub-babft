@@ -1,12 +1,12 @@
 {
-  "version": "6.1.0",
+  "version": "6.2.0",
   "releaseDate": "2026-11-04",
   "changes": [
-    "Sześć pionowych kategorii i ustawienia funkcji pod prawym przyciskiem / przyciskiem ⋯",
-    "MM2: wykrywanie widocznej monety przy przezroczystym korzeniu kolizji i oznaczeń Collected",
-    "BABFT: przejście całej postaci przez etapy, wyjście z siedzenia i oczekiwanie na brakujące punkty",
-    "Osobna nieruchoma kopia schematu mechanicznego, z oznaczeniem pominiętego wyposażenia",
-    "Teleport: trzy punkty sesji i powrót, z blokadą konfliktu z farmą"
+    "Universal jako trzeci wybór na starcie: FPS, kamera, celownik, lokalny jasny dzień, ruch i punkty teleportu",
+    "MM2 Trolling: Fling z wyborem najbliższego gracza, Murderera lub dokładnego nicku",
+    "Fake Headless, noga w stylu Korblox i mały skin jako odwracalne efekty lokalne",
+    "Eksperymentalne lokalne zmniejszenie HumanoidRootPart z osobnym oznaczeniem ograniczeń",
+    "Przywracanie wyglądu, skali i kamery przy STOP, respawnie i wyłączeniu"
   ],
-  "compatibility": "Poprawki sprawdzono offline. Odbiór waluty, przejazd BABFT i fizyka wymagają sprawdzenia w aktualnej grze. Mechanika WORM-a nadal nie jest obsługiwana w BABFT. Statyczna kopia jest nieruchoma i nie zawiera wyposażenia."
+  "compatibility": "Efekty wyglądu są lokalne i nie nadają posiadania płatnych przedmiotów. Zmiana lokalnego korzenia nie potwierdza zmiany serwerowego hitboxa. Ruch, Fling i skalowanie mogą być korygowane przez grę. Natywny wygląd i fizyka wymagają testu w Roblox."
 }

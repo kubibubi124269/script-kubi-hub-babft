@@ -1,5 +1,14 @@
 # Historia zmian
 
+## 6.2.0 — 2026-11-04
+
+Universal jest trzecim przyciskiem obok BABFT i MM2 na ekranie wyboru. Ma własne pięć pionowych kategorii: Główne, Postać, Widok, Teleport i Ustawienia. Oferuje FPS, własny ruch / Fly, trzy punkty teleportu, FOV, celownik, lokalny jasny dzień i lokalny wygląd. Gra może przywracać swoją kamerę, oświetlenie, rozmiar i ruch; brak obietnicy działania ruchu we wszystkich grach.
+
+MM2 / Trolling: Fling ma cel NEAREST / MURDERER / SELECTED oraz czas 0,5–3 s. Są osobne przełączniki Fake Headless, nogi w stylu Korblox, małego skina i lokalnego korzenia hitboxa. Ustawienia pod PPM / ⋯; przywracanie po STOP, respawnie i wyłączeniu. Efekty nie nadają płatnych przedmiotów na konto. Lokalny HumanoidRootPart nie jest potwierdzeniem zmniejszenia serwerowego obszaru trafień.
+
+Luau 0.744: **86 testów logiki, 181 sprawdzeń klienta, 4 importy modeli, 38 modułów**. Wszystkie offline; natywna fizyka, wygląd i serwerowe efekty wymagają testu w grze.
+
+
 ## 6.1.0 — 2026-11-04
 
 Sześć pionowych kategorii, PPM / ⋯ na opcje funkcji, poprawione przezroczyste monety MM2 i przechodzenie całej postaci przez etapy BABFT, trzy punkty teleportu i jawna nieruchoma kopia schematu mechanicznego. 86 testów logiki, 139 sprawdzeń klienta, 4 importy modeli. Nagrody i natywna fizyka wymagają sprawdzenia w grze. [Szczegóły](docs/V6.1-REPORT.md).
