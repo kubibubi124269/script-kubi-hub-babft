@@ -52,6 +52,8 @@ function methods:FindFirstChildOfClass(name)for _,c in ipairs(self:GetChildren()
 function methods:FindFirstChildWhichIsA(name,recursive)for _,c in ipairs(recursive and self:GetDescendants()or self:GetChildren())do if c:IsA(name)then return c end end end
 function methods:IsDescendantOf(parent)local p=self.Parent;while p do if p==parent then return true end;p=p.Parent end;return false end
 function methods:EquipTool(tool)tool.Parent=self.Parent end
+function methods:GetPivot()local r=self:FindFirstChild('HumanoidRootPart') or self.PrimaryPart or self:FindFirstChildWhichIsA('BasePart',true);return r and r.CFrame or CFrame.new()end
+function methods:PivotTo(cf)local old=self:GetPivot();local delta=cf.Position-old.Position;for _,part in ipairs(self:GetDescendants())do if part:IsA('BasePart')then part.CFrame=CFrame.new(part.Position+delta)end end;self.PivotMoves=(self.PivotMoves or 0)+1 end
 function methods:Activate()self.Activations=(self.Activations or 0)+1;if self.ActivateError then error(self.ActivateError)end end
 function methods:GetAttribute(name)return self.Attributes[name]end
 function methods:SetAttribute(name,value)self.Attributes[name]=value end
