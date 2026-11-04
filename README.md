@@ -1,4 +1,4 @@
-# KUBI HUB V6.2.0 — BABFT, MM2 i Universal
+# KUBI HUB V6.3.0 — BABFT, MM2 i Universal
 
 Ten sam loader otwiera wybór BABFT / MM2 / Universal. Moduły zaczynają wyłączone.
 
@@ -6,7 +6,9 @@ Ten sam loader otwiera wybór BABFT / MM2 / Universal. Moduły zaczynają wyłą
 loadstring(game:HttpGet("https://raw.githubusercontent.com/kubibubi124269/script-kubi-hub-babft/main/main.lua"))()
 ```
 
-**Nowe:** Universal z FPS, FOV, celownikiem, lokalnym jasnym dniem, ruchem i punktami teleportu. MM2 / Trolling ma Fling z wyborem celu, Fake Headless, nogę w stylu Korblox i mały skin. Wygląd jest lokalny; płatne przedmioty nie są nadawane na konto. Zmniejszenie lokalnego korzenia nie gwarantuje mniejszego serwerowego hitboxa. [Raport V6.2](docs/V6.2-REPORT.md).
+**Poprawka V6.3:** Headless ukrywa również samą głowę i odnawia ukrycie po kamerze. Dodano 12 narzędzi: oznaczenia przedmiotów i skróty ról MM2, lokalne efekty oraz dwa tryby zoomu Universal. [Szczegóły i ograniczenia](docs/V6.3-REPORT.md). Potwierdzenie wyglądu Headless nadal wymaga testu w grze.
+
+**Z V6.2:** Universal z FPS, FOV, celownikiem, lokalnym jasnym dniem, ruchem i punktami teleportu. MM2 / Trolling ma Fling z wyborem celu, Fake Headless, nogę w stylu Korblox i mały skin. Wygląd jest lokalny; płatne przedmioty nie są nadawane na konto. Zmniejszenie lokalnego korzenia nie gwarantuje mniejszego serwerowego hitboxa. [Raport V6.2](docs/V6.2-REPORT.md).
 
 Menu BABFT / MM2: **Autofarm · Trolling · Teleport · Fight · Misc · Ustawienia**. Builder, schematy, generatory i Circle Maker są w Misc. Shapes nie ma osobnej zakładki.
 
@@ -20,7 +22,7 @@ MM2 zachowuje Aimbot, Auto Shot, ESP ról, Auto Gun, Knife Aura, obieg z własny
 
 Nowe w MM2: podgląd gracza z przywróceniem kamery, teleport do wybranego gracza i ostrzeżenie o bliskim Murdererze rozpoznanym po nożu. Opcje nicku i odległości są pod PPM.
 
-Sprawdzenie: **86 testów logiki, 181 sprawdzeń klienta, 4 importy modeli, 38 modułów**, Luau 0.744. Bez natywnych testów renderowania, fizyki ani nagród.
+Sprawdzenie: **86 testów logiki, 210 sprawdzeń klienta, 4 importy modeli, 38 modułów**, Luau 0.744. Bez natywnych testów renderowania, fizyki ani nagród.
 
 [Raport V6.1](docs/V6.1-REPORT.md) · [Testy w grze](docs/TESTING.md) · [Źródła modeli](docs/COMMUNITY-MODELS.md) · [Historia](CHANGELOG.md)
 

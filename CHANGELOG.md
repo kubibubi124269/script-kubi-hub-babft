@@ -1,5 +1,14 @@
 # Historia zmian
 
+## 6.3.0 — 2026-11-04
+
+Poprawka Headless po zgłoszeniu, że cała głowa pozostaje widoczna mimo aktywnego efektu. Teraz głowa i jej części mają lokalnie Transparency=1 oraz LocalTransparencyModifier=1. Zmiana Transparency jest korygowana zdarzeniem, a osobny etap renderowania po priorytecie Last odnawia ukrycie po kamerze. Widoczność nie zależy od modułu celowania. Wyłączenie odłącza zdarzenia i przywraca zapamiętane wartości. Geometria Korblox pozostaje bez zmian.
+
+Dwanaście nowych narzędzi w istniejących kategoriach: cztery wspólne efekty (bez akcesoriów, bez twarzy, Duch i latarka), MM2 podświetlanie monet oraz upuszczonej broni, dwa skróty podglądu ról i dwa skróty teleportu, a w Universal daleki zoom oraz pierwsza osoba.
+
+Luau 0.744: **86 testów logiki, 210 sprawdzeń klienta, 4 importy modeli i 38 modułów**, bez błędów. To testy offline; Headless wymaga potwierdzenia wyglądu w grze użytkownika.
+
+
 ## 6.2.0 — 2026-11-04
 
 Universal jest trzecim przyciskiem obok BABFT i MM2 na ekranie wyboru. Ma własne pięć pionowych kategorii: Główne, Postać, Widok, Teleport i Ustawienia. Oferuje FPS, własny ruch / Fly, trzy punkty teleportu, FOV, celownik, lokalny jasny dzień i lokalny wygląd. Gra może przywracać swoją kamerę, oświetlenie, rozmiar i ruch; brak obietnicy działania ruchu we wszystkich grach.
