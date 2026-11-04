@@ -8,7 +8,7 @@ return function(Util)
  function Log:error(module,err) return self:add(module,'Operacja nie powiodła się','ERROR',err,true) end
  function Log:clear()self.rows={}end
  function Log:text()
-  local lines={'KUBI HUB ULTIMATE V5.0 — raport diagnostyczny'}
+  local lines={'KUBI HUB — raport diagnostyczny'}
   for _,r in ipairs(self.rows) do lines[#lines+1]=string.format('[%s] %s / %s / handled=%s: %s%s',r.time,r.module,r.level,tostring(r.handled),r.message,r.details~='' and ('\n'..r.details) or '') end
   return table.concat(lines,'\n')
  end
