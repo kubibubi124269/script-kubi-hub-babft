@@ -9,14 +9,14 @@ return function(M)
   if onCreating then onCreating(self) end
   self.config={data=M.Util.copy(M.Config.defaults)}
   local saved=_G.KubiHubMM2Settings;if type(saved)=='table' then local data=M.Config.validate({ui=saved.ui});if data then self.config.data.ui=data.ui end end
-  self.platform=M.MM2Platform.new(self.player,self.players,workspace,game.PlaceId,game.GameId);self.controller=M.MM2Controller.new(self.runtime,self.platform,self.clock);self.avatar=M.AvatarAppearance.new(self.platform,self.runtime);self.controller.avatar=self.avatar;self.runtime:own(self.avatar)
+  self.platform=M.MM2Platform.new(self.player,self.players,workspace,game.PlaceId,game.GameId);self.controller=M.MM2Controller.new(self.runtime,self.platform,self.clock);self.avatar=M.AvatarAppearance.new(self.platform,self.runtime);self.controller.avatar=self.avatar;self.controller.itemESP={coins=false,gun=false,range=120};self.runtime:own(self.avatar);self.avatar:bind(self.runService)
   self.adapter={mode='MM2',capabilities={movement=self.platform.allowed},cancel=function()end}
   self.adapter.movement=function(_,values)local _,h=self.platform:character();if not self.platform.allowed or not h then return {ok=false,error='Brak aktywnej postaci MM2.'} end;h.WalkSpeed=values.walk;if h.UseJumpPower then h.JumpPower=values.jump else h.JumpHeight=values.jump^2/(2*workspace.Gravity) end;return {ok=true}end
   self.movement=M.Movement.new(self.runtime,self.adapter,self.player,self.input,self.log,self.config.data.movement);self.effects=M.Effects.new(self.clock)
   self.ui=M.UI.new(self);self.ui.title.Text='KUBI HUB  /  MM2';self:pages();self.ui:show('FARM');self.ui:theme();self:updateDashboard()
   self.runtime:connect(self.runService.Heartbeat,function(dt)self.fps=self.fps==0 and 1/math.max(dt,.001) or self.fps*.95+1/math.max(dt,.001)*.05;self.runtime:tick(dt)end,'MM2')
   self.runtime:connect(self.runService.RenderStepped,function()self.movement:tick()end,'Movement')
-  self.runService:BindToRenderStep('KubiHubMM2Aim',Enum.RenderPriority.Camera.Value+1,function(dt)if self.alive then local ok,err=pcall(function()self.avatar:render();self.controller:aimTick(dt)end);if not ok then self.avatar:reset();self.controller.aimbot=false;self.controller.autoShot=false;self.log:error('Aim',err);self.ui:toast('Aim',err,true);self.ui:refreshControls() end end end)
+  self.runService:BindToRenderStep('KubiHubMM2Aim',Enum.RenderPriority.Camera.Value+1,function(dt)if self.alive then local ok,err=pcall(function()self.controller:aimTick(dt)end);if not ok then self.controller.aimbot=false;self.controller.autoShot=false;self.log:error('Aim',err);self.ui:toast('Aim',err,true);self.ui:refreshControls() end end end)
   self.runtime:own({Destroy=function()self.runService:UnbindFromRenderStep('KubiHubMM2Aim')end})
   self.runtime:connect(self.player.CharacterAdded,function()self.controller:stopCombat();self.avatar:reset();self.controller.current=nil;self.controller.coins={};self.controller.scannedAt=-math.huge;self.movement:reset();self.effects:clear()end,'Respawn')
   self.runtime:schedule('MM2Controllers',.05,function(dt)
@@ -24,7 +24,7 @@ return function(M)
    if not ok then self.controller:stopAll();self.log:error('MM2',err);self.ui:toast('MM2',err,true);self.ui:refreshControls() end
    self.effects:tick();self.ui:tick()
   end)
-  self.runtime:schedule('MM2Status',.5,function()self.platform:updateESP(self.controller.esp);local ok,err=self.avatar:refresh();if not ok then self.ui:toast('Postać',err,true)end;self:updateDashboard()end)
+  self.runtime:schedule('MM2Status',.5,function()self.platform:updateESP(self.controller.esp);self.platform:updateItems(self.controller.itemESP);local ok,err=self.avatar:refresh();if not ok then self.ui:toast('Postać',err,true)end;self:updateDashboard()end)
   return self
  end
  function A:pages()
@@ -79,6 +79,23 @@ return function(M)
   ui:feature(p,'Auto podnoszenie pistoletu',function()return c.autoGun end,function()c.autoGun=not c.autoGun end,function(panel)ui:label(panel,'Odwiedza upuszczony GunDrop, gdy nie masz broni i inne moduły ruchu są wyłączone.')end)
   local travel=ui:card(ui:page('TELEPORT'),'Upuszczona broń');ui:feature(travel,'Podnieś pistolet',nil,function()if self.runtime.lock then return false,'Najpierw zatrzymaj moduł '..self.runtime.lock end;return self.platform:pickupGun()end,function(panel)ui:label(panel,'Przenosi do pistoletu obecnego na mapie.')end)
   ui:feature(travel,'Teleport do gracza',nil,function()local person=self.platform:selected(c.settings.selected);if not person then return false,'Wybierz aktywnego gracza pod PPM.' end;return self.travel:go(person.root.CFrame*CFrame.new(3,0,0))end,playerOptions)
+  local items=ui:card(players,'Przedmioty na mapie')
+  ui:feature(items,'Podświetl monety / cukierki',function()return c.itemESP.coins end,function()c.itemESP.coins=not c.itemESP.coins;self.platform:updateItems(c.itemESP)end,function(panel)
+   ui:field(panel,'Zasięg: 10–300',c.itemESP.range,function(v)c.itemESP.range=M.Util.number(tonumber(v),120,10,300);return c.itemESP.range end,false,function()return c.itemESP.range end)
+   ui:label(panel,'Do 40 najbliższych rzeczywistych przedmiotów. Nie uruchamia zbierania.')
+  end)
+  ui:feature(items,'Podświetl upuszczony pistolet',function()return c.itemESP.gun end,function()c.itemESP.gun=not c.itemESP.gun;self.platform:updateItems(c.itemESP)end,function(panel)ui:label(panel,'Oznacza rzeczywisty GunDrop na mapie, gdy jest dostępny.')end)
+  local roles=ui:card(players,'Szybki podgląd ról')
+  local locations=ui:card(ui:page('TELEPORT'),'Skróty do graczy')
+  for _,row in ipairs({{'Murderer','Murderera'},{'Sheriff','Sheriffa'}})do local role,label=row[1],row[2]
+   local function help(panel)ui:label(panel,'Wybiera najbliższego gracza z widoczną bronią tej roli. Brak broni oznacza brak pewnego rozpoznania.')end
+   ui:feature(roles,'Podgląd '..label,function()return self.platform.spectating and self.platform.spectating.role==role end,function()
+    if self.platform.spectating and self.platform.spectating.role==role then self.platform:stopWatch();return true end
+    local person,err=self.platform:personByRole(role);if not person then return false,err end
+    local ok,why=self.platform:watch(person.player.Name);if ok then c.aimbot=false;c.autoShot=false end;return ok,why
+   end,help)
+   ui:feature(locations,'Teleport do '..label,nil,function()local person,err=self.platform:personByRole(role);if not person then return false,err end;return self.travel:go(person.root.CFrame*CFrame.new(3,0,0))end,help)
+  end
   local move=ui:card(players,'Własna postać')
   local function moveOptions(panel)for _,spec in ipairs({{'WalkSpeed','walk',8,60},{'Skok','jump',20,120},{'Fly speed','flySpeed',10,100}}) do local s=spec;ui:slider(panel,s[1],function()return self.config.data.movement[s[2]]end,function(v)self.config.data.movement[s[2]]=v end,s[3],s[4],1)end end
   ui:feature(move,'Zastosuj ruch',nil,function()return self.movement:apply()end,moveOptions)

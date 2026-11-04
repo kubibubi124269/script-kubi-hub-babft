@@ -1,4 +1,16 @@
-# Testy V6.2.0
+# Testy V6.3.0
+
+Offline: 86 testów logiki, 210 sprawdzeń klienta, 4 importy i 38 modułów — bez błędów. Natywnego wyglądu nadal nie potwierdzono.
+
+1. Uruchom ten sam loader; nagłówek V6.3.0. W MM2 / Trolling włącz Fake Headless. W trzeciej osobie głowa powinna zniknąć. Przełącz kamerę blisko / daleko i sprawdź, czy nie wraca. Wyłącz: ma wrócić zwykła głowa i twarz. Potwierdzenie użytkownika jest wymagane do uznania poprawki wizualnej za sprawdzoną w grze.
+2. Sprawdź, że dotychczas działający Korblox zachował kształt i sposób włączania.
+3. Misc MM2: włącz osobno oznaczanie monet i GunDrop. Sprawdź rzeczywisty przedmiot, zasięg i wyłączenie. Włączenie nie powinno ruszyć postaci ani farmy.
+4. Podgląd Murderera / Sheriffa działa tylko przy rozpoznanej broni. Ponowne kliknięcie ma oddać kamerę. Teleport do tych ról ma zgłosić konflikt, gdy aktywna jest farma albo Fly.
+5. Efekty bez akcesoriów, bez twarzy i Duch są lokalne. Wyłącz i sprawdź wcześniejszą widoczność. Latarka ma zniknąć po STOP i respawnie.
+6. Universal / Widok: daleki zoom i pierwsza osoba. Kliknięcie aktywnej funkcji ma ją wyłączyć i przywrócić oryginalny tryb. STOP również przywraca zoom.
+
+Wcześniejsze scenariusze:
+
 
 Offline: 86 testów logiki, 181 sprawdzeń klienta, 4 importy modeli, 38 modułów — bez błędów. To nie jest potwierdzenie natywnej fizyki ani renderowania.
 

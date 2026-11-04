@@ -25,7 +25,7 @@ RaycastParams={new=function()return {}end}
 Color3={new=function(r,g,b)return {R=r,G=g,B=b}end,fromRGB=function(r,g,b)return {R=r/255,G=g/255,B=b/255}end,fromHSV=function()return {}end}
 UDim={new=function(s,o)return {Scale=s or 0,Offset=o or 0}end};UDim2={new=function(a,b,c,d)return {X=UDim.new(a,b),Y=UDim.new(c,d)}end};UDim2.fromOffset=function(x,y)return UDim2.new(0,x,0,y)end;UDim2.fromScale=function(x,y)return UDim2.new(x,0,y,0)end
 Enum=setmetatable({},{__index=function(t,k)local group=setmetatable({},{__index=function(g,v)local item={Name=v};rawset(g,v,item);return item end});rawset(t,k,group);return group end})
-Enum.RenderPriority.Camera.Value=200
+Enum.RenderPriority.Camera.Value=200;Enum.RenderPriority.Last.Value=2000
 local methods={};local im={};local events={Activated=true,FocusLost=true,InputBegan=true,InputChanged=true,InputEnded=true,MouseEnter=true,MouseLeave=true,ChildAdded=true,ChildRemoved=true,Changed=true,CharacterAdded=true,Heartbeat=true,RenderStepped=true}
 im.__index=function(o,k)
  if methods[k] then return methods[k]end
@@ -40,7 +40,7 @@ im.__newindex=function(o,k,v)
  if o.signals[k] and previous~=v then o.signals[k]:Fire()end
 end
 Instance={new=function(class)return setmetatable({props={Name=class,ClassName=class,Visible=true,CanvasPosition=Vector2.zero,Transparency=0,LocalTransparencyModifier=0,Size=Vector3.new(2,2,1),CFrame=CFrame.new(),HipHeight=2,AutomaticScalingEnabled=true,AssemblyMass=10,AssemblyLinearVelocity=Vector3.zero,AssemblyAngularVelocity=Vector3.zero,Attributes={}},children={},signals={}},im)end}
-function methods:IsA(c)return self.ClassName==c or c=='GuiObject'and ({Frame=true,TextButton=true,TextLabel=true,TextBox=true,ScrollingFrame=true,ViewportFrame=true})[self.ClassName]==true or c=='BasePart'and(self.ClassName=='Part'or self.ClassName=='WedgePart')end
+function methods:IsA(c)return self.ClassName==c or c=='GuiObject'and ({Frame=true,TextButton=true,TextLabel=true,TextBox=true,ScrollingFrame=true,ViewportFrame=true})[self.ClassName]==true or c=='BasePart'and(self.ClassName=='Part'or self.ClassName=='WedgePart'or self.ClassName=='MeshPart')end
 function methods:GetChildren()local out={};for _,c in ipairs(self.children)do if c.Parent==self then out[#out+1]=c end end;return out end
 function methods:GetDescendants()local out={};local function walk(o)for _,c in ipairs(o:GetChildren())do out[#out+1]=c;walk(c)end end;walk(self);return out end
 function methods:FindFirstChild(name,recursive)
@@ -78,7 +78,7 @@ local function child(p,c,n)local o=Instance.new(c);o.Name=n or c;o.Parent=p;retu
 workspace=Instance.new('Workspace');workspace.Gravity=196.2;workspace.CurrentCamera=Instance.new('Camera');workspace.CurrentCamera.ViewportSize=Vector2.new(1280,720);workspace.CurrentCamera.CFrame=CFrame.new();workspace.CurrentCamera.FieldOfView=70
 local services={};for _,name in ipairs({'Players','UserInputService','RunService','HttpService','ReplicatedStorage','Lighting'})do services[name]=Instance.new(name)end
 services.Lighting.Brightness=1;services.Lighting.ClockTime=19;services.Lighting.Ambient=Color3.new(.2,.2,.2);services.Lighting.OutdoorAmbient=Color3.new(.3,.3,.3);services.Lighting.FogEnd=500;services.Lighting.GlobalShadows=true
-local player=child(services.Players,'Player','Tester');player.UserId=123;player.DisplayName='Tester';services.Players.LocalPlayer=player;child(player,'PlayerGui','PlayerGui')
+local player=child(services.Players,'Player','Tester');player.UserId=123;player.DisplayName='Tester';player.CameraMinZoomDistance=.5;player.CameraMaxZoomDistance=12;player.CameraMode=Enum.CameraMode.Classic;services.Players.LocalPlayer=player;child(player,'PlayerGui','PlayerGui')
 local data=child(player,'Folder','Data');for _,name in ipairs({'WoodBlock','TitaniumBlock','MetalBlock','Seat','Dynamite'})do child(data,'IntValue',name).Value=10000 end
 local ch=Instance.new('Model');player.Character=ch;local hum=child(ch,'Humanoid');hum.Health=100;hum.MaxHealth=100;hum.WalkSpeed=21;hum.JumpPower=56;hum.JumpHeight=8;hum.UseJumpPower=true;hum.AutoRotate=true;hum.PlatformStand=false
 local root=child(ch,'Part','HumanoidRootPart');root.AssemblyLinearVelocity=Vector3.zero;root.CFrame=CFrame.new()

@@ -1,8 +1,8 @@
 -- Appearance, chooser and cleanup contracts only: no native render or server hitbox claim.
 game.PlaceId=987654321;game.GameId=1
-local universalCharacter,universalHum,universalRoot=newCharacter('UniversalR15');player.Character=universalCharacter
+local universalCharacter,universalHum,universalRoot=newCharacter('UniversalR15','MeshPart');player.Character=universalCharacter
 local upper=child(universalCharacter,'Part','RightUpperLeg');local lower=child(universalCharacter,'Part','RightLowerLeg');local foot=child(universalCharacter,'Part','RightFoot');local neck=child(universalCharacter.Head,'Motor6D','Neck')
-local face=child(universalCharacter.Head,'Decal','face');face.Transparency=.15;universalCharacter.Head.LocalTransparencyModifier=.2
+local face=child(universalCharacter.Head,'Decal','face');face.Transparency=.15;universalCharacter.Head.LocalTransparencyModifier=.2;universalCharacter.Head.Transparency=.3
 local hat=child(universalCharacter,'Accessory','Hat');local handle=child(hat,'Part','Handle');child(handle,'Attachment','HatAttachment')
 local launcher=openLauncher();check(launcher.gui:FindFirstChild('UNIVERSAL',true)~=nil,'chooser includes Universal next to BABFT and MM2')
 local ok,u=launcher:choose('UNIVERSAL');assert(ok,u)
@@ -11,11 +11,29 @@ local count=0;for _ in pairs(u.ui.pages)do count+=1 end;check(count==5 and u.ui.
 local a=u.avatar;check(not a.enabled.headless and not a.enabled.mini and not u.fovEnabled and not u.bright and not u.cross.Visible,'Universal and appearance options always start disabled')
 local rootSize=universalRoot.Size;local hip=universalHum.HipHeight;local originalAutomatic=universalHum.AutomaticScalingEnabled
 assert(a:set('headless',true));check(universalCharacter.Head.LocalTransparencyModifier==1 and face.Transparency==1 and neck.Parent~=nil and universalHum.Health==100,'fake headless hides head and face without destroying neck or health')
+do
+ check(universalCharacter.Head.Transparency==1 and services.RunService.RenderBindings.KubiHubAvatarVisibility.priority>Enum.RenderPriority.Last.Value,'Headless hides a MeshPart head itself and runs after camera visibility work')
+ universalCharacter.Head.LocalTransparencyModifier=0;universalCharacter.Head.Transparency=0
+ check(universalCharacter.Head.Transparency==1,'Headless immediately repairs a game script resetting head Transparency')
+ services.RunService.RenderBindings.KubiHubAvatarVisibility.fn();check(universalCharacter.Head.LocalTransparencyModifier==1,'dedicated late visibility pass restores the camera modifier')
+ local connections=u.runtime:counts().connections;for _=1,12 do assert(a:refresh())end
+ check(u.runtime:counts().connections==connections,'Headless refresh disconnects replaced property listeners without accumulating connections')
+end
 check(universalRoot.Size==rootSize and universalHum.HipHeight==hip,'cosmetic headless does not resize the local collision root')
 assert(a:option('hideHats',true));check(handle.LocalTransparencyModifier==1,'optional headless accessory hiding follows attachment type')
 universalCharacter.Head.LocalTransparencyModifier=0;a:render();check(universalCharacter.Head.LocalTransparencyModifier==1,'headless reapplies its local visibility after camera changes')
 local extraFace=child(universalCharacter.Head,'Decal','newFace');extraFace.Transparency=.25;assert(a:refresh());check(extraFace.Transparency==1,'late appearance descendants receive the active local visibility effect')
-assert(a:set('headless',false));check(universalCharacter.Head.LocalTransparencyModifier==.2 and face.Transparency==.15 and extraFace.Transparency==.25 and handle.LocalTransparencyModifier==0,'headless off restores the exact original local opacity and face values')
+local headConnection=a.headOpacity[universalCharacter.Head].connection;assert(a:set('headless',false));check(not headConnection.Connected and next(a.headOpacity)==nil and universalCharacter.Head.Transparency==.3,'Headless off restores exact original opacity and disconnects the correction listener');check(universalCharacter.Head.LocalTransparencyModifier==.2 and face.Transparency==.15 and extraFace.Transparency==.25 and handle.LocalTransparencyModifier==0,'headless off restores the exact original local opacity and face values')
+do
+ assert(a:set('noAccessories',true));check(handle.LocalTransparencyModifier==1 and universalCharacter.Head.Transparency==.3,'accessory hiding preserves the normal head')
+ assert(a:set('noAccessories',false));check(handle.LocalTransparencyModifier==0,'accessory visibility is restored')
+ assert(a:set('noFace',true));assert(a:set('headless',true));assert(a:set('headless',false));check(face.Transparency==1 and universalCharacter.Head.Transparency==.3,'face-only hiding remains active when Headless is disabled')
+ assert(a:set('noFace',false));check(face.Transparency==.15,'face-only effect restores the original decal opacity')
+ assert(a:set('ghost',true));check(universalRoot.LocalTransparencyModifier==1 and upper.LocalTransparencyModifier==1,'local ghost hides the owned avatar body')
+ assert(a:set('ghost',false));check(universalRoot.LocalTransparencyModifier==0 and upper.LocalTransparencyModifier==0,'ghost off restores body visibility')
+ assert(a:set('lamp',true));local lamp=a.lamp;assert(a:option('lampRange',90));assert(a:refresh());check(a.lamp==lamp and lamp.Parent==universalRoot and lamp.Range==60,'local lamp follows the owned root and clamps range without duplicates')
+ assert(a:set('lamp',false));check(lamp.Parent==nil and a.lamp==nil,'lamp off removes its owned light')
+end
 assert(a:set('korblox',true));local legFolder=a.legFolder
 check(upper.LocalTransparencyModifier==1 and lower.LocalTransparencyModifier==1 and foot.LocalTransparencyModifier==1 and legFolder and #legFolder:GetChildren()==2,'R15 fake Korblox keeps originals and creates two local non-colliding pieces')
 local welded=true;for _,piece in ipairs(legFolder:GetChildren())do local weld=piece:FindFirstChildOfClass('WeldConstraint');welded=welded and not piece.CanCollide and not piece.CanTouch and not piece.CanQuery and piece.Massless and weld.Part0==upper end
@@ -31,6 +49,13 @@ universalCharacter:ScaleTo(1.2);local customSize=universalRoot.Size;assert(a:set
 assert(u.runtime:acquire('Fly'));local blocked=a:set('mini',true);check(not blocked and not a.enabled.mini and u.runtime.lock=='Fly','resize cannot race Fly or release another movement owner');u.runtime:release('Fly')
 universalCharacter.ScaleError='Fixture ScaleTo failure';local resized=a:set('mini',true);universalCharacter.ScaleError=nil
 check(not resized and not a.enabled.mini and a.base==nil and u.runtime.lock==nil,'failed scale application clears enabled flags and releases its lock')
+do
+ local min,max,mode=player.CameraMinZoomDistance,player.CameraMaxZoomDistance,player.CameraMode
+ button(u,'Daleki zoom  OFF').Activated:Fire();check(u.zoomMode=='FAR' and player.CameraMaxZoomDistance==300,'far zoom applies its configurable maximum')
+ button(u,'Daleki zoom  ON').Activated:Fire();check(u.zoomMode==nil and player.CameraMaxZoomDistance==max and player.CameraMinZoomDistance==min,'far zoom left-click can disable and restore original bounds')
+ button(u,'Daleki zoom  OFF').Activated:Fire();button(u,'Pierwsza osoba  OFF').Activated:Fire();check(u.zoomMode=='FIRST' and player.CameraMode==Enum.CameraMode.LockFirstPerson,'first-person mode replaces far zoom without losing the original snapshot')
+ button(u,'Pierwsza osoba  ON').Activated:Fire();check(player.CameraMode==mode and player.CameraMaxZoomDistance==max and u.zoomMode==nil,'first-person off restores original mode and zoom')
+end
 local priorFov=workspace.CurrentCamera.FieldOfView;button(u,'Pole widzenia  OFF').Activated:Fire();check(u.fovEnabled and workspace.CurrentCamera.FieldOfView==80,'Universal FOV updates the current camera only after explicit enable')
 local originalCamera=workspace.CurrentCamera;local replacement=Instance.new('Camera');replacement.FieldOfView=65;replacement.ViewportSize=Vector2.new(1280,720);workspace.CurrentCamera=replacement;u:applyFov();u:resetFov()
 check(originalCamera.FieldOfView==priorFov and replacement.FieldOfView==65,'FOV off restores both original and replacement cameras');workspace.CurrentCamera=originalCamera
@@ -45,5 +70,5 @@ local r6,r6hum,r6root=newCharacter('UniversalR6');local r6leg=child(r6,'Part','R
 assert(a:set('korblox',true));check(a.legPart==r6leg and r6leg.LocalTransparencyModifier==1,'fake Korblox also supports the R6 Right Leg layout')
 assert(a:set('mini',true));local r6scale=r6:GetScale();local afterRespawn=newCharacter('AfterUniversalRespawn');player.Character=afterRespawn;player.CharacterAdded:Fire(afterRespawn)
 check(not a.enabled.mini and not a.enabled.korblox and r6:GetScale()==1 and r6scale<1 and afterRespawn:GetScale()==1,'respawn restores the previous model and leaves new appearance effects disabled')
-u:unload();check(u.runtime:counts().connections==0 and u.crossGui.Parent==nil and u.ui.gui.Parent==nil,'Universal unload removes GUI, crosshair and event listeners')
+u:unload();check(services.RunService.RenderBindings.KubiHubAvatarVisibility==nil,'Universal unload removes the dedicated Headless render binding');check(u.runtime:counts().connections==0 and u.crossGui.Parent==nil and u.ui.gui.Parent==nil,'Universal unload removes GUI, crosshair and event listeners')
 print('UNIVERSAL SMOKE COMPLETE: local contracts only; no paid ownership, native appearance or server hitbox claim')

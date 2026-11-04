@@ -156,6 +156,27 @@ return function(Util)
   for _,p in ipairs(self:people()) do if p.role=='Murderer' then local d=(root.Position-p.root.Position).Magnitude;if d<distance then nearest=p;distance=d end end end
   return nearest,distance
  end
- function P:close()self:stopWatch();self:endFling();self:updateESP(false)end
+ function P:personByRole(role)
+  if not self.allowed then return nil,'Te skróty działają w MM2.'end
+  local _,_,root=self:character();local nearest,distance=nil,math.huge
+  for _,person in ipairs(self:people())do if person.role==role then local d=root and (person.root.Position-root.Position).Magnitude or 0;if d<distance then nearest=person;distance=d end end end
+  if nearest then return nearest end;return nil,'Brak gracza z widocznym '..(role=='Murderer' and 'nożem.' or 'pistoletem.')
+ end
+ function P:updateItems(settings)
+  self.itemHighlights=self.itemHighlights or {};local keep={};local _,_,root=self:character()
+  local function mark(part,color)
+   local row=self.itemHighlights[part];if not row or not row.Parent then row=Instance.new('Highlight');row.Name='KubiHubPickupESP';row.Adornee=part;row.DepthMode=Enum.HighlightDepthMode.AlwaysOnTop;row.FillTransparency=.55;row.OutlineTransparency=0;row.Parent=part;self.itemHighlights[part]=row end
+   row.FillColor=color;row.OutlineColor=color;keep[part]=true
+  end
+  if self.allowed and settings.coins and root then
+   local near={};local range=Util.number(settings.range,120,10,300)
+   for _,coin in ipairs(self:coins('BOTH'))do local distance=(coin.part.Position-root.Position).Magnitude;if distance<=range then near[#near+1]={coin=coin,distance=distance}end end
+   table.sort(near,function(a,b)return a.distance<b.distance end)
+   for i=1,math.min(40,#near)do local coin=near[i].coin;mark(coin.part,coin.kind=='CANDY' and Color3.fromRGB(255,135,65) or Color3.fromRGB(255,215,65))end
+  end
+  if self.allowed and settings.gun then local drop=self.world:FindFirstChild('GunDrop');local part=drop and self:part(drop);if part then mark(part,Color3.fromRGB(80,165,255))end end
+  for part,row in pairs(self.itemHighlights)do if not keep[part] then row:Destroy();self.itemHighlights[part]=nil end end
+ end
+ function P:close()self:stopWatch();self:endFling();self:updateESP(false);self:updateItems({coins=false,gun=false})end
  return P
 end

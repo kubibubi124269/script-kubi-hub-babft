@@ -4,9 +4,9 @@ local accepted,wrong=chooser:choose('MM2');check(not accepted and chooser.alive 
 local stages=child(child(workspace,'Folder','BoatStages'),'Folder','NormalStages')
 for stage=1,10 do local point=child(child(stages,'Folder','CaveStage'..stage),'Part','DarknessPart');point.CFrame=CFrame.new(0,10,stage*100)end
 local trigger=child(child(child(stages,'Folder','TheEnd'),'Model','GoldenChest'),'Part','Trigger');trigger.CFrame=CFrame.new(0,5,1500)
-local function newCharacter(name)
+local function newCharacter(name,headClass)
  local c=Instance.new('Model');c.Name=name;local h=child(c,'Humanoid');h.Health=100;h.MaxHealth=100;h.WalkSpeed=16;h.JumpPower=50;h.JumpHeight=7;h.UseJumpPower=true;h.AutoRotate=true;h.PlatformStand=false
- local r=child(c,'Part','HumanoidRootPart');r.CFrame=CFrame.new();local head=child(c,'Part','Head');head.CFrame=CFrame.new(0,2,0);return c,h,r
+ local r=child(c,'Part','HumanoidRootPart');r.CFrame=CFrame.new();local head=child(c,headClass or 'Part','Head');head.CFrame=CFrame.new(0,2,0);return c,h,r
 end
 local routeHub=startHub();check(routeHub.adapter.capabilities.farm,'complete BABFT route enables the restored farm without a Studio bridge')
 routeHub.config.data.farm.profile='SONIC';routeHub.config.data.farm.stopAfter=1
@@ -97,6 +97,12 @@ local avatarToggles={};for _,entry in ipairs(mm.ui.featureSettings)do avatarTogg
 check(avatarToggles['Fling'] and avatarToggles['Fake Headless'] and avatarToggles['Fake Korblox — noga'] and avatarToggles['Mały skin'] and avatarToggles['Mniejszy hitbox — lokalnie'],'MM2 Trolling exposes Fling and all four requested appearance/root controls')
 avatarToggles['Mniejszy hitbox — lokalnie'].button.InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton2});check(mm.ui.activeSettings==avatarToggles['Mniejszy hitbox — lokalnie'].panel and not mm.avatar.enabled.hitbox,'MM2 hitbox right-click opens its limitations and options without changing the avatar')
 mm.ui:show('TROLLING');avatarToggles['Fake Headless'].button.Activated:Fire();check(mm.avatar.enabled.headless and mmCharacter.Head.LocalTransparencyModifier==1,'MM2 fake Headless left-click enables the local appearance effect');mm:stopAll();check(not mm.avatar.enabled.headless and mmCharacter.Head.LocalTransparencyModifier==0,'MM2 STOP restores its local appearance changes')
+do
+ assert(mm.avatar:set('headless',true));local originalAimTick=c.aimTick;c.aimTick=function()error('Fixture aim failure')end
+ renderAim();c.aimTick=originalAimTick;services.RunService.RenderBindings.KubiHubAvatarVisibility.fn()
+ check(mm.avatar.enabled.headless and mmCharacter.Head.Transparency==1,'an aiming error cannot disable the independent Headless fix')
+ mm:stopAll();check(mmCharacter.Head.Transparency==0,'MM2 STOP restores original head Transparency')
+end
 local drop=child(workspace,'Part','GunDrop');drop.CFrame=CFrame.new(50,0,0);assert(mm.platform:pickupGun());check(mmRoot.Position.X==50,'gun pickup visits an actual replicated GunDrop')
 knife:Destroy();mmGun:Destroy();mmRoot.CFrame=CFrame.new();c.autoGun=true;tick+=2;c:tick(.05);check(mmRoot.Position.X==50,'Auto Gun visits a real drop only while no owned weapon or movement task is active');c.autoGun=false
 local auraKnife=child(backpack,'Tool','Knife');mmRoot.CFrame=enemyRoot.CFrame*CFrame.new(0,0,2);c.aura=true;local stabsBefore=c.stabs;tick+=1;c:tick(.05);check(c.stabs==stabsBefore+1 and auraKnife.Activations==1,'Knife Aura uses its owned knife only when a target is within six studs');c.aura=false
@@ -110,7 +116,22 @@ assert(mm.platform:watch('Enemy'));mm.proximity=true;mm:stopAll();check(mm.platf
 mmRoot.CFrame=CFrame.new(5,0,5);mm.travel.slot=2;assert(mm.travel:save());mmRoot.CFrame=CFrame.new(90,0,90);assert(mm.travel:go(mm.travel.slots[2]));check(mmRoot.Position.X==5 and mmRoot.Position.Z==5,'Teleport uses the selected saved point')
 assert(mm.runtime:acquire('MM2Farm'));local blockedTravel=mm.travel:go(CFrame.new());check(not blockedTravel and mm.runtime.lock=='MM2Farm','manual teleport cannot race an active farm');mm.runtime:release('MM2Farm')
 assert(mm.travel:back());check(mmRoot.Position.X==90,'Teleport back restores the prior position for the same character')
-mm:unload();check(mm.runtime:counts().connections==0 and mm.ui.gui.Parent==nil and next(mm.platform.highlights)==nil and services.RunService.RenderBindings.KubiHubMM2Aim==nil,'MM2 unload removes GUI, listeners, render binding and its local effects')
+do
+ local sheriff=child(services.Players,'Player','Detective');sheriff.UserId=789;local sheriffChar,sheriffHum,sheriffRoot=newCharacter('SheriffCharacter');sheriff.Character=sheriffChar;sheriffRoot.CFrame=CFrame.new(200,0,0);child(sheriffChar,'Tool','Gun')
+ local detected,err=mm.platform:personByRole('Sheriff');check(detected and detected.player==sheriff and err==nil,'role shortcut identifies only a live visible weapon holder')
+ button(mm,'Podgląd Sheriffa  OFF').Activated:Fire();check(workspace.CurrentCamera.CameraSubject==sheriffHum,'Sheriff watch shortcut selects the detected camera subject')
+ button(mm,'Podgląd Sheriffa  ON').Activated:Fire();check(mm.platform.spectating==nil and workspace.CurrentCamera.CameraSubject==mmHum,'role watch shortcut can stop and restore the camera')
+ button(mm,'Teleport do Sheriffa').Activated:Fire();check(mmRoot.Position.X==203,'role teleport uses the detected live player and a small offset')
+ assert(mm.runtime:acquire('MM2Farm'));local before=mmRoot.CFrame;button(mm,'Teleport do Murderera').Activated:Fire();check(mmRoot.CFrame==before and mm.runtime.lock=='MM2Farm','role teleport cannot interrupt a running movement owner');mm.runtime:release('MM2Farm')
+ local targets={};for i=1,50 do local object=coin('ExtraCoin'..i,'Coin',0);object.CFrame=CFrame.new(mmRoot.Position+Vector3.new(i,0,0));targets[#targets+1]=object end
+ local attempts=c.attempts;c.itemESP.coins=true;c.itemESP.gun=true;c.itemESP.range=300;mm.platform:updateItems(c.itemESP)
+ local total=0;for _ in pairs(mm.platform.itemHighlights)do total+=1 end
+ check(total==41 and mm.platform.itemHighlights[drop]~=nil and c.attempts==attempts,'item ESP caps coins at forty, highlights the actual gun and never starts collection')
+ local marker=mm.platform.itemHighlights[drop];drop:Destroy();mm.platform:updateItems(c.itemESP);check(marker.Parent==nil and mm.platform.itemHighlights[drop]==nil,'gun marker is removed when the actual drop disappears')
+ mm:stopAll();check(next(mm.platform.itemHighlights)==nil and not c.itemESP.coins and not c.itemESP.gun,'MM2 STOP clears both item overlays and their toggles')
+ for _,object in ipairs(targets)do object:Destroy()end;sheriff:Destroy()
+end
+mm:unload();check(services.RunService.RenderBindings.KubiHubAvatarVisibility==nil,'MM2 unload removes the dedicated Headless render binding');check(mm.runtime:counts().connections==0 and mm.ui.gui.Parent==nil and next(mm.platform.highlights)==nil and services.RunService.RenderBindings.KubiHubMM2Aim==nil,'MM2 unload removes GUI, listeners, render binding and its local effects')
 local failedChooser=openLauncher();local savedViewport=workspace.CurrentCamera.ViewportSize;workspace.CurrentCamera.ViewportSize=nil
 local failedOpen=failedChooser:choose('MM2');workspace.CurrentCamera.ViewportSize=savedViewport
 check(not failedOpen and failedChooser.alive and player.PlayerGui:FindFirstChild('KubiHubUltimateV5')==nil,'failed hub startup leaves the chooser usable and cleans partial GUI resources');failedChooser:unload()

@@ -90,6 +90,6 @@ return function(Util)
    end
   end
  end
- function C:stopAll()self:stopFarm();self:stopCombat();if self.avatar then self.avatar:reset()end;self.aimbot=false;self.autoShot=false;self.autoGun=false;self.aura=false;self.esp=false;self.p:close()end
+ function C:stopAll()self:stopFarm();self:stopCombat();if self.avatar then self.avatar:reset()end;if self.itemESP then self.itemESP.coins=false;self.itemESP.gun=false end;self.aimbot=false;self.autoShot=false;self.autoGun=false;self.aura=false;self.esp=false;self.p:close()end
  return C
 end
