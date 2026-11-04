@@ -11,6 +11,14 @@ return function(Util,Schema,Inventory)
   self.source=schema;self.schema=transformed;self.options=options;self.bounds=Schema.bounds(transformed,options.yaw);self.history={};self.future={};self.state='PREVIEW';self.error=nil;self.revision=self.revision+1;return true
  end
  function Builder:isBusy()return self.state=='BUILDING' or self.state=='BEGINNING' or self.state=='PAUSED' or self.state=='COMMITTING' or self.state=='CANCELLING' end
+ function Builder:staticDraft(id)
+  if self:isBusy() or not self.source then return nil,'Najpierw zatrzymaj budowę i wybierz plan.' end
+  if self.source.assistantOnly or self.source.intentionalOverlap then return nil,'Ten plan pozostaje asystentem; nie jest modelem do konwersji statycznej.' end
+  local out={schemaVersion=2,id=id,name=self.source.name:sub(1,85)..' — statyczny',category='Własne projekty',elements={},connections={},geometryOnly=true,source=self.source.source}
+  for _,e in ipairs(self.source.elements) do local d=Inventory.definitions[e.material];if d and d.volume and e.class=='Part' then out.elements[#out.elements+1]=Util.copy(e) end end
+  local schema,errors=Schema.validate(out);if not schema then return nil,table.concat(errors,'; ') end
+  return schema,#self.source.elements-#schema.elements
+ end
  function Builder:edit(options,record)
   if self:isBusy() then return false,'Edycja jest zablokowana podczas budowania.' end
   if not self.source then return false,'Wybierz schemat.' end
