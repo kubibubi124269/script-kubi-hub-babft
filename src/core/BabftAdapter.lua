@@ -69,10 +69,10 @@ return function(Util,Schema,Inventory)
   return {ok=true,state=tx.state,count=#tx.objects}
  end
  function B:expectingRespawn()return self.platform.expectingRespawn and self.platform:expectingRespawn() or false end
- function B:farmStep(stage,paused)
+ function B:farmStep(stage,paused,settings)
   if not self.platform.farmStep then return {ok=false,error='Brak obsługi farmy w tym środowisku.'} end
   local generation=self.farmGeneration or 0
-  return self.platform:farmStep(stage,function()return not self.context.alive() or generation~=(self.farmGeneration or 0) end,paused)
+  return self.platform:farmStep(stage,function()return not self.context.alive() or generation~=(self.farmGeneration or 0) end,paused,settings)
  end
  function B:rig()return {ok=false,error='Mechanika WORM-a nie jest obsługiwana przez narzędzia zgodności BABFT.'} end
  function B:movement()return {ok=false,error='Ten tryb nie zmienia ustawień ruchu.'} end
