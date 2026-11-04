@@ -14,13 +14,13 @@ return function(M)
    local c=self.player.Character;local h=c and c:FindFirstChildOfClass('Humanoid');local r=c and c:FindFirstChild('HumanoidRootPart');if c and h and r and h.Health>0 then return c,h,r end
   end}
   self.adapter={mode='UNIVERSAL',capabilities={movement=true},cancel=function()end,movement=function(_,values)local _,h=self.platform:character();if not h then return {ok=false,error='Poczekaj na aktywną postać.'}end;h.WalkSpeed=values.walk;if h.UseJumpPower then h.JumpPower=values.jump else h.JumpHeight=values.jump^2/(2*workspace.Gravity)end;return {ok=true}end}
-  self.movement=M.Movement.new(self.runtime,self.adapter,self.player,self.input,self.log,self.config.data.movement);self.avatar=M.AvatarAppearance.new(self.platform,self.runtime);self.runtime:own(self.avatar)
+  self.movement=M.Movement.new(self.runtime,self.adapter,self.player,self.input,self.log,self.config.data.movement);self.avatar=M.AvatarAppearance.new(self.platform,self.runtime);self.runtime:own(self.avatar);self.avatar:bind(self.runService)
   self.ui=M.UI.new(self);self.ui.title.Text='KUBI HUB  /  UNIVERSAL'
   self.crossGui=self.ui:create('ScreenGui',{Name='KubiHubUniversalCrosshair',IgnoreGuiInset=true,ResetOnSpawn=false,DisplayOrder=80},self.player.PlayerGui);self.runtime:own(self.crossGui)
   self.cross=self.ui:create('TextLabel',{AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromOffset(48,48),Text='+',TextSize=24,Font=Enum.Font.GothamBold,TextColor3=Color3.new(1,1,1),BackgroundTransparency=1,Visible=false},self.crossGui)
   self:pages();self.ui:show('MISC');self.ui:theme();self:updateDashboard()
   self.runtime:connect(self.runService.Heartbeat,function(dt)self.fps=self.fps==0 and 1/math.max(dt,.001) or self.fps*.95+1/math.max(dt,.001)*.05;self.runtime:tick(dt)end,'Universal')
-  self.runtime:connect(self.runService.RenderStepped,function()self.movement:tick();self.avatar:render();self:applyFov()end,'Universal')
+  self.runtime:connect(self.runService.RenderStepped,function()self.movement:tick();self:applyFov()end,'Universal')
   self.runtime:connect(self.player.CharacterAdded,function()self.movement:reset();self.avatar:reset();self.ui:refreshFeatures()end,'Respawn')
   self.runtime:schedule('UniversalUI',.1,function()self.ui:tick()end)
   self.runtime:schedule('UniversalStatus',.5,function()local ok,err=self.avatar:refresh();if not ok then self.ui:toast('Postać',err,true)end;self:updateDashboard()end)
@@ -33,6 +33,18 @@ return function(M)
  end
  function A:resetFov()
   self.fovEnabled=false;for camera,value in pairs(self.cameraOriginal)do pcall(function()camera.FieldOfView=value end)end;self.cameraOriginal={}
+ end
+ function A:setZoom(mode)
+  if mode~=nil and mode~='FAR' and mode~='FIRST' then return false,'Nieznany tryb kamery.'end
+  if not mode then
+   local saved=self.zoomOriginal;self.zoomOriginal=nil;self.zoomMode=nil
+   if saved then self.player.CameraMaxZoomDistance=math.max(saved.max,self.player.CameraMinZoomDistance);self.player.CameraMinZoomDistance=saved.min;self.player.CameraMaxZoomDistance=saved.max;self.player.CameraMode=saved.mode end
+   return true
+  end
+  if not self.zoomOriginal then self.zoomOriginal={min=self.player.CameraMinZoomDistance,max=self.player.CameraMaxZoomDistance,mode=self.player.CameraMode}end
+  self.zoomMode=mode
+  if mode=='FAR' then self.player.CameraMode=Enum.CameraMode.Classic;self.player.CameraMaxZoomDistance=math.max(self.zoomDistance or 300,self.player.CameraMinZoomDistance);self.player.CameraMinZoomDistance=.5;self.player.CameraMaxZoomDistance=self.zoomDistance or 300
+  else self.player.CameraMode=Enum.CameraMode.LockFirstPerson end;return true
  end
  function A:setBright(value)
   if value and not self.bright then self.lightOriginal={};for _,key in ipairs({'Brightness','ClockTime','Ambient','OutdoorAmbient','FogEnd','GlobalShadows'})do self.lightOriginal[key]=self.lighting[key]end end
@@ -53,6 +65,11 @@ return function(M)
   ui:feature(view,'Pole widzenia',function()return self.fovEnabled end,function()if self.fovEnabled then self:resetFov()else self.fovEnabled=true;self:applyFov()end end,function(panel)ui:slider(panel,'FOV',function()return self.fov end,function(v)self.fov=v;self:applyFov()end,40,110,1)end)
   ui:feature(view,'Celownik',function()return self.cross.Visible end,function()self.cross.Visible=not self.cross.Visible end,function(panel)ui:slider(panel,'Rozmiar celownika',function()return self.cross.TextSize end,function(v)self.cross.TextSize=v end,12,40,1)end)
   ui:feature(view,'Jasny dzień — lokalnie',function()return self.bright end,function()return self:setBright(not self.bright)end,function(panel)ui:label(panel,'Lokalne oświetlenie. Wyłączenie przywraca porę, jasność, mgłę i cienie.')end)
+  self.zoomDistance=300
+  ui:feature(view,'Daleki zoom',function()return self.zoomMode=='FAR' end,function()if self.zoomMode=='FAR' then return self:setZoom(nil)else return self:setZoom('FAR')end end,function(panel)
+   ui:field(panel,'Maksymalna odległość: 20–400',self.zoomDistance,function(v)self.zoomDistance=M.Util.number(tonumber(v),300,20,400);if self.zoomMode=='FAR' then self:setZoom('FAR')end;return self.zoomDistance end,false,function()return self.zoomDistance end)
+  end)
+  ui:feature(view,'Pierwsza osoba',function()return self.zoomMode=='FIRST' end,function()if self.zoomMode=='FIRST' then return self:setZoom(nil)else return self:setZoom('FIRST')end end,function(panel)ui:label(panel,'Ustawia lokalny tryb pierwszej osoby. Wyłączenie przywraca poprzedni tryb i zoom.')end)
   local settings=ui:page('SETTINGS');local s=ui:card(settings,'Wygląd huba')
   ui:cycle(s,'Akcent',{'BLUE','PURPLE'},function()return self.config.data.ui.theme end,function(v)self.config.data.ui.theme=v;ui:theme()end)
   ui:toggle(s,'Tryb kompaktowy',function()return self.config.data.ui.compact end,function(v)self.config.data.ui.compact=v;ui:fit()end)
@@ -65,7 +82,7 @@ return function(M)
   self.info.Text=string.format('FPS %.0f\nMiejsce: %s\nLPM: użyj · PPM / ⋯: opcje\nFunkcje zaczynają wyłączone.',self.fps,tostring(game.PlaceId))
  end
  function A:stopAll()
-  self.movement:reset();self.avatar:reset();self:resetFov();self:setBright(false);self.cross.Visible=false;if self.ui then self.ui:refreshFeatures()end
+  self.movement:reset();self.avatar:reset();self:resetFov();self:setZoom(nil);self:setBright(false);self.cross.Visible=false;if self.ui then self.ui:refreshFeatures()end
  end
  function A:unload()if not self.alive then return end;self:stopAll();self.alive=false;self.runtime:close();if _G.KubiHubRuntime==self then _G.KubiHubRuntime=nil end end
  return A
