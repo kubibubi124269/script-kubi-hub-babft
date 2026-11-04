@@ -39,7 +39,7 @@ im.__newindex=function(o,k,v)
  if k=='Parent'and v and v~=previous then v.children[#v.children+1]=o end
  if o.signals[k] and previous~=v then o.signals[k]:Fire()end
 end
-Instance={new=function(class)return setmetatable({props={Name=class,ClassName=class,Visible=true,CanvasPosition=Vector2.zero,Transparency=0,AssemblyMass=10,AssemblyLinearVelocity=Vector3.zero,AssemblyAngularVelocity=Vector3.zero,Attributes={}},children={},signals={}},im)end}
+Instance={new=function(class)return setmetatable({props={Name=class,ClassName=class,Visible=true,CanvasPosition=Vector2.zero,Transparency=0,LocalTransparencyModifier=0,Size=Vector3.new(2,2,1),CFrame=CFrame.new(),HipHeight=2,AutomaticScalingEnabled=true,AssemblyMass=10,AssemblyLinearVelocity=Vector3.zero,AssemblyAngularVelocity=Vector3.zero,Attributes={}},children={},signals={}},im)end}
 function methods:IsA(c)return self.ClassName==c or c=='GuiObject'and ({Frame=true,TextButton=true,TextLabel=true,TextBox=true,ScrollingFrame=true,ViewportFrame=true})[self.ClassName]==true or c=='BasePart'and(self.ClassName=='Part'or self.ClassName=='WedgePart')end
 function methods:GetChildren()local out={};for _,c in ipairs(self.children)do if c.Parent==self then out[#out+1]=c end end;return out end
 function methods:GetDescendants()local out={};local function walk(o)for _,c in ipairs(o:GetChildren())do out[#out+1]=c;walk(c)end end;walk(self);return out end
@@ -54,6 +54,13 @@ function methods:IsDescendantOf(parent)local p=self.Parent;while p do if p==pare
 function methods:EquipTool(tool)tool.Parent=self.Parent end
 function methods:GetPivot()local r=self:FindFirstChild('HumanoidRootPart') or self.PrimaryPart or self:FindFirstChildWhichIsA('BasePart',true);return r and r.CFrame or CFrame.new()end
 function methods:PivotTo(cf)local old=self:GetPivot();local delta=cf.Position-old.Position;for _,part in ipairs(self:GetDescendants())do if part:IsA('BasePart')then part.CFrame=CFrame.new(part.Position+delta)end end;self.PivotMoves=(self.PivotMoves or 0)+1 end
+function methods:GetScale()return self.MockScale or 1 end
+function methods:ScaleTo(value)
+ if self.ScaleError then error(self.ScaleError)end
+ assert(type(value)=='number'and value>0);local ratio=value/self:GetScale();local pivot=self:GetPivot().Position
+ for _,part in ipairs(self:GetDescendants())do if part:IsA('BasePart')then part.Size=part.Size*ratio;part.CFrame=CFrame.new(pivot+(part.Position-pivot)*ratio)end end
+ self.MockScale=value;self.ScaleCalls=(self.ScaleCalls or 0)+1
+end
 function methods:Activate()self.Activations=(self.Activations or 0)+1;if self.ActivateError then error(self.ActivateError)end end
 function methods:GetAttribute(name)return self.Attributes[name]end
 function methods:SetAttribute(name,value)self.Attributes[name]=value end
@@ -68,8 +75,9 @@ function methods:GetPropertyChangedSignal(name)if not self.signals[name]then sel
 function methods:Destroy()for _,c in ipairs(self:GetChildren())do c:Destroy()end;self.Parent=nil;self.Destroyed=true end
 function methods:GetFocusedTextBox()return nil end;function methods:IsKeyDown()return false end;function methods:GetState()return {Name='Running'}end
 local function child(p,c,n)local o=Instance.new(c);o.Name=n or c;o.Parent=p;return o end
-workspace=Instance.new('Workspace');workspace.Gravity=196.2;workspace.CurrentCamera=Instance.new('Camera');workspace.CurrentCamera.ViewportSize=Vector2.new(1280,720);workspace.CurrentCamera.CFrame=CFrame.new()
-local services={};for _,name in ipairs({'Players','UserInputService','RunService','HttpService','ReplicatedStorage'})do services[name]=Instance.new(name)end
+workspace=Instance.new('Workspace');workspace.Gravity=196.2;workspace.CurrentCamera=Instance.new('Camera');workspace.CurrentCamera.ViewportSize=Vector2.new(1280,720);workspace.CurrentCamera.CFrame=CFrame.new();workspace.CurrentCamera.FieldOfView=70
+local services={};for _,name in ipairs({'Players','UserInputService','RunService','HttpService','ReplicatedStorage','Lighting'})do services[name]=Instance.new(name)end
+services.Lighting.Brightness=1;services.Lighting.ClockTime=19;services.Lighting.Ambient=Color3.new(.2,.2,.2);services.Lighting.OutdoorAmbient=Color3.new(.3,.3,.3);services.Lighting.FogEnd=500;services.Lighting.GlobalShadows=true
 local player=child(services.Players,'Player','Tester');player.UserId=123;player.DisplayName='Tester';services.Players.LocalPlayer=player;child(player,'PlayerGui','PlayerGui')
 local data=child(player,'Folder','Data');for _,name in ipairs({'WoodBlock','TitaniumBlock','MetalBlock','Seat','Dynamite'})do child(data,'IntValue',name).Value=10000 end
 local ch=Instance.new('Model');player.Character=ch;local hum=child(ch,'Humanoid');hum.Health=100;hum.MaxHealth=100;hum.WalkSpeed=21;hum.JumpPower=56;hum.JumpHeight=8;hum.UseJumpPower=true;hum.AutoRotate=true;hum.PlatformStand=false
