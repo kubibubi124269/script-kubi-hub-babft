@@ -19,7 +19,7 @@ return function(M)
   self.movement=M.Movement.new(self.runtime,self.adapter,self.player,self.input,self.log,self.config.data.movement)
   self.effects=M.Effects.new(self.clock);self.inventorySnapshot=M.Inventory.snapshot(nil,'Oczekiwanie na dane')
   self.readInventory=M.Inventory.observePlayer(self.player,self.runtime,function(snapshot)if not self.serverInventory then self.inventorySnapshot=snapshot;self.previewDirty=true end end)
-  self.ui=M.UI.new(self);self:pages();self:select('WORM_MK2');self.ui:show('FARM');self.ui:theme()
+  self.ui=M.UI.new(self);self:pages();M.QuickTools(self);self:select('WORM_MK2');self.ui:show('FARM');self.ui:theme()
   self.runtime:connect(self.player.CharacterAdded,function()if not (self.adapter.mode=='BABFT' and self.adapter:expectingRespawn() and (self.farm.state=='RUNNING' or self.farm.state=='PAUSED')) then self.farm:stop('Respawn — uruchom ponownie ręcznie.') end;self.movement:reset();if self.builder:isBusy() then self.builder:cancel('Respawn — anulowanie własnej budowy.') end;if self.babft then self.babft.buildVerified=false;self.babft.capabilities.build=false end;self.effects:clear()end,'Character')
   self.runtime:connect(self.runService.Heartbeat,function(dt)
    self.fps=self.fps==0 and 1/math.max(dt,.001) or self.fps*.94+math.min(240,1/math.max(dt,.001))*.06
@@ -344,7 +344,7 @@ return function(M)
   self.performanceInfo.Text=string.format('FPS %.1f • limit podglądu %d\nCzęstotliwość statystyk: co %.1f s\nObiekty podglądu: %d • lokalne efekty: %d',self.fps,p.previewLimit,p.statsInterval,#self.preview.parts,#self.effects.objects)
  end
  function App:stopAll()
-  self.farm:stop();self.builder:cancel();self.movement:reset();self.effects:clear();self.adapter:cancel('all');self:notify('Core','Zatrzymano moduły. Trwające żądanie serwera może jeszcze kończyć zatwierdzanie; stan sprawdzisz w Settings / Raport błędów.')
+  self.farm:stop();self.builder:cancel();self.movement:reset();self.effects:clear();self.adapter:cancel('all');if self.quickTools then self.quickTools:reset()end;self:notify('Core','Zatrzymano moduły. Trwające żądanie serwera może jeszcze kończyć zatwierdzanie; stan sprawdzisz w Settings / Raport błędów.')
  end
  function App:unload()
   if not self.alive then return end
