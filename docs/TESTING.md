@@ -2,10 +2,10 @@
 
 ## MM2 i Narzędzia
 
-1. W MM2 włącz **Autofarm → Monety / cukierki**. Wybierz typ pod PPM. Gdy w pobliżu pojawi się przedmiot, postać powinna podejść zwykłym krokiem. Przy pełnej torbie zbieranie czeka, a STOP i odrodzenie je wyłączają. Sprawdź, czy klawisze ruchu przejmują sterowanie.
+1. W MM2 włącz **Autofarm → Monety / cukierki**. Wybierz typ pod PPM. Przy **Ruch: Lot** postać powinna przemieścić się płynnie i opadać przy pobliskim przedmiocie. Przełącz na **Chód**, żeby sprawdzić zwykłe podejście. Przy pełnej torbie zbieranie czeka, a STOP i odrodzenie je wyłączają. Sprawdź, czy klawisze ruchu przejmują sterowanie.
 2. W każdym trybie otwórz **Narzędzia**. Włącz dwie linie HUD-u, zamień sepię na inny filtr, użyj stopera i minutnika oraz zapisz znacznik miejsca. Globalny STOP usuwa efekty, HUD i znacznik.
 
-Testy offline sprawdzają zwykłe polecenia ruchu i zwalnianie sterowania. Zachowanie publicznego serwera MM2 oraz skutki odbioru przedmiotów nie są potwierdzone. [Dokumentacja ruchu Roblox](https://create.roblox.com/docs/reference/engine/classes/Humanoid#Move).
+Testy offline sprawdzają ograniczoną prędkość lotu, usuwanie siły po przełączeniu trybu i zwalnianie sterowania. Zachowanie publicznego serwera MM2, fizyka lotu i odbiór przedmiotów wymagają sprawdzenia w grze. [Dokumentacja ruchu Roblox](https://create.roblox.com/docs/reference/engine/classes/Humanoid#Move).
 
 ## Steal a Brainrot
 

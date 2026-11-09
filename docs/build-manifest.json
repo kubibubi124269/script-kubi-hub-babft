@@ -139,12 +139,12 @@
     {
       "name": "MM2Platform",
       "file": "src/modules/mm2/Platform.lua",
-      "sha256": "24ff9a3ceb14d3f2964a1c4fb56d4b4e71ade4016ff35c09828ff9ffb0a527a4"
+      "sha256": "7f245d74aa715d250868f684afa858874f47e89da7a98cb8e6b74c2e15677e41"
     },
     {
       "name": "MM2Controller",
       "file": "src/modules/mm2/Controller.lua",
-      "sha256": "e462a62ba6ad8233da46025c4dd9fa83a23c53ed6f616c05ee923eec16acff38"
+      "sha256": "671571f3bea2015e20925fd90ad0194eb695d7ff483662bda97a51e566e20d08"
     },
     {
       "name": "AvatarAppearance",
@@ -179,7 +179,7 @@
     {
       "name": "MM2App",
       "file": "src/modules/mm2/Application.lua",
-      "sha256": "55626c2efabb36eb3540f97cfc30b33705a2503284019e7b21cc0e2a3ef03507"
+      "sha256": "d7a8b68caf6d2d49c8dd56dae8859cff6768db56d6989b956bfae34420901b0a"
     },
     {
       "name": "UniversalApp",
@@ -202,5 +202,5 @@
       "sha256": "fbfda1d2204301205868ce3d8490bb1dc9b9b622f69e4c021739dece2eec22f7"
     }
   ],
-  "mainSha256": "9069650cb5c6c2a90695f532d1acc80c682286e2ca9dbaef4ea59e28f5fd3e32"
+  "mainSha256": "df729d37b2067685520905d527e20d2de8ec17bcf94d611d9e8700ca1a162a70"
 }
