@@ -1,5 +1,5 @@
 {
-  "version": "6.5.0",
+  "version": "6.6.0",
   "modules": [
     {
       "name": "Util",
@@ -94,7 +94,7 @@
     {
       "name": "Version",
       "file": "src/modules/tools/Version.lua",
-      "sha256": "91d67a72f955c1f2b7787d0d41d8f2f4f467dcaa647c4000c1da80fe453e5418"
+      "sha256": "5c7e678cef97109693b4c03810fb13c843d0bccae7e5325accae5e94924965fa"
     },
     {
       "name": "Performance",
@@ -179,7 +179,7 @@
     {
       "name": "MM2App",
       "file": "src/modules/mm2/Application.lua",
-      "sha256": "d7a8b68caf6d2d49c8dd56dae8859cff6768db56d6989b956bfae34420901b0a"
+      "sha256": "7760d1e77dbd8f6161a55fdacdf68e80d724ee2f060137be51b711c1c4eaf25a"
     },
     {
       "name": "UniversalApp",
@@ -192,6 +192,11 @@
       "sha256": "af6c7e4d5b8cc03d15102ff4d0f3b42a09b934a57de6379c2f660916426318e7"
     },
     {
+      "name": "MM2Skins",
+      "file": "src/modules/mm2/Skins.lua",
+      "sha256": "3eb55dc2163778fca1aa62c17a2028143cf745a175a50e330edaf4ff46b80785"
+    },
+    {
       "name": "BrainrotApp",
       "file": "src/modules/brainrot/Application.lua",
       "sha256": "2039e3098ea820a6f615bd8fe988d415fee418210379257539eb0db4ee9b983a"
@@ -202,5 +207,5 @@
       "sha256": "fbfda1d2204301205868ce3d8490bb1dc9b9b622f69e4c021739dece2eec22f7"
     }
   ],
-  "mainSha256": "df729d37b2067685520905d527e20d2de8ec17bcf94d611d9e8700ca1a162a70"
+  "mainSha256": "fbe49531e05cd9d86c9f46bc6d6362471e61643045f290426f55325c8fdaa07f"
 }
