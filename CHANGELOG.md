@@ -1,5 +1,9 @@
 # Historia zmian
 
+## 6.4.0 — 2026-11-09
+
+Na ekranie wyboru jest osobny tryb Steal a Brainrot. AutoSteal zaczyna wyłączony. Po włączeniu przytrzymuje najbliższą widoczną akcję „Steal” w jej zwykłym zasięgu przez wymagany czas. Próba nie jest ponawiana, dopóki ten sam przycisk się nie schowa i nie pojawi ponownie. STOP, odrodzenie i zamknięcie przerywają trwającą interakcję. Przeniesienie Brainrota do bazy wykonuje gracz. Testy klienta nie potwierdzają skutku na serwerze gry.
+
 ## 6.3.0 — 2026-11-04
 
 Poprawka Headless po zgłoszeniu, że cała głowa pozostaje widoczna mimo aktywnego efektu. Teraz głowa i jej części mają lokalnie Transparency=1 oraz LocalTransparencyModifier=1. Zmiana Transparency jest korygowana zdarzeniem, a osobny etap renderowania po priorytecie Last odnawia ukrycie po kamerze. Widoczność nie zależy od modułu celowania. Wyłączenie odłącza zdarzenia i przywraca zapamiętane wartości. Geometria Korblox pozostaje bez zmian.

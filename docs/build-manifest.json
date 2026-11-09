@@ -1,5 +1,5 @@
 {
-  "version": "6.3.0",
+  "version": "6.4.0",
   "modules": [
     {
       "name": "Util",
@@ -94,7 +94,7 @@
     {
       "name": "Version",
       "file": "src/modules/tools/Version.lua",
-      "sha256": "54f4c16f4c66f2af3d2ccef3a45158bab7094f82c1e493001695467305fb2edd"
+      "sha256": "add3e2c7ee4789761667afa5bec4ed9e2e0e7e5f8c1a0364f017991ffcc05ae9"
     },
     {
       "name": "Performance",
@@ -134,7 +134,7 @@
     {
       "name": "Games",
       "file": "src/core/Games.lua",
-      "sha256": "d549c5815031508c55bdb19aa3200ae13a0944afadde4e615acd376731bb7ac5"
+      "sha256": "0d5060c38d518a8b28f82e5157ab3ac0145fe322c7b3c8b9992782da08918c42"
     },
     {
       "name": "MM2Platform",
@@ -187,10 +187,15 @@
       "sha256": "b54c6f9f474e820bc833631e31fbb24f1bc690e1c079fd97e303a3362c426c44"
     },
     {
+      "name": "BrainrotApp",
+      "file": "src/modules/brainrot/Application.lua",
+      "sha256": "dfabf0461a9c51dc67817846b271f0e5d92f77feec5eae4f8ab9dcddd2730dfd"
+    },
+    {
       "name": "Launcher",
       "file": "src/core/Launcher.lua",
-      "sha256": "e28035afa16226e96cc1bc13d266452fbe3e2223bb16be15a829d4ae2205a9e9"
+      "sha256": "fbfda1d2204301205868ce3d8490bb1dc9b9b622f69e4c021739dece2eec22f7"
     }
   ],
-  "mainSha256": "0d29a8e898ca1f3949c25953ce095904edd1b52d7097277779b26ccd81c2382a"
+  "mainSha256": "3057558b0c38633e458160cd98e9457584d10f3521e61967a5e3224c3ea6c29c"
 }

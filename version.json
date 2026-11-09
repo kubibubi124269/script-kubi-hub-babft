@@ -1,11 +1,10 @@
 {
-  "version": "6.3.0",
-  "releaseDate": "2026-11-04",
+  "version": "6.4.0",
+  "releaseDate": "2026-11-09",
   "changes": [
-    "Headless ukrywa głowę także po zmianie widoczności przez kamerę; dokładne przywracanie przezroczystości",
-    "MM2: podświetlenie monet i upuszczonej broni oraz skróty do podglądu i teleportu według wykrytej roli",
-    "Lokalne efekty: bez akcesoriów, bez twarzy, Duch i latarka",
-    "Universal: daleki zoom i wymuszona pierwsza osoba z przywracaniem ustawień"
+    "Nowy tryb Steal a Brainrot na ekranie wyboru",
+    "AutoSteal przytrzymuje widoczną akcję Steal, gdy postać jest w zasięgu, przez czas ustawiony w grze",
+    "STOP, odrodzenie i zamknięcie huba przerywają próbę"
   ],
-  "compatibility": "Efekty są lokalne. Role MM2 są rozpoznawane po widocznym wyposażeniu. Zmiany kamery i pozycji mogą być cofane przez grę. Testy offline nie potwierdzają natywnego wyglądu ani serwerowych skutków."
+  "compatibility": "AutoSteal wymaga widocznej, aktywnej akcji Steal w oryginalnej grze. Do bazy wracasz samodzielnie. O wyniku decyduje serwer gry; sprawdzono zachowanie klienta w testach offline."
 }

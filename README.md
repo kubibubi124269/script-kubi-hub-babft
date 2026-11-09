@@ -1,10 +1,12 @@
-# KUBI HUB V6.3.0 — BABFT, MM2 i Universal
+# KUBI HUB V6.4.0 — BABFT, MM2, Steal a Brainrot i Universal
 
-Ten sam loader otwiera wybór BABFT / MM2 / Universal. Moduły zaczynają wyłączone.
+Ten sam loader otwiera wybór BABFT / MM2 / Steal a Brainrot / Universal. Moduły zaczynają wyłączone.
 
 ```lua
 loadstring(game:HttpGet("https://raw.githubusercontent.com/kubibubi124269/script-kubi-hub-babft/main/main.lua"))()
 ```
+
+**Nowe w V6.4:** Dołącz do [Steal a Brainrot](https://www.roblox.com/games/109983668079237/Steal-a-Brainrot), wybierz jego tryb i włącz AutoSteal. Gdy podejdziesz w zasięg widocznej akcji „Steal”, hub przytrzyma przycisk przez czas ustawiony w grze. Do bazy wracasz samodzielnie. STOP, odrodzenie i zamknięcie przerywają próbę. O wyniku decyduje serwer gry; przebieg sprawdzono w testach offline. [Test w grze](docs/TESTING.md#steal-a-brainrot).
 
 **Poprawka V6.3:** Headless ukrywa również samą głowę i odnawia ukrycie po kamerze. Dodano 12 narzędzi: oznaczenia przedmiotów i skróty ról MM2, lokalne efekty oraz dwa tryby zoomu Universal. [Szczegóły i ograniczenia](docs/V6.3-REPORT.md). Potwierdzenie wyglądu Headless nadal wymaga testu w grze.
 
@@ -22,7 +24,7 @@ MM2 zachowuje Aimbot, Auto Shot, ESP ról, Auto Gun, Knife Aura, obieg z własny
 
 Nowe w MM2: podgląd gracza z przywróceniem kamery, teleport do wybranego gracza i ostrzeżenie o bliskim Murdererze rozpoznanym po nożu. Opcje nicku i odległości są pod PPM.
 
-Sprawdzenie: **86 testów logiki, 210 sprawdzeń klienta, 4 importy modeli, 38 modułów**, Luau 0.744. Bez natywnych testów renderowania, fizyki ani nagród.
+Sprawdzenie: testy logiki i klienta, 4 importy modeli, 39 modułów (Luau 0.744). Bez natywnych testów renderowania, fizyki ani skutków kradzieży.
 
 [Raport V6.1](docs/V6.1-REPORT.md) · [Testy w grze](docs/TESTING.md) · [Źródła modeli](docs/COMMUNITY-MODELS.md) · [Historia](CHANGELOG.md)
 

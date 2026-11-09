@@ -1,4 +1,14 @@
-# Testy V6.3.0
+# Testy V6.4.0
+
+## Steal a Brainrot
+
+1. Uruchom dotychczasowy loader w oryginalnym Steal a Brainrot. Sprawdź wersję V6.4.0 i wybierz nowy tryb. AutoSteal powinien być wyłączony.
+2. Włącz AutoSteal i podejdź do celu. Jeśli „Steal” było widoczne przed otwarciem huba, odejdź i podejdź jeszcze raz. Gdy gra pokaże „Steal”, sprawdź, czy rozpoczyna się przytrzymanie. Potem samodzielnie wróć do bazy. Sygnał interakcji nie potwierdza, że serwer przekazał Brainrota.
+3. Podczas przytrzymania użyj STOP lub odejdź poza zasięg. Przytrzymanie powinno się zakończyć. Funkcja nie powinna nacisnąć „Buy”. Odrodzenie ma wyłączyć AutoSteal.
+
+Testy offline sprawdzają wybór gry, obsługę widocznych akcji Roblox, zasięg, czas, przerwę między próbami i sprzątanie. Nie uruchamiają publicznego serwera Steal a Brainrot. [Dokumentacja akcji Roblox](https://create.roblox.com/docs/reference/engine/classes/ProximityPrompt).
+
+## V6.3.0
 
 Offline: 86 testów logiki, 210 sprawdzeń klienta, 4 importy i 38 modułów — bez błędów. Natywnego wyglądu nadal nie potwierdzono.
 

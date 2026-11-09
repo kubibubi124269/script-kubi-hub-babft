@@ -1,5 +1,5 @@
 return function(Util)
- local Version={current='6.3.0',releaseDate='2026-11-04',url='https://raw.githubusercontent.com/kubibubi124269/script-kubi-hub-babft/main/version.json'}
+ local Version={current='6.4.0',releaseDate='2026-11-09',url='https://raw.githubusercontent.com/kubibubi124269/script-kubi-hub-babft/main/version.json'}
  function Version.validate(raw)
   if type(raw)~='table' or not Util.semver(raw.version) or type(raw.releaseDate)~='string' or not raw.releaseDate:match('^%d%d%d%d%-%d%d%-%d%d$') then return nil,'Nieprawidłowe informacje o wersji.' end
   if type(raw.changes)~='table' or #raw.changes>30 then return nil,'Nieprawidłowa lista zmian.' end
