@@ -159,6 +159,39 @@ do
  mm:stopAll();check(next(mm.platform.itemHighlights)==nil and not c.itemESP.coins and not c.itemESP.gun,'MM2 STOP clears both item overlays and their toggles')
  for _,object in ipairs(targets)do object:Destroy()end;sheriff:Destroy()
 end
+do
+ local s=mm.skins
+ local knifePreview=s.world:GetChildren()
+ check(#knifePreview==6 and s.world.Parent.Name=='WeaponSkinPreview' and not s.enabled,'skin studio starts with a knife model in the UI and its in-hand tint disabled')
+ button(mm,'Styl: Zorza').Activated:Fire()
+ check(s.style=='Rubin' and s.world:GetChildren()[1]==knifePreview[1],'changing style recolors the same preview geometry')
+ local angle=s.angle;button(mm,'Obróć podgląd').Activated:Fire();check(s.angle==(angle+45)%360,'preview rotation only changes the viewport camera angle')
+ button(mm,'Model: Nóż').Activated:Fire()
+ check(s.kind=='Gun' and #s.world:GetChildren()==7 and knifePreview[1].Parent==nil and mm.platform:tool('Gun')==nil,'switching to the gun builds a display model without creating an inventory weapon')
+ button(mm,'Załóż broń z tej rundy').Activated:Fire()
+ check(mm.platform:tool('Gun')==nil and mm.ui.statusInfo.Text:find('Brak własnej broni',1,true)~=nil,'equip reports a missing owned tool without creating one')
+
+ local gun=child(backpack,'Tool','Gun')
+ local handle=child(gun,'MeshPart','Handle');local original=Color3.fromRGB(25,39,81);handle.Color=original
+ local hidden=child(gun,'Part','Invisible');hidden.Transparency=1
+ local enemyKnife=enemyChar:FindFirstChild('Knife');local foreign=child(enemyKnife,'Part','Handle')
+ button(mm,'Przymierz styl — lokalnie  OFF').Activated:Fire()
+ check(s.enabled and not s.folder and gun.Parent==backpack,'armed cosmetic waits for the player to equip their own gun')
+ button(mm,'Załóż broń z tej rundy').Activated:Fire()
+ local tint=s.tint[handle]
+ check(gun.Parent==mmCharacter and not gun.Activations and tint and tint.Adornee==handle and tint.DepthMode==Enum.HighlightDepthMode.Occluded,'equip moves only an existing round weapon and adds a local visual overlay')
+ check(handle.Color==original and not s.tint[hidden] and not s.tint[foreign] and #s.folder:GetChildren()==1,'style leaves the original skin and other tools untouched and skips invisible parts')
+ local selected=s.style;button(mm,'Losuj styl').Activated:Fire()
+ check(s.style~=selected and s.tint[handle]==tint and #s.folder:GetChildren()==1,'selecting another look updates the existing effect without stacking objects')
+ gun.Parent=backpack;mm.runtime.schedules.MM2Skins.fn()
+ check(not s.folder and tint.Parent==nil and s.enabled,'holstering removes the overlay while keeping the selected style ready')
+ button(mm,'Załóż broń z tej rundy').Activated:Fire();local tinted=s.tint[handle]
+ player.CharacterAdded:Fire(mmCharacter)
+ check(tinted and not s.enabled and tinted.Parent==nil,'respawn disables and removes all temporary weapon effects')
+ button(mm,'Przymierz styl — lokalnie  OFF').Activated:Fire();tinted=s.tint[handle]
+ mm:stopAll();check(tinted and tinted.Parent==nil and not s.enabled and handle.Color==original,'global STOP removes the tint and preserves the original weapon appearance')
+ foreign:Destroy();gun:Destroy()
+end
 check(mm.ui.pages.QUICK~=nil and mm.quickTools~=nil,'MM2 has the same grouped quick tools as the other modes')
 mm:unload();check(services.RunService.RenderBindings.KubiHubAvatarVisibility==nil,'MM2 unload removes the dedicated Headless render binding');check(mm.runtime:counts().connections==0 and mm.ui.gui.Parent==nil and next(mm.platform.highlights)==nil and services.RunService.RenderBindings.KubiHubMM2Aim==nil and services.RunService.RenderBindings.KubiHubMM2FarmMotion==nil,'MM2 unload removes GUI, listeners, movement/aim bindings and local effects')
 local failedChooser=openLauncher();local savedViewport=workspace.CurrentCamera.ViewportSize;workspace.CurrentCamera.ViewportSize=nil

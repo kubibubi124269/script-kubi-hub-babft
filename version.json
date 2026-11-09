@@ -1,10 +1,10 @@
 {
-  "version": "6.5.0",
+  "version": "6.6.0",
   "releaseDate": "2026-11-09",
   "changes": [
-    "MM2: płynny lot do pobliskich monet lub cukierków zamiast teleportów farmy, z opcją zwykłego chodu",
-    "20 funkcji w zakładce Narzędzia we wszystkich trybach: HUD, filtry obrazu, stoper, minutnik i znacznik",
-    "Steal a Brainrot: AutoSteal obsługuje widoczną akcję Steal w jej zwykłym zasięgu"
+    "MM2: Studio skórek z podglądem 3D noża i pistoletu oraz sześcioma lokalnymi stylami",
+    "Przymiarka koloru na widocznej broni z rundy i skrót do jej założenia",
+    "Schowanie broni, STOP, odrodzenie lub wyjście usuwa lokalny efekt"
   ],
-  "compatibility": "MM2 zbiera pobliskie przedmioty trybem Lot lub Chód. Skutki zbierania i decyzje serwera wymagają sprawdzenia w grze. AutoSteal wymaga widocznej akcji Steal; gracz sam wraca do bazy."
+  "compatibility": "Modele i kolory są widoczne lokalnie. Hub nie dodaje skórek do ekwipunku. Rzeczywiste wymiany odbywają się w MM2."
 }

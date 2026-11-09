@@ -1,4 +1,12 @@
-# Testy V6.5.0
+# Testy V6.6.0
+
+## Studio skórek MM2
+
+1. W **MM2 → Misc → Studio skórek MM2** przełącz model, zmień styl i obróć podgląd. Model ma pojawić się w oknie.
+2. Bez wybranej broni kliknij **Załóż broń z tej rundy**. Jeśli gra nie dała jej w rundzie, hub pokaże komunikat o braku broni.
+3. W odpowiedniej rundzie załóż własną broń i włącz **Przymierz styl — lokalnie**. Sprawdź kolor, zmianę stylu i wyłączenie. Schowaj broń lub użyj STOP: tymczasowy efekt powinien zniknąć.
+
+Testy offline sprawdzają cykl życia podglądu, istniejące narzędzia gracza i sprzątanie nakładki. Nie sprawdzają natywnego renderowania ani wymiany na serwerze. [ViewportFrame](https://create.roblox.com/docs/reference/engine/classes/ViewportFrame) · [Highlight](https://create.roblox.com/docs/reference/engine/classes/Highlight).
 
 ## MM2 i Narzędzia
 
