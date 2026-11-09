@@ -1,6 +1,6 @@
 local N={}
-N.order={'FARM','TROLLING','TELEPORT','FIGHT','MISC','SETTINGS'}
-N.titles={FARM='Autofarm',TROLLING='Trolling',TELEPORT='Teleport',FIGHT='Fight',MISC='Misc',SETTINGS='Ustawienia'}
+N.order={'FARM','TROLLING','TELEPORT','FIGHT','MISC','QUICK','SETTINGS'}
+N.titles={FARM='Autofarm',TROLLING='Trolling',TELEPORT='Teleport',FIGHT='Fight',MISC='Misc',QUICK='Narzędzia',SETTINGS='Ustawienia'}
 N.aliases={HOME='SETTINGS',PRO='SETTINGS',MOVEMENT='MISC',PLAYER='TROLLING',BUILDER='MISC',TOOLS='MISC',SCHEMATICS='MISC',SHAPES='MISC',CIRCLE='MISC',COMBAT='FIGHT',STATS='SETTINGS',DEBUG='SETTINGS',PERFORMANCE='SETTINGS'}
 function N.resolve(id)return N.aliases[id] or id end
 function N.rank(id)for i,v in ipairs(N.order) do if id==v then return i end end;return 99 end
