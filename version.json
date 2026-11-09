@@ -1,10 +1,10 @@
 {
-  "version": "6.4.0",
+  "version": "6.5.0",
   "releaseDate": "2026-11-09",
   "changes": [
-    "Nowy tryb Steal a Brainrot na ekranie wyboru",
-    "AutoSteal przytrzymuje widoczną akcję Steal, gdy postać jest w zasięgu, przez czas ustawiony w grze",
-    "STOP, odrodzenie i zamknięcie huba przerywają próbę"
+    "MM2: płynny lot do pobliskich monet lub cukierków zamiast teleportów farmy, z opcją zwykłego chodu",
+    "20 funkcji w zakładce Narzędzia we wszystkich trybach: HUD, filtry obrazu, stoper, minutnik i znacznik",
+    "Steal a Brainrot: AutoSteal obsługuje widoczną akcję Steal w jej zwykłym zasięgu"
   ],
-  "compatibility": "AutoSteal wymaga widocznej, aktywnej akcji Steal w oryginalnej grze. Do bazy wracasz samodzielnie. O wyniku decyduje serwer gry; sprawdzono zachowanie klienta w testach offline."
+  "compatibility": "MM2 zbiera pobliskie przedmioty trybem Lot lub Chód. Skutki zbierania i decyzje serwera wymagają sprawdzenia w grze. AutoSteal wymaga widocznej akcji Steal; gracz sam wraca do bazy."
 }

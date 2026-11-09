@@ -1,4 +1,13 @@
-# Funkcje V6.4.0
+# Funkcje V6.5.0
+
+## 6.5.0 — Narzędzia w każdym trybie
+
+- **HUD (7):** FPS, czas sesji, pozycja XYZ, zdrowie, prędkość, liczba graczy i odległość do znacznika. Każdą linię można włączyć osobno.
+- **Filtry (6):** czarno-biały, sepia, wyższy kontrast, nasycone kolory, chłodny obraz i przyciemnienie. Jeden filtr naraz.
+- **Czas (4):** stoper, zapis międzyczasu, reset stopera i minutnik z powiadomieniem. Czas minutnika ustawisz pod PPM / ⋯.
+- **Znacznik (3):** zapisz bieżącą pozycję, pokaż lub schowaj etykietę i usuń znacznik. To wskazówka widoczna u Ciebie.
+
+**MM2:** w zakładce Autofarm wybierz monety, cukierki lub oba typy. Postać leci do pobliskich celów lub podchodzi w trybie **Chód**. Klawisze ruchu mają pierwszeństwo, a zablokowane cele są czasowo pomijane.
 
 ## 6.4.0 — Steal a Brainrot
 
