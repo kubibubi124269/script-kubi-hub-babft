@@ -1,4 +1,10 @@
-# Funkcje V6.3.0
+# Funkcje V6.4.0
+
+## 6.4.0 — Steal a Brainrot
+
+- Osobny tryb z przełącznikiem **AutoSteal** oraz stanem ostatniej próby.
+- Gdy gra pokazuje aktywną akcję kradzieży w zasięgu, AutoSteal przytrzymuje ją zgodnie z czasem gry. Wybiera najbliższą akcję i robi przerwę pomiędzy próbami.
+- **STOP** lub wyjście z huba od razu zwalnia przycisk. AutoSteal wyłącza się po odrodzeniu. Brainrota zanosisz do bazy samodzielnie.
 
 ## 6.3.0 — 2026-11-04
 
