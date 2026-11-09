@@ -27,7 +27,7 @@ return function(M)
    if not ok then c:stopFarm();c.lastError=tostring(err);self.log:error('MM2 Farm',err);self.ui:toast('MM2 Farm',err,true);self.ui:refreshFeatures()end
   end)
   self.runtime:own({Destroy=function()self.runService:UnbindFromRenderStep('KubiHubMM2FarmMotion')end})
-  self.runtime:connect(self.player.CharacterAdded,function()self.controller:stopFarm();self.controller:stopCombat();self.avatar:reset();self.movement:reset();self.effects:clear();self.ui:refreshFeatures()end,'Respawn')
+  self.runtime:connect(self.player.CharacterAdded,function()self.controller:stopFarm();self.controller:stopCombat();self.avatar:reset();self.movement:reset();self.effects:clear();self.skins:reset();self.ui:refreshFeatures()end,'Respawn')
   self.runtime:schedule('MM2Controllers',.05,function(dt)
    local ok,err=pcall(function()self.controller:tick(dt)end)
    if not ok then self.controller:stopAll();self.log:error('MM2',err);self.ui:toast('MM2',err,true);self.ui:refreshControls() end
@@ -94,6 +94,7 @@ return function(M)
    ui:label(panel,'Do 40 najbliższych rzeczywistych przedmiotów. Nie uruchamia zbierania.')
   end)
   ui:feature(items,'Podświetl upuszczony pistolet',function()return c.itemESP.gun end,function()c.itemESP.gun=not c.itemESP.gun;self.platform:updateItems(c.itemESP)end,function(panel)ui:label(panel,'Oznacza rzeczywisty GunDrop na mapie, gdy jest dostępny.')end)
+  self.skins=M.MM2Skins(self,players)
   local roles=ui:card(players,'Szybki podgląd ról')
   local locations=ui:card(ui:page('TELEPORT'),'Skróty do graczy')
   for _,row in ipairs({{'Murderer','Murderera'},{'Sheriff','Sheriffa'}})do local role,label=row[1],row[2]
@@ -124,6 +125,7 @@ return function(M)
  function A:updateDashboard()
   self.ui:refreshFeatures()
   self.platform:updateWatch()
+  self.skins:updateLabel()
   if self.threatInfo then local person,distance=self.platform:nearestMurderer();self.threatInfo.Visible=self.proximity;self.threatInfo.Text=person and (distance<=self.alertDistance and 'UWAGA: ' or '')..person.player.Name..' · '..math.floor(distance)..' studów' or 'Brak gracza z wykrytym nożem.';self.threatInfo.TextColor3=person and distance<=self.alertDistance and self.ui.palette.red or self.ui.palette.muted end
   local c=self.controller;local roles={};for _,p in ipairs(self.platform:people()) do roles[#roles+1]=p.player.Name..': '..p.role end
   self.ui.subtitle.Text='V'..M.Version.current..'  •  MURDER MYSTERY 2'
@@ -134,7 +136,7 @@ return function(M)
   self.rolesInfo.Text=#roles>0 and table.concat(roles,'\n') or 'Brak innych aktywnych postaci.'
   if self.ui.current=='SETTINGS' then self.debugBox.Text=self:report() end
  end
- function A:stopAll()self.controller:stopAll();self.proximity=false;if self.threatInfo then self.threatInfo.Visible=false end;self.movement:reset();self.effects:clear();if self.quickTools then self.quickTools:reset()end;if self.ui then self.ui:refreshControls();self:notify('MM2','Zatrzymano funkcje, przywrócono kamerę i wyczyszczono efekty.') end end
+ function A:stopAll()self.controller:stopAll();self.proximity=false;if self.threatInfo then self.threatInfo.Visible=false end;self.movement:reset();self.effects:clear();if self.skins then self.skins:reset()end;if self.quickTools then self.quickTools:reset()end;if self.ui then self.ui:refreshControls();self:notify('MM2','Zatrzymano funkcje, przywrócono kamerę i wyczyszczono efekty.') end end
  function A:unload()if not self.alive then return end;self:stopAll();self.alive=false;self.runtime:close();if _G.KubiHubRuntime==self then _G.KubiHubRuntime=nil end end
  return A
 end
