@@ -1,6 +1,6 @@
 return function(M)
  local A={};A.__index=A;A.run=M.Application.run;A.notify=M.Application.notify;A.copy=M.Application.copy
- local N={order={'MISC','PLAYER','CAMERA','TELEPORT','SETTINGS'},titles={MISC='Główne',PLAYER='Postać',CAMERA='Widok',TELEPORT='Teleport',SETTINGS='Ustawienia'},matches=M.Navigation.matches}
+ local N={order={'MISC','PLAYER','CAMERA','TELEPORT','QUICK','SETTINGS'},titles={MISC='Główne',PLAYER='Postać',CAMERA='Widok',TELEPORT='Teleport',QUICK='Narzędzia',SETTINGS='Ustawienia'},matches=M.Navigation.matches}
  function N.resolve(id)return id=='HOME' and 'MISC' or id=='DEBUG' and 'SETTINGS' or id end
  function N.rank(id)for i,key in ipairs(N.order)do if id==key then return i end end;return 99 end
  function A.new(onCreating)
@@ -18,7 +18,7 @@ return function(M)
   self.ui=M.UI.new(self);self.ui.title.Text='KUBI HUB  /  UNIVERSAL'
   self.crossGui=self.ui:create('ScreenGui',{Name='KubiHubUniversalCrosshair',IgnoreGuiInset=true,ResetOnSpawn=false,DisplayOrder=80},self.player.PlayerGui);self.runtime:own(self.crossGui)
   self.cross=self.ui:create('TextLabel',{AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromOffset(48,48),Text='+',TextSize=24,Font=Enum.Font.GothamBold,TextColor3=Color3.new(1,1,1),BackgroundTransparency=1,Visible=false},self.crossGui)
-  self:pages();self.ui:show('MISC');self.ui:theme();self:updateDashboard()
+  self:pages();M.QuickTools(self);self.ui:show('MISC');self.ui:theme();self:updateDashboard()
   self.runtime:connect(self.runService.Heartbeat,function(dt)self.fps=self.fps==0 and 1/math.max(dt,.001) or self.fps*.95+1/math.max(dt,.001)*.05;self.runtime:tick(dt)end,'Universal')
   self.runtime:connect(self.runService.RenderStepped,function()self.movement:tick();self:applyFov()end,'Universal')
   self.runtime:connect(self.player.CharacterAdded,function()self.movement:reset();self.avatar:reset();self.ui:refreshFeatures()end,'Respawn')
@@ -82,7 +82,7 @@ return function(M)
   self.info.Text=string.format('FPS %.0f\nMiejsce: %s\nLPM: użyj · PPM / ⋯: opcje\nFunkcje zaczynają wyłączone.',self.fps,tostring(game.PlaceId))
  end
  function A:stopAll()
-  self.movement:reset();self.avatar:reset();self:resetFov();self:setZoom(nil);self:setBright(false);self.cross.Visible=false;if self.ui then self.ui:refreshFeatures()end
+  self.movement:reset();self.avatar:reset();self:resetFov();self:setZoom(nil);self:setBright(false);self.cross.Visible=false;if self.quickTools then self.quickTools:reset()end;if self.ui then self.ui:refreshFeatures()end
  end
  function A:unload()if not self.alive then return end;self:stopAll();self.alive=false;self.runtime:close();if _G.KubiHubRuntime==self then _G.KubiHubRuntime=nil end end
  return A
