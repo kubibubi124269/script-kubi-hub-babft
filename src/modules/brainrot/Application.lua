@@ -1,8 +1,8 @@
 return function(M)
  local A={};A.__index=A;A.run=M.Application.run
- local N={order={'STEAL','SETTINGS'},titles={STEAL='AutoSteal',SETTINGS='Ustawienia'},matches=M.Navigation.matches}
+ local N={order={'STEAL','QUICK','SETTINGS'},titles={STEAL='AutoSteal',QUICK='Narzędzia',SETTINGS='Ustawienia'},matches=M.Navigation.matches}
  function N.resolve(id)return id=='HOME' and 'STEAL' or id=='DEBUG' and 'SETTINGS' or id end
- function N.rank(id)return id=='STEAL' and 1 or 2 end
+ function N.rank(id)return id=='STEAL' and 1 or id=='QUICK' and 2 or 3 end
 
  local function normalize(text)
   return (text:lower():gsub('%s+',' '):match('^%s*(.-)%s*$'))
@@ -47,13 +47,13 @@ return function(M)
   end)
   self.state=ui:label(home,'AutoSteal wyłączony.')
   self.last=ui:label(home,'Ostatnia próba: —')
-  ui:button(home,'STOP / wyłącz AutoSteal',function()self:stopAll()end)
+  ui:button(home,'STOP / wyłącz AutoSteal',function()self:setEnabled(false)end)
   local settings=ui:card(ui:page('SETTINGS'),'Sesja')
   ui:button(settings,'Wróć do wyboru huba',function()self:unload();_G.KubiHubRuntime=M.Launcher.new()end)
   ui:button(settings,'Wyłącz hub',function()self:unload()end)
   ui.statusBody=ui:card(ui:page('SETTINGS'),'Ostatni komunikat')
   ui.statusInfo=ui:label(ui.statusBody,'Gotowy.')
-  ui:show('STEAL')
+  M.QuickTools(self);ui:show('STEAL')
 
   self.runtime:connect(prompts.PromptShown,function(prompt)
    if not self.shown[prompt] and isSteal(prompt) then
@@ -69,11 +69,11 @@ return function(M)
    local active=self.active
    if active and active.prompt==prompt and player==self.player then active.triggered=true end
   end,'AutoSteal')
-  self.runtime:connect(self.player.CharacterAdded,function()self:stopAll('Odrodzenie. Włącz AutoSteal ponownie.')end,'AutoSteal')
+  self.runtime:connect(self.player.CharacterAdded,function()self:setEnabled(false,'Odrodzenie. Włącz AutoSteal ponownie.')end,'AutoSteal')
   self.runtime:connect(game:GetService('RunService').Heartbeat,function(dt)self.runtime:tick(dt)end,'Brainrot')
   self.runtime:schedule('AutoSteal',.05,function(_,now)
    local ok,err=pcall(self.update,self,now)
-   if not ok then self:stopAll('AutoSteal przerwany przez błąd.');self.runtime.errors('AutoSteal',err)end
+   if not ok then self:setEnabled(false,'AutoSteal przerwany przez błąd.');self.runtime.errors('AutoSteal',err)end
   end)
   self.runtime:schedule('BrainrotUI',.1,function()ui:tick()end)
   return self
@@ -120,7 +120,7 @@ return function(M)
   if not self.enabled then return end
   local model,root=character(self.player)
   if not root then
-   self:stopAll('Brak aktywnej postaci. Włącz AutoSteal ponownie po odrodzeniu.')
+   self:setEnabled(false,'Brak aktywnej postaci. Włącz AutoSteal ponownie po odrodzeniu.')
    return
   end
   local active=self.active
@@ -149,10 +149,10 @@ return function(M)
   self.active={prompt=closest,character=model,untilAt=now+duration+.1}
   self.state.Text='Przytrzymuję „Steal”…'
   local ok,err=pcall(function()closest:InputHoldBegin()end)
-  if not ok then self:stopAll('Gra nie przyjęła próby AutoSteal.');self.runtime.errors('AutoSteal',err)end
+  if not ok then self:setEnabled(false,'Gra nie przyjęła próby AutoSteal.');self.runtime.errors('AutoSteal',err)end
  end
 
- function A:stopAll(reason)self:setEnabled(false,reason)end
+ function A:stopAll()self:setEnabled(false);if self.quickTools then self.quickTools:reset()end end
  function A:unload()
   if not self.alive then return end
   self:stopAll();self.alive=false;self.runtime:close();table.clear(self.shown)

@@ -1,5 +1,5 @@
 {
-  "version": "6.4.0",
+  "version": "6.5.0",
   "modules": [
     {
       "name": "Util",
@@ -94,7 +94,7 @@
     {
       "name": "Version",
       "file": "src/modules/tools/Version.lua",
-      "sha256": "add3e2c7ee4789761667afa5bec4ed9e2e0e7e5f8c1a0364f017991ffcc05ae9"
+      "sha256": "91d67a72f955c1f2b7787d0d41d8f2f4f467dcaa647c4000c1da80fe453e5418"
     },
     {
       "name": "Performance",
@@ -124,7 +124,7 @@
     {
       "name": "Navigation",
       "file": "src/ui/Navigation.lua",
-      "sha256": "84e1a531e5db9224a2677eaa92115f19bea42abebff968573b4e543282151245"
+      "sha256": "70cdbacb1fe010441e66780fb4e443bf231bc32db2b193093e97a716d194d5f4"
     },
     {
       "name": "MM2Navigation",
@@ -139,12 +139,12 @@
     {
       "name": "MM2Platform",
       "file": "src/modules/mm2/Platform.lua",
-      "sha256": "24ff9a3ceb14d3f2964a1c4fb56d4b4e71ade4016ff35c09828ff9ffb0a527a4"
+      "sha256": "7f245d74aa715d250868f684afa858874f47e89da7a98cb8e6b74c2e15677e41"
     },
     {
       "name": "MM2Controller",
       "file": "src/modules/mm2/Controller.lua",
-      "sha256": "a38bf7f10affc4bd7ea8f709441d66e5d282bba736abcb2c2e01f057dd9f013e"
+      "sha256": "671571f3bea2015e20925fd90ad0194eb695d7ff483662bda97a51e566e20d08"
     },
     {
       "name": "AvatarAppearance",
@@ -174,22 +174,27 @@
     {
       "name": "Application",
       "file": "src/core/Application.lua",
-      "sha256": "2f3caacebb1d04a399a2b32da50dc43323db24a07b98e12642beb3060a40aeee"
+      "sha256": "b2908ed49a5cb6b6442f087a83a0fc2a3bc40c3471f3af60c158c24d07db6243"
     },
     {
       "name": "MM2App",
       "file": "src/modules/mm2/Application.lua",
-      "sha256": "9b6242893b8884d96596b42ccbcc1c305868c3dc3d41eac645b9dd9cb3aeab20"
+      "sha256": "d7a8b68caf6d2d49c8dd56dae8859cff6768db56d6989b956bfae34420901b0a"
     },
     {
       "name": "UniversalApp",
       "file": "src/modules/tools/Universal.lua",
-      "sha256": "b54c6f9f474e820bc833631e31fbb24f1bc690e1c079fd97e303a3362c426c44"
+      "sha256": "231b150d60c6146a562ac8d0e401712b66ea466c1b7c6896e25ae7830f8ec31f"
+    },
+    {
+      "name": "QuickTools",
+      "file": "src/ui/QuickTools.lua",
+      "sha256": "af6c7e4d5b8cc03d15102ff4d0f3b42a09b934a57de6379c2f660916426318e7"
     },
     {
       "name": "BrainrotApp",
       "file": "src/modules/brainrot/Application.lua",
-      "sha256": "dfabf0461a9c51dc67817846b271f0e5d92f77feec5eae4f8ab9dcddd2730dfd"
+      "sha256": "2039e3098ea820a6f615bd8fe988d415fee418210379257539eb0db4ee9b983a"
     },
     {
       "name": "Launcher",
@@ -197,5 +202,5 @@
       "sha256": "fbfda1d2204301205868ce3d8490bb1dc9b9b622f69e4c021739dece2eec22f7"
     }
   ],
-  "mainSha256": "3057558b0c38633e458160cd98e9457584d10f3521e61967a5e3224c3ea6c29c"
+  "mainSha256": "df729d37b2067685520905d527e20d2de8ec17bcf94d611d9e8700ca1a162a70"
 }

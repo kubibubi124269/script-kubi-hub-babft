@@ -13,12 +13,21 @@ return function(M)
   self.adapter={mode='MM2',capabilities={movement=self.platform.allowed},cancel=function()end}
   self.adapter.movement=function(_,values)local _,h=self.platform:character();if not self.platform.allowed or not h then return {ok=false,error='Brak aktywnej postaci MM2.'} end;h.WalkSpeed=values.walk;if h.UseJumpPower then h.JumpPower=values.jump else h.JumpHeight=values.jump^2/(2*workspace.Gravity) end;return {ok=true}end
   self.movement=M.Movement.new(self.runtime,self.adapter,self.player,self.input,self.log,self.config.data.movement);self.effects=M.Effects.new(self.clock)
-  self.ui=M.UI.new(self);self.ui.title.Text='KUBI HUB  /  MM2';self:pages();self.ui:show('FARM');self.ui:theme();self:updateDashboard()
+  self.ui=M.UI.new(self);self.ui.title.Text='KUBI HUB  /  MM2';self:pages();M.QuickTools(self);self.ui:show('FARM');self.ui:theme();self:updateDashboard()
   self.runtime:connect(self.runService.Heartbeat,function(dt)self.fps=self.fps==0 and 1/math.max(dt,.001) or self.fps*.95+1/math.max(dt,.001)*.05;self.runtime:tick(dt)end,'MM2')
   self.runtime:connect(self.runService.RenderStepped,function()self.movement:tick()end,'Movement')
   self.runService:BindToRenderStep('KubiHubMM2Aim',Enum.RenderPriority.Camera.Value+1,function(dt)if self.alive then local ok,err=pcall(function()self.controller:aimTick(dt)end);if not ok then self.controller.aimbot=false;self.controller.autoShot=false;self.log:error('Aim',err);self.ui:toast('Aim',err,true);self.ui:refreshControls() end end end)
   self.runtime:own({Destroy=function()self.runService:UnbindFromRenderStep('KubiHubMM2Aim')end})
-  self.runtime:connect(self.player.CharacterAdded,function()self.controller:stopCombat();self.avatar:reset();self.controller.current=nil;self.controller.coins={};self.controller.scannedAt=-math.huge;self.movement:reset();self.effects:clear()end,'Respawn')
+  local manualKeys={Enum.KeyCode.W,Enum.KeyCode.A,Enum.KeyCode.S,Enum.KeyCode.D,Enum.KeyCode.Up,Enum.KeyCode.Down,Enum.KeyCode.Left,Enum.KeyCode.Right,Enum.KeyCode.Space}
+  self.runService:BindToRenderStep('KubiHubMM2FarmMotion',Enum.RenderPriority.Character.Value+1,function()
+   local c=self.controller;if not self.alive or not c.farming then return end
+   local manual=self.input:GetFocusedTextBox()~=nil
+   for _,key in ipairs(manualKeys)do if self.input:IsKeyDown(key) then manual=true;break end end
+   local ok,err=pcall(c.farmMotionTick,c,manual)
+   if not ok then c:stopFarm();c.lastError=tostring(err);self.log:error('MM2 Farm',err);self.ui:toast('MM2 Farm',err,true);self.ui:refreshFeatures()end
+  end)
+  self.runtime:own({Destroy=function()self.runService:UnbindFromRenderStep('KubiHubMM2FarmMotion')end})
+  self.runtime:connect(self.player.CharacterAdded,function()self.controller:stopFarm();self.controller:stopCombat();self.avatar:reset();self.movement:reset();self.effects:clear();self.ui:refreshFeatures()end,'Respawn')
   self.runtime:schedule('MM2Controllers',.05,function(dt)
    local ok,err=pcall(function()self.controller:tick(dt)end)
    if not ok then self.controller:stopAll();self.log:error('MM2',err);self.ui:toast('MM2',err,true);self.ui:refreshControls() end
@@ -29,16 +38,16 @@ return function(M)
  end
  function A:pages()
   local ui=self.ui;local c=self.controller;self:extraPages()
-  local farm=ui:page('FARM');local f=ui:card(farm,'Autofarma MM2','Zbiera przedmioty z aktywnej mapy. Pełna torba wstrzymuje zbieranie. Liczniki pokazują próby i zniknięcia przedmiotów.')
+  local farm=ui:page('FARM');local f=ui:card(farm,'Autofarma MM2','Postać leci do pobliskich monet lub cukierków. Poniżej możesz zmienić Lot na Chód. Pełna torba wstrzymuje zbieranie, a odrodzenie je wyłącza.')
   self.farmInfo=ui:label(f,'')
   ui:feature(f,'Monety / cukierki',function()return c.farming end,function()if c.farming then return c:stopFarm() else return c:startFarm() end end,function(panel)
    ui:cycle(panel,'Zbieraj',{'BOTH','COIN','CANDY'},function()return c.kind end,function(v)return c:setFilter(v)end)
-   ui:cycle(panel,'Tempo',{'NORMAL','FAST','TURBO'},function()return c.speed end,function(v)c.speed=v end)
+   ui:slider(panel,'Zasięg szukania (study)',function()return c.farmRange end,function(v)c.farmRange=v;c:refreshFarm()end,8,45,1)
    ui:slider(panel,'Czekanie na odbiór (s)',function()return c.pickupTimeout end,function(v)c.pickupTimeout=v end,.3,2,.1)
-   ui:slider(panel,'Wysokość nad przedmiotem',function()return c.pickupOffset end,function(v)c.pickupOffset=v end,-2,3,.25)
-   ui:button(panel,'Odśwież przedmioty',function()c.scannedAt=-math.huge;c.current=nil;c.nextAt=0 end)
+   ui:button(panel,'Odśwież przedmioty',function()c:refreshFarm()end)
    ui:button(panel,'Reset statystyk',function()return c:resetStats()end)
   end)
+  ui:cycle(f,'Ruch',{'Lot','Chód'},function()return c.farmMotion end,function(v)return c:setFarmMotion(v)end)
   ui:button(f,'PAUZA / WZNÓW',function()return c:pauseFarm()end);ui:button(f,'STOP zbierania',function()return c:stopFarm()end)
   local combat=ui:page('FIGHT');local aim=ui:card(combat,'Celowanie i walka','Auto Shot wymaga własnego pistoletu. Kill all i Knife Aura wymagają własnego noża. Skutki akcji zatwierdza gra.')
   self.combatInfo=ui:label(aim,'')
@@ -119,13 +128,13 @@ return function(M)
   local c=self.controller;local roles={};for _,p in ipairs(self.platform:people()) do roles[#roles+1]=p.player.Name..': '..p.role end
   self.ui.subtitle.Text='V'..M.Version.current..'  •  MURDER MYSTERY 2'
   self.homeInfo.Text=string.format('MM2: %s\nWłasna rola / broń: %s\nFPS %.1f • zbieranie: %s\nAkcja walki: %s',self.platform.allowed and 'wykryto' or 'nie wykryto — moduły gry zablokowane',self.platform:role(self.player),self.fps,c.state,c.combat and c.combat.kind or 'STOP')
-  local states={STOPPED='Wyłączona',SEARCHING='Szukam przedmiotów',WAIT_ITEMS='Czekam na przedmioty / rundę',WAIT_CHARACTER='Czekam na postać',BAG_FULL='Pełna torba — czekam',PICKUP='Zbieram',PAUSED='Pauza'}
+  local states={STOPPED='Wyłączona',SEARCHING='Szukam przedmiotów',WAIT_ITEMS='Brak przedmiotu w zasięgu — podejdź bliżej',WAIT_CHARACTER='Czekam na aktywną postać',BAG_FULL='Pełna torba — czekam',PICKUP='Czekam na odbiór',APPROACH=c.farmMotion=='Lot' and 'Lecę do przedmiotu' or 'Idę do przedmiotu',MANUAL='Sterujesz ręcznie',PAUSED='Pauza'}
   self.farmInfo.Text=string.format('Stan %s\nPróby odbioru %d • zniknięcia obiektów %d\nNie jest to potwierdzone saldo monet ani cukierków.\n%s',(states[c.state] or c.state)..' · znaleziono '..c.lastScanCount,c.attempts,c.disappeared,c.lastError)
   self.combatInfo.Text=string.format('Aimbot %s • Auto Shot %s\nAktywacje pistoletu %d • noża %d\n%s',c.aimbot and 'ON' or 'OFF',c.autoShot and 'ON' or 'OFF',c.shots,c.stabs,c.lastError)
   self.rolesInfo.Text=#roles>0 and table.concat(roles,'\n') or 'Brak innych aktywnych postaci.'
   if self.ui.current=='SETTINGS' then self.debugBox.Text=self:report() end
  end
- function A:stopAll()self.controller:stopAll();self.proximity=false;if self.threatInfo then self.threatInfo.Visible=false end;self.movement:reset();self.effects:clear();if self.ui then self.ui:refreshControls();self:notify('MM2','Zatrzymano funkcje, przywrócono kamerę i wyczyszczono efekty.') end end
+ function A:stopAll()self.controller:stopAll();self.proximity=false;if self.threatInfo then self.threatInfo.Visible=false end;self.movement:reset();self.effects:clear();if self.quickTools then self.quickTools:reset()end;if self.ui then self.ui:refreshControls();self:notify('MM2','Zatrzymano funkcje, przywrócono kamerę i wyczyszczono efekty.') end end
  function A:unload()if not self.alive then return end;self:stopAll();self.alive=false;self.runtime:close();if _G.KubiHubRuntime==self then _G.KubiHubRuntime=nil end end
  return A
 end

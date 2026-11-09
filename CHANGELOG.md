@@ -1,5 +1,11 @@
 # Historia zmian
 
+## 6.5.0 — 2026-11-09
+
+Farma monet i cukierków w MM2 wybiera cele w pobliżu i leci do nich z ograniczoną prędkością, zwalniając i opadając przy celu. Opcja **Chód** używa zwykłego ruchu postaci. Usunięto skoki teleportem, Turbo i ustawianie wysokości nad przedmiotem. Pełna torba, zablokowana ścieżka, klawisze ruchu, pauza, STOP i odrodzenie wstrzymują lub kończą ruch. Komunikat moderatora nie pozwala ustalić, dlaczego serwer wyrzucił gracza. Testy sprawdzają polecenia ruchu, nie decyzje serwera.
+
+W BABFT, MM2, Steal a Brainrot i Universal jest jedna zakładka Narzędzia z 20 funkcjami w czterech grupach: HUD (7), filtry obrazu (6), stoper i minutnik (4), znacznik miejsca (3).
+
 ## 6.4.0 — 2026-11-09
 
 Na ekranie wyboru jest osobny tryb Steal a Brainrot. AutoSteal zaczyna wyłączony. Po włączeniu przytrzymuje najbliższą widoczną akcję „Steal” w jej zwykłym zasięgu przez wymagany czas. Próba nie jest ponawiana, dopóki ten sam przycisk się nie schowa i nie pojawi ponownie. STOP, odrodzenie i zamknięcie przerywają trwającą interakcję. Przeniesienie Brainrota do bazy wykonuje gracz. Testy klienta nie potwierdzają skutku na serwerze gry.

@@ -7,7 +7,7 @@ local hat=child(universalCharacter,'Accessory','Hat');local handle=child(hat,'Pa
 local launcher=openLauncher();check(launcher.gui:FindFirstChild('UNIVERSAL',true)~=nil,'chooser includes Universal next to BABFT and MM2')
 local ok,u=launcher:choose('UNIVERSAL');assert(ok,u)
 check(u.mode=='UNIVERSAL' and u.ui.pages.FARM==nil and u.ui.pages.FIGHT==nil and u.ui.pages.CAMERA~=nil,'Universal opens in an unrelated game with its own tools and no MM2 combat or fake farm')
-local count=0;for _ in pairs(u.ui.pages)do count+=1 end;check(count==5 and u.ui.layout.navColumns==1,'Universal keeps a simple vertical five-category menu')
+local count=0;for _ in pairs(u.ui.pages)do count+=1 end;check(count==6 and u.ui.layout.navColumns==1 and u.ui.pages.QUICK,'Universal adds the grouped tools to its vertical menu')
 local a=u.avatar;check(not a.enabled.headless and not a.enabled.mini and not u.fovEnabled and not u.bright and not u.cross.Visible,'Universal and appearance options always start disabled')
 local rootSize=universalRoot.Size;local hip=universalHum.HipHeight;local originalAutomatic=universalHum.AutomaticScalingEnabled
 assert(a:set('headless',true));check(universalCharacter.Head.LocalTransparencyModifier==1 and face.Transparency==1 and neck.Parent~=nil and universalHum.Health==100,'fake headless hides head and face without destroying neck or health')

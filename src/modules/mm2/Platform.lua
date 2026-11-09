@@ -62,6 +62,24 @@ return function(Util)
   local _,_,root=self:character();if not root then return false,'Poczekaj na aktywną postać.' end
   local character,h=self:character();h.Sit=false;root.AssemblyLinearVelocity=Vector3.zero;root.AssemblyAngularVelocity=Vector3.zero;character:PivotTo(cf*root.CFrame:ToObjectSpace(character:GetPivot()));return true
  end
+ function P:pickupFlight(root,velocity)
+  local flight=self.pickupFlightState
+  if not flight or flight.root~=root or flight.force.Parent~=root or flight.anchor.Parent~=root then
+   self:endPickupFlight()
+   local anchor=Instance.new('Attachment');anchor.Name='KubiHubCoinFlightAnchor'
+   local force=Instance.new('LinearVelocity');force.Name='KubiHubCoinFlight'
+   flight={root=root,anchor=anchor,force=force};self.pickupFlightState=flight
+   force.Attachment0=anchor;force.RelativeTo=Enum.ActuatorRelativeTo.World
+   force.VelocityConstraintMode=Enum.VelocityConstraintMode.Vector
+   force.ForceLimitsEnabled=true;force.MaxForce=math.max(1,root.AssemblyMass)*(self.world.Gravity+95)
+   force.VectorVelocity=velocity
+   anchor.Parent=root;force.Parent=root
+  else flight.force.VectorVelocity=velocity end
+ end
+ function P:endPickupFlight()
+  local flight=self.pickupFlightState;self.pickupFlightState=nil
+  if flight then flight.force:Destroy();flight.anchor:Destroy()end
+ end
  function P:part(object)
   if object:IsA('BasePart') then return object end
   if object:IsA('Model') then return object.PrimaryPart or object:FindFirstChildWhichIsA('BasePart',true) end
@@ -177,6 +195,6 @@ return function(Util)
   if self.allowed and settings.gun then local drop=self.world:FindFirstChild('GunDrop');local part=drop and self:part(drop);if part then mark(part,Color3.fromRGB(80,165,255))end end
   for part,row in pairs(self.itemHighlights)do if not keep[part] then row:Destroy();self.itemHighlights[part]=nil end end
  end
- function P:close()self:stopWatch();self:endFling();self:updateESP(false);self:updateItems({coins=false,gun=false})end
+ function P:close()self:endPickupFlight();self:stopWatch();self:endFling();self:updateESP(false);self:updateItems({coins=false,gun=false})end
  return P
 end
