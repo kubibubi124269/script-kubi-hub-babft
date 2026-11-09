@@ -25,7 +25,7 @@ RaycastParams={new=function()return {}end}
 Color3={new=function(r,g,b)return {R=r,G=g,B=b}end,fromRGB=function(r,g,b)return {R=r/255,G=g/255,B=b/255}end,fromHSV=function()return {}end}
 UDim={new=function(s,o)return {Scale=s or 0,Offset=o or 0}end};UDim2={new=function(a,b,c,d)return {X=UDim.new(a,b),Y=UDim.new(c,d)}end};UDim2.fromOffset=function(x,y)return UDim2.new(0,x,0,y)end;UDim2.fromScale=function(x,y)return UDim2.new(x,0,y,0)end
 Enum=setmetatable({},{__index=function(t,k)local group=setmetatable({},{__index=function(g,v)local item={Name=v};rawset(g,v,item);return item end});rawset(t,k,group);return group end})
-Enum.RenderPriority.Camera.Value=200;Enum.RenderPriority.Last.Value=2000
+Enum.RenderPriority.Camera.Value=200;Enum.RenderPriority.Character.Value=300;Enum.RenderPriority.Last.Value=2000
 local methods={};local im={};local events={Activated=true,FocusLost=true,InputBegan=true,InputChanged=true,InputEnded=true,MouseEnter=true,MouseLeave=true,ChildAdded=true,ChildRemoved=true,Changed=true,CharacterAdded=true,Heartbeat=true,RenderStepped=true}
 im.__index=function(o,k)
  if methods[k] then return methods[k]end
@@ -62,6 +62,7 @@ function methods:ScaleTo(value)
  self.MockScale=value;self.ScaleCalls=(self.ScaleCalls or 0)+1
 end
 function methods:Activate()self.Activations=(self.Activations or 0)+1;if self.ActivateError then error(self.ActivateError)end end
+function methods:Move(direction,relativeToCamera)if self.MoveError then error(self.MoveError)end;self.LastMove=direction;self.RelativeMove=relativeToCamera end
 function methods:GetAttribute(name)return self.Attributes[name]end
 function methods:SetAttribute(name,value)self.Attributes[name]=value end
 function methods:GetPlayers()return self:GetChildren()end
@@ -73,7 +74,7 @@ function methods:UnbindFromRenderStep(name)if self.RenderBindings then self.Rend
 function methods:WaitForChild(name)return self:FindFirstChild(name)end
 function methods:GetPropertyChangedSignal(name)if not self.signals[name]then self.signals[name]=signal()end;return self.signals[name]end
 function methods:Destroy()for _,c in ipairs(self:GetChildren())do c:Destroy()end;self.Parent=nil;self.Destroyed=true end
-function methods:GetFocusedTextBox()return nil end;function methods:IsKeyDown()return false end;function methods:GetState()return {Name='Running'}end
+function methods:GetFocusedTextBox()return nil end;function methods:IsKeyDown(key)return self.mockKeys and self.mockKeys[key]==true or false end;function methods:GetState()return {Name='Running'}end
 local function child(p,c,n)local o=Instance.new(c);o.Name=n or c;o.Parent=p;return o end
 workspace=Instance.new('Workspace');workspace.Gravity=196.2;workspace.CurrentCamera=Instance.new('Camera');workspace.CurrentCamera.ViewportSize=Vector2.new(1280,720);workspace.CurrentCamera.CFrame=CFrame.new();workspace.CurrentCamera.FieldOfView=70
 local services={};for _,name in ipairs({'Players','UserInputService','RunService','HttpService','ReplicatedStorage','Lighting'})do services[name]=Instance.new(name)end

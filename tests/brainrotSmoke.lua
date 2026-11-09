@@ -24,7 +24,7 @@ do
  check(launcher.status.Text:find('Steal a Brainrot',1,true)~=nil,'chooser detects the official Brainrot place')
  launcher.gui:FindFirstChild('BRAINROT',true).Activated:Fire()
  local app=_G.KubiHubRuntime
- check(app.mode=='BRAINROT' and not app.enabled and app.ui.current=='STEAL','Brainrot opens its own AutoSteal screen with the feature off')
+ check(app.mode=='BRAINROT' and not app.enabled and app.ui.current=='STEAL' and app.ui.pages.QUICK,'Brainrot opens AutoSteal disabled, with the new tools available separately')
 
  local target=prompt('  Steal ',3,.7,true)
  local other=prompt('Steal Example Brainrot',5,2)

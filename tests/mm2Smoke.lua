@@ -67,17 +67,44 @@ mmFarmSettings.button.InputBegan:Fire({UserInputType=Enum.UserInputType.MouseBut
 local hasFilter=false;for _,o in ipairs(mmFarmSettings.body:GetDescendants())do if o:IsA('TextButton')and o.Text:find('Zbieraj:',1,true)then hasFilter=true end end;check(hasFilter,'MM2 farm settings contain the live currency filter')
 mm.ui:show('FIGHT');check(mm.ui.activeSettings==nil,'MM2 category change dismisses the settings panel')
 local function renderAim()services.RunService.RenderBindings.KubiHubMM2Aim.fn(.05)end
+local function renderWalk()services.RunService.RenderBindings.KubiHubMM2FarmMotion.fn()end
 check(services.RunService.RenderBindings.KubiHubMM2Aim.priority==201,'aim updates are bound immediately after the game camera')
-assert(c:setFilter('CANDY'));assert(c:startFarm());c:tick(.05)
-check(c.current and c.current.object==candy and c.attempts==1,'candy filter selects a typed candy and visits its actual map position')
-check(math.abs(mmRoot.Position.X-20)<.001 and math.abs(mmRoot.Position.Y)<.001,'MM2 farm moves its own active character to the selected pickup')
+do
+ check(c.farmMotion=='Lot' and not c.farming,'MM2 defaults to flight but requires enabling the farm')
+ assert(c:setFilter('CANDY'));assert(c:startFarm());c:tick(.05);renderWalk()
+ local flight=mm.platform.pickupFlightState
+ check(flight and flight.force.Parent==mmRoot and flight.force.VectorVelocity.X==15 and flight.force.VectorVelocity.Y>0 and mmRoot.Position.X==0 and not mmCharacter.PivotMoves,'coin flight uses a limited physical velocity without moving the character instantly')
+ mmRoot.CFrame=CFrame.new(18,2,0);tick+=.1;c:tick(.05);renderWalk()
+ check(mm.platform.pickupFlightState==flight and flight.force.VectorVelocity.X<15 and flight.force.VectorVelocity.Y<0,'flight reuses its force and slows and descends near the pickup')
+ assert(c:setFarmMotion('Chód'))
+ check(not mm.platform.pickupFlightState and not flight.force.Parent and not flight.anchor.Parent and c.current==nil,'changing motion to walking removes both flight objects')
+ c:stopFarm();assert(c:resetStats());mmRoot.CFrame=CFrame.new()
+end
+assert(c:setFilter('CANDY'));assert(c:startFarm());c:tick(.05);renderWalk()
+check(c.current and c.current.object==candy and c.attempts==1 and c.state=='APPROACH','candy filter selects a typed candy to approach')
+check(mmHum.LastMove.X==1 and mmHum.RelativeMove==false and mmRoot.Position.X==0 and not mmCharacter.PivotMoves and mmHum.WalkSpeed==16,'MM2 farm commands ordinary walking without teleporting or changing speed')
+mmRoot.CFrame=CFrame.new(20,0,0);tick+=.3;c:tick(.05);renderWalk()
+check(c.state=='PICKUP' and mmHum.LastMove.Magnitude==0,'arrival stops walking and waits for the normal pickup')
 candy:Destroy();tick+=.2;c:tick(.05)
 check(c.disappeared==1 and c.state=='WAIT_ITEMS','removed pickup updates only the observed disappearance counter')
 assert(c:pauseFarm());local attempts=c.attempts;tick+=1;c:tick(.05);check(c.attempts==attempts and c.state=='PAUSED','MM2 farm pause blocks all later pickup visits');assert(c:pauseFarm())
 local bag=child(child(child(child(child(child(player.PlayerGui,'ScreenGui','MainGUI'),'Frame','Game'),'Frame','CoinBags'),'Frame','Container'),'Frame','Coin'),'Frame','FullBagIcon');bag.Visible=true
 tick+=1;c:tick(.05);check(c.state=='BAG_FULL','visible full-bag state pauses the pickup queue')
-bag.Visible=false;assert(c:setFilter('COIN'));tick+=1;c:tick(.05);check(c.current and c.current.object==money,'coin filter resumes with a typed coin after the bag state clears')
+bag.Visible=false;assert(c:setFilter('COIN'));mmRoot.CFrame=CFrame.new();tick+=1;c:tick(.05);renderWalk()
+check(c.current and c.current.object==money,'coin filter resumes with a typed coin after the bag state clears')
+assert(c:pauseFarm());check(mmHum.LastMove.Magnitude==0 and c.current==nil,'pause releases current walking immediately');assert(c:pauseFarm());tick+=.2;c:tick(.05);renderWalk()
 local flingOk=c:startFling();check(not flingOk and mm.platform.fling==nil and mm.runtime.lock=='MM2Farm','farming excludes simultaneous Fling character movement')
+do
+ local distant=coin('OutOfRangeCoin','Coin',75)
+ tick+=2.1;c:tick(.05)
+ check(c.current==nil and c.state=='WAIT_ITEMS' and mmHum.LastMove.Magnitude==0 and c.cooldown[money]>tick,'blocked walking times out and ignores out-of-range pickups')
+ distant:Destroy()
+ tick+=5.5;c:tick(.05);renderWalk()
+ services.UserInputService.mockKeys={[Enum.KeyCode.W]=true}
+ mmHum:Move(Vector3.new(0,0,-1),true);renderWalk();tick+=.2;c:tick(.05)
+ services.UserInputService.mockKeys=nil
+ check(c.state=='MANUAL' and not c.current and mmHum.LastMove.Z==-1,'manual keyboard input has priority over the farm')
+end
 c:stopFarm();c.aimbot=true;c.autoShot=true;local shots=mmGun.Activations or 0;tick+=1;c:tick(.05);renderAim()
 check((mmGun.Activations or 0)==shots+1 and c.shots==1,'Auto Shot activates the owned gun only with a visible target')
 tick+=.1;c:tick(.05);renderAim();check(c.shots==1,'Auto Shot respects its configured interval')
@@ -107,9 +134,10 @@ local drop=child(workspace,'Part','GunDrop');drop.CFrame=CFrame.new(50,0,0);asse
 knife:Destroy();mmGun:Destroy();mmRoot.CFrame=CFrame.new();c.autoGun=true;tick+=2;c:tick(.05);check(mmRoot.Position.X==50,'Auto Gun visits a real drop only while no owned weapon or movement task is active');c.autoGun=false
 local auraKnife=child(backpack,'Tool','Knife');mmRoot.CFrame=enemyRoot.CFrame*CFrame.new(0,0,2);c.aura=true;local stabsBefore=c.stabs;tick+=1;c:tick(.05);check(c.stabs==stabsBefore+1 and auraKnife.Activations==1,'Knife Aura uses its owned knife only when a target is within six studs');c.aura=false
 bag.Parent.Visible=false;bag.Visible=true;check(not mm.platform:bagFull(),'a hidden ancestor prevents a stale full-bag icon from stopping the next round');bag.Visible=false;bag.Parent.Visible=true
-local savedTeleport=mm.platform.teleport;mm.platform.teleport=function()error('Fixture respawn race')end
-assert(c:startFarm());tick+=2;mm.runtime.schedules.MM2Controllers.fn(.05);mm.platform.teleport=savedTeleport
-check(not c.farming and mm.runtime.schedules.MM2Controllers~=nil and mm.ui.statusInfo.Text:find('Fixture respawn race',1,true)~=nil,'unexpected movement failure stops the action and preserves the scheduler plus readable error')
+mmRoot.CFrame=CFrame.new();assert(c:startFarm());tick+=2;c:tick(.05);mmHum.MoveError='Fixture respawn race';renderWalk();mmHum.MoveError=nil
+check(not c.farming and mm.runtime.schedules.MM2Controllers~=nil and mm.ui.statusInfo.Text:find('Fixture respawn race',1,true)~=nil,'unexpected walking failure stops the farm and preserves the scheduler plus readable error')
+assert(c:startFarm());tick+=1;c:tick(.05);renderWalk();player.CharacterAdded:Fire(mmCharacter)
+check(not c.farming and mmHum.LastMove.Magnitude==0 and mm.runtime.lock==nil,'respawn turns off pickup walking and releases control')
 assert(c:startFarm());local seenAttempts=c.attempts;c:stopAll();tick+=2;c:tick(.05);check(not c.farming and not c.aimbot and not c.autoShot and c.attempts==seenAttempts and mm.runtime.lock==nil,'STOP ALL prevents subsequent MM2 farm and combat actions')
 c:stopAll();c.settings.selected='Enemy';button(mm,'Teleport do gracza').Activated:Fire();check(mmRoot.Position.X==enemyRoot.Position.X+3,'manual player teleport uses the selected live player with an offset')
 assert(mm.platform:watch('Enemy'));mm.proximity=true;mm:stopAll();check(mm.platform.spectating==nil and workspace.CurrentCamera.CameraSubject==mmHum and not mm.proximity,'STOP ALL restores spectate camera and disables the proximity warning')
@@ -131,7 +159,8 @@ do
  mm:stopAll();check(next(mm.platform.itemHighlights)==nil and not c.itemESP.coins and not c.itemESP.gun,'MM2 STOP clears both item overlays and their toggles')
  for _,object in ipairs(targets)do object:Destroy()end;sheriff:Destroy()
 end
-mm:unload();check(services.RunService.RenderBindings.KubiHubAvatarVisibility==nil,'MM2 unload removes the dedicated Headless render binding');check(mm.runtime:counts().connections==0 and mm.ui.gui.Parent==nil and next(mm.platform.highlights)==nil and services.RunService.RenderBindings.KubiHubMM2Aim==nil,'MM2 unload removes GUI, listeners, render binding and its local effects')
+check(mm.ui.pages.QUICK~=nil and mm.quickTools~=nil,'MM2 has the same grouped quick tools as the other modes')
+mm:unload();check(services.RunService.RenderBindings.KubiHubAvatarVisibility==nil,'MM2 unload removes the dedicated Headless render binding');check(mm.runtime:counts().connections==0 and mm.ui.gui.Parent==nil and next(mm.platform.highlights)==nil and services.RunService.RenderBindings.KubiHubMM2Aim==nil and services.RunService.RenderBindings.KubiHubMM2FarmMotion==nil,'MM2 unload removes GUI, listeners, movement/aim bindings and local effects')
 local failedChooser=openLauncher();local savedViewport=workspace.CurrentCamera.ViewportSize;workspace.CurrentCamera.ViewportSize=nil
 local failedOpen=failedChooser:choose('MM2');workspace.CurrentCamera.ViewportSize=savedViewport
 check(not failedOpen and failedChooser.alive and player.PlayerGui:FindFirstChild('KubiHubUltimateV5')==nil,'failed hub startup leaves the chooser usable and cleans partial GUI resources');failedChooser:unload()

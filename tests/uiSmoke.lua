@@ -1,7 +1,7 @@
 local function check(condition,message)assert(condition,message);print('PASS UI '..message)end
 local first=startHub();check(first and first.alive,'full client starts in assistant mode')
 check(first.adapter.capabilities.build~=true,'absent adapter cannot report build authorization')
-local n=0;for _ in pairs(first.ui.pages)do n+=1 end;check(n==6 and first.ui.pages.SHAPES==nil,'six simple categories without a Shapes tab')
+local n=0;for _ in pairs(first.ui.pages)do n+=1 end;check(n==7 and first.ui.pages.QUICK and first.ui.pages.SHAPES==nil,'BABFT adds one grouped tools category without bringing back Shapes')
 local farmSettings;for _,entry in ipairs(first.ui.featureSettings)do if entry.title=='Autofarma BABFT' then farmSettings=entry end end;assert(farmSettings)
 farmSettings.button.InputBegan:Fire({UserInputType=Enum.UserInputType.MouseButton2});check(first.ui.activeSettings~=nil and first.farm.state=='STOPPED','right click opens feature options without starting the farm')
 local settingsConnections=first.runtime:counts().connections;local panel=farmSettings.panel
