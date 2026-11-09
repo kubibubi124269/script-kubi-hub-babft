@@ -1,4 +1,10 @@
-# Funkcje V6.5.0
+# Funkcje V6.6.0
+
+## 6.6.0 — Studio skórek MM2
+
+- W Misc są modele 3D noża i pistoletu. Style: Zorza, Rubin, Złoty, Lód, Obsydian i Laser. Podgląd można obrócić i wylosować inny kolor.
+- Przymiarka nakłada lokalny efekt koloru na widoczną broń gracza. Oryginalna skórka pozostaje bez zmian.
+- **Załóż broń z tej rundy** wybiera wyłącznie broń, którą gra już dała graczowi. Skórki, które da się przekazać, wymienia się przez okno wymiany w MM2.
 
 ## 6.5.0 — Narzędzia w każdym trybie
 

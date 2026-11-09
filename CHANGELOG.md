@@ -1,5 +1,9 @@
 # Historia zmian
 
+## 6.6.0 — 2026-11-09
+
+Studio skórek w MM2 / Misc: własne modele 3D noża i pistoletu, sześć stylów, obrót, losowanie, przymiarka na widocznej broni trzymanej przez gracza i założenie istniejącej broni z rundy. Przymiarka nie zmienia oryginalnej skórki, statystyk ani ekwipunku. Schowanie broni, STOP, odrodzenie i zamknięcie usuwają efekt.
+
 ## 6.5.0 — 2026-11-09
 
 Farma monet i cukierków w MM2 wybiera cele w pobliżu i leci do nich z ograniczoną prędkością, zwalniając i opadając przy celu. Opcja **Chód** używa zwykłego ruchu postaci. Usunięto skoki teleportem, Turbo i ustawianie wysokości nad przedmiotem. Pełna torba, zablokowana ścieżka, klawisze ruchu, pauza, STOP i odrodzenie wstrzymują lub kończą ruch. Komunikat moderatora nie pozwala ustalić, dlaczego serwer wyrzucił gracza. Testy sprawdzają polecenia ruchu, nie decyzje serwera.

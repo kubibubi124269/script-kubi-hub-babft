@@ -1,4 +1,4 @@
-# KUBI HUB V6.5.0 — BABFT, MM2, Steal a Brainrot i Universal
+# KUBI HUB V6.6.0 — BABFT, MM2, Steal a Brainrot i Universal
 
 Ten sam loader otwiera wybór BABFT / MM2 / Steal a Brainrot / Universal. Moduły zaczynają wyłączone.
 
@@ -6,7 +6,9 @@ Ten sam loader otwiera wybór BABFT / MM2 / Steal a Brainrot / Universal. Moduł
 loadstring(game:HttpGet("https://raw.githubusercontent.com/kubibubi124269/script-kubi-hub-babft/main/main.lua"))()
 ```
 
-**Nowe w V6.5:** Farma MM2 leci płynnie do pobliskich monet lub cukierków, a w opcji **Ruch** można zmienić Lot na Chód. Podejdź bliżej, gdy nie ma celu w zasięgu. W każdym trybie zakładka **Narzędzia** zawiera 20 funkcji: HUD, filtry obrazu, stoper, minutnik i znacznik miejsca. [Lista](FEATURES.md).
+**Nowe w V6.6:** **MM2 → Misc → Studio skórek MM2** pokazuje nóż i pistolet w 3D w sześciu wzorach. Możesz obracać model, losować styl, przymierzyć kolor na własnej broni z rundy lub założyć broń, którą już masz w plecaku. Podgląd i kolor są lokalne. Prawdziwe wymiany odbywają się w grze.
+
+**Z V6.5:** Farma MM2 leci płynnie do pobliskich monet lub cukierków, a w opcji **Ruch** można zmienić Lot na Chód. Podejdź bliżej, gdy nie ma celu w zasięgu. W każdym trybie zakładka **Narzędzia** zawiera 20 funkcji: HUD, filtry obrazu, stoper, minutnik i znacznik miejsca. [Lista](FEATURES.md).
 
 **Z V6.4:** Dołącz do [Steal a Brainrot](https://www.roblox.com/games/109983668079237/Steal-a-Brainrot), wybierz jego tryb i włącz AutoSteal. Gdy podejdziesz w zasięg widocznej akcji „Steal”, hub przytrzyma przycisk przez czas ustawiony w grze. Do bazy wracasz samodzielnie. STOP, odrodzenie i zamknięcie przerywają próbę. O wyniku decyduje serwer gry; przebieg sprawdzono w testach offline. [Test w grze](docs/TESTING.md#steal-a-brainrot).
 
@@ -26,7 +28,7 @@ MM2 zachowuje Aimbot, Auto Shot, ESP ról, Auto Gun, Knife Aura, obieg z własny
 
 Nowe w MM2: podgląd gracza z przywróceniem kamery, teleport do wybranego gracza i ostrzeżenie o bliskim Murdererze rozpoznanym po nożu. Opcje nicku i odległości są pod PPM.
 
-Sprawdzenie: testy logiki i klienta, 4 importy modeli, 40 modułów (Luau 0.744). Nie testowano fizyki ani odbioru przedmiotów na publicznych serwerach.
+Sprawdzenie: testy logiki i klienta, 4 importy modeli, 41 modułów (Luau 0.744). Nie testowano wyglądu w natywnym kliencie Roblox ani odbioru przedmiotów na publicznych serwerach.
 
 [Raport V6.1](docs/V6.1-REPORT.md) · [Testy w grze](docs/TESTING.md) · [Źródła modeli](docs/COMMUNITY-MODELS.md) · [Historia](CHANGELOG.md)
 
