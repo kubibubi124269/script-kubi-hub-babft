@@ -1,4 +1,4 @@
-# KUBI HUB DELUXE 7.0
+# KUBI HUB DELUXE 7.1
 
 Ten sam loader otwiera wybór języka, kartę społeczności i menu BABFT / MM2 / Steal a Brainrot / Bike Universe / Universal. Automaty zaczynają wyłączone.
 
@@ -6,7 +6,11 @@ Ten sam loader otwiera wybór języka, kartę społeczności i menu BABFT / MM2 
 loadstring(game:HttpGet("https://raw.githubusercontent.com/kubibubi124269/script-kubi-hub-babft/main/main.lua"))()
 ```
 
-**Nowe w 7.0:** Na ekranie startowym i w podstawowych kontrolkach wybierzesz polski, angielski, rosyjski, ukraiński, chiński uproszczony, hiszpański, niemiecki, portugalski, francuski lub włoski. Starsze opisy i część komunikatów mogą pozostać po polsku.
+**Nowe w 7.1 — Bike Universe:** w **Jazda → Autostrada** zapisz na rowerze punkt A, a potem B na tym samym prostym pasie (70–2000 studów dalej). Włącz **Farma autostrady**. Hub wraca do A, koryguje skręt i wykonuje wheelie oraz triki, gdy rower jedzie prosto. Na końcu odczekuje 3 sekundy przed kolejną pętlą. Po wykrytej kraksie próbuje odtworzyć rower przez Q i E; po serii nieudanych powrotów staje. **F8** zatrzymuje jazdę i ponawianie. Punkty A/B można zapisać w profilu. Kasa jest naliczana przez grę, a działanie fizyki i wypłat wymaga próby w Robloxie.
+
+**Fly na motorze:** wsiądź i otwórz **Jazda → Lot na motorze**. WASD steruje kierunkiem, Spacja wznosi, lewy Ctrl opuszcza, a F8 wyłącza lot. Prędkość ustawisz przez **PPM / ⋯**. Fly działa osobno od farmy; opuszczenie siedzenia wyłącza napęd lotu.
+
+**Z 7.0:** Na ekranie startowym i w podstawowych kontrolkach wybierzesz polski, angielski, rosyjski, ukraiński, chiński uproszczony, hiszpański, niemiecki, portugalski, francuski lub włoski. Starsze opisy i część komunikatów mogą pozostać po polsku.
 
 - **Tempo:** osobny wybór w BABFT, MM2, Steal a Brainrot i Bike Universe. W BABFT wybierz **Autofarm → Tryb trasy → Teleport szybki**, jeśli chcesz pojedynczy skok do każdego etapu. Nadal czeka na trasę i powrót od skrzyni.
 - **Bike Universe:** automatyczny gaz, sekwencja wheelie i trików, boost gazu i zatrzymanie przy wykrytej przeszkodzie. **F8** zwalnia klawisze. Zapisz start i checkpointy, przyjmij zaproszenie w grze, a po starcie uruchom trasę. Gra nalicza kasę i wynik; sterowania i zaliczenia nie potwierdzono w publicznej grze.
@@ -35,7 +39,7 @@ MM2 zachowuje Aimbot, Auto Shot, ESP ról, Auto Gun, Knife Aura, obieg z własny
 
 Nowe w MM2: podgląd gracza z przywróceniem kamery, teleport do wybranego gracza i ostrzeżenie o bliskim Murdererze rozpoznanym po nożu. Opcje nicku i odległości są pod PPM.
 
-Sprawdzenie: testy logiki i klienta, 4 importy modeli, 46 modułów (Luau 0.744). Nie testowano w natywnym kliencie Roblox ani na publicznych serwerach.
+Sprawdzenie: testy logiki i klienta, 4 importy modeli, 48 modułów (Luau 0.744). Nie testowano w natywnym kliencie Roblox ani na publicznych serwerach.
 
 [Raport V6.1](docs/V6.1-REPORT.md) · [Testy w grze](docs/TESTING.md) · [Źródła modeli](docs/COMMUNITY-MODELS.md) · [Historia](CHANGELOG.md)
 

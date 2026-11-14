@@ -12,14 +12,17 @@ local function signal()
  return s
 end
 local vm={};vm.__index=function(v,k)if k=='Magnitude' then return math.sqrt(v.X*v.X+v.Y*v.Y+v.Z*v.Z)elseif k=='Unit'then return v/math.max(.0001,v.Magnitude)end end
+function vm:Dot(v)return self.X*v.X+self.Y*v.Y+self.Z*v.Z end
+function vm:Cross(v)return Vector3.new(self.Y*v.Z-self.Z*v.Y,self.Z*v.X-self.X*v.Z,self.X*v.Y-self.Y*v.X)end
+local vecIndex=vm.__index;vm.__index=function(v,k)return vm[k] or vecIndex(v,k)end
 vm.__add=function(a,b)return Vector3.new(a.X+b.X,a.Y+b.Y,a.Z+b.Z)end;vm.__sub=function(a,b)return Vector3.new(a.X-b.X,a.Y-b.Y,a.Z-b.Z)end
 vm.__mul=function(a,b)if type(a)=='number'then a,b=b,a end;return Vector3.new(a.X*b,a.Y*b,a.Z*b)end;vm.__div=function(a,b)return Vector3.new(a.X/b,a.Y/b,a.Z/b)end
 vm.__unm=function(v)return Vector3.new(-v.X,-v.Y,-v.Z)end
 Vector3={new=function(x,y,z)return setmetatable({X=x or 0,Y=y or 0,Z=z or 0},vm)end};Vector3.zero=Vector3.new();Vector3.yAxis=Vector3.new(0,1,0)
 local v2m={__div=function(v,n)return Vector2.new(v.X/n,v.Y/n)end}
 Vector2={new=function(x,y)return setmetatable({X=x or 0,Y=y or 0},v2m)end};Vector2.zero=Vector2.new()
-local cm={};cm.__index=function(c,k)if k=='Position'then return c.pos elseif k=='Rotation'then return c elseif k=='LookVector'then return Vector3.new(0,0,-1)elseif k=='ToObjectSpace' then return function(a,b)return CFrame.new(b.pos-a.pos)end elseif k=='ToAxisAngle'then return function()return Vector3.yAxis,0 end end end;cm.__mul=function(a,b)return CFrame.new(a.pos+b.pos)end
-CFrame={new=function(x,y,z)return setmetatable({pos=type(x)=='table' and x or Vector3.new(x,y,z)},cm)end,Angles=function()return CFrame.new()end,lookAt=function(p)return CFrame.new(p)end}
+local cm={};cm.__index=function(c,k)if k=='Position'then return c.pos elseif k=='Rotation'then return c elseif k=='LookVector'then return c.look or Vector3.new(0,0,-1)elseif k=='ToObjectSpace' then return function(a,b)return CFrame.new(b.pos-a.pos)end elseif k=='ToAxisAngle'then return function()return Vector3.yAxis,0 end end end;cm.__mul=function(a,b)return setmetatable({pos=a.pos+b.pos,look=a.look or b.look},cm)end
+CFrame={new=function(x,y,z)return setmetatable({pos=type(x)=='table' and x or Vector3.new(x,y,z)},cm)end,Angles=function()return CFrame.new()end,lookAt=function(p,t)return setmetatable({pos=p,look=(t-p).Unit},cm)end}
 local originalCFrameIndex=cm.__index;cm.__index=function(c,k)if k=='RightVector' then return Vector3.new(1,0,0) elseif k=='UpVector' then return Vector3.yAxis elseif k=='Lerp' then return function(a,b,t)return CFrame.new(a.pos+(b.pos-a.pos)*t)end end;return originalCFrameIndex(c,k)end
 cm.__add=function(c,v)return CFrame.new(c.pos+v)end
 RaycastParams={new=function()return {}end}
@@ -27,6 +30,7 @@ Color3={new=function(r,g,b)return {R=r,G=g,B=b}end,fromRGB=function(r,g,b)return
 UDim={new=function(s,o)return {Scale=s or 0,Offset=o or 0}end};UDim2={new=function(a,b,c,d)return {X=UDim.new(a,b),Y=UDim.new(c,d)}end};UDim2.fromOffset=function(x,y)return UDim2.new(0,x,0,y)end;UDim2.fromScale=function(x,y)return UDim2.new(x,0,y,0)end
 Enum=setmetatable({},{__index=function(t,k)local group=setmetatable({},{__index=function(g,v)local item={Name=v};rawset(g,v,item);return item end});rawset(t,k,group);return group end})
 Enum.RenderPriority.Camera.Value=200;Enum.RenderPriority.Character.Value=300;Enum.RenderPriority.Last.Value=2000
+Enum.ContextActionPriority.High.Value=3000
 local methods={};local im={};local events={Activated=true,FocusLost=true,InputBegan=true,InputChanged=true,InputEnded=true,MouseEnter=true,MouseLeave=true,ChildAdded=true,ChildRemoved=true,Changed=true,CharacterAdded=true,Heartbeat=true,RenderStepped=true,WindowFocusReleased=true,Idled=true}
 im.__index=function(o,k)
  if methods[k] then return methods[k]end
@@ -78,9 +82,11 @@ function methods:GetPropertyChangedSignal(name)if not self.signals[name]then sel
 function methods:Destroy()for _,c in ipairs(self:GetChildren())do c:Destroy()end;self.Parent=nil;self.Destroyed=true end
 function methods:GetFocusedTextBox()return self.mockFocused end;function methods:IsKeyDown(key)return self.mockKeys and self.mockKeys[key]==true or false end;function methods:GetState()return {Name='Running'}end
 function methods:CreateVirtualInput()return self.mockVirtualInput end
+function methods:BindActionAtPriority(name,fn,_,_,...)self.bindings=self.bindings or {};self.bindings[name]={fn=fn,keys={...}}end
+function methods:UnbindAction(name)if self.bindings then self.bindings[name]=nil end end
 local function child(p,c,n)local o=Instance.new(c);o.Name=n or c;o.Parent=p;return o end
 workspace=Instance.new('Workspace');workspace.Gravity=196.2;workspace.CurrentCamera=Instance.new('Camera');workspace.CurrentCamera.ViewportSize=Vector2.new(1280,720);workspace.CurrentCamera.CFrame=CFrame.new();workspace.CurrentCamera.FieldOfView=70
-local services={};for _,name in ipairs({'Players','UserInputService','RunService','HttpService','ReplicatedStorage','Lighting'})do services[name]=Instance.new(name)end
+local services={};for _,name in ipairs({'Players','UserInputService','ContextActionService','RunService','HttpService','ReplicatedStorage','Lighting'})do services[name]=Instance.new(name)end
 services.Lighting.Brightness=1;services.Lighting.ClockTime=19;services.Lighting.Ambient=Color3.new(.2,.2,.2);services.Lighting.OutdoorAmbient=Color3.new(.3,.3,.3);services.Lighting.FogEnd=500;services.Lighting.GlobalShadows=true
 local player=child(services.Players,'Player','Tester');player.UserId=123;player.DisplayName='Tester';player.CameraMinZoomDistance=.5;player.CameraMaxZoomDistance=12;player.CameraMode=Enum.CameraMode.Classic;services.Players.LocalPlayer=player;child(player,'PlayerGui','PlayerGui')
 local data=child(player,'Folder','Data');for _,name in ipairs({'WoodBlock','TitaniumBlock','MetalBlock','Seat','Dynamite'})do child(data,'IntValue',name).Value=10000 end

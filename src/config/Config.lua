@@ -1,6 +1,6 @@
 return function(Util,Inventory)
  local Config={version=2}
- Config.defaults={schemaVersion=2,ui={theme='BLUE',width=960,height=650,x=.08,y=.08,compact=false,tooltips=true},farm={profile='NORMAL',route='Przejście',retryLimit=2,stopAfter=0,crossingTime=.8},builder={material='ORIGINAL',yaw=0,mirrorX=false,mirrorZ=false,previewLayer=0,scale=1,offsetX=0,offsetY=0,offsetZ=0},movement={walk=16,jump=50,flySpeed=40},performance={profile='BALANCED'},mm2={tempo='NORMAL',kind='BOTH',motion='Lot',range=32,timeout=.8},brainrot={tempo='NORMAL'},bike={tempo='NORMAL',wheelie=true,tricks=true,guard=true,antiIdle=false,boost=false},favorites={},language='PL'}
+ Config.defaults={schemaVersion=2,ui={theme='BLUE',width=960,height=650,x=.08,y=.08,compact=false,tooltips=true},farm={profile='NORMAL',route='Przejście',retryLimit=2,stopAfter=0,crossingTime=.8},builder={material='ORIGINAL',yaw=0,mirrorX=false,mirrorZ=false,previewLayer=0,scale=1,offsetX=0,offsetY=0,offsetZ=0},movement={walk=16,jump=50,flySpeed=40},performance={profile='BALANCED'},mm2={tempo='NORMAL',kind='BOTH',motion='Lot',range=32,timeout=.8},brainrot={tempo='NORMAL'},bike={tempo='NORMAL',wheelie=true,tricks=true,guard=true,antiIdle=false,boost=false,highway={}},favorites={},language='PL'}
  function Config.profileName(name)
   if type(name)~='string' or #name<1 or #name>24 or not name:match('^[%a%d][%w_%-]*$') then return false end
   local n=name:upper();return n~='CON' and n~='PRN' and n~='AUX' and n~='NUL' and not n:match('^COM[1-9]$') and not n:match('^LPT[1-9]$')
@@ -19,6 +19,20 @@ return function(Util,Inventory)
   for _,s in ipairs({{'builder','scale',.1,2},{'builder','offsetX',-1000,1000},{'builder','offsetY',-1000,1000},{'builder','offsetZ',-1000,1000},{'mm2','range',8,45},{'mm2','timeout',.3,2}}) do number(table.unpack(s)) end
   for _,s in ipairs({{'ui','compact'},{'ui','tooltips'},{'builder','mirrorX'},{'builder','mirrorZ'},{'bike','wheelie'},{'bike','tricks'},{'bike','guard'},{'bike','antiIdle'},{'bike','boost'}}) do local v=read(s[1],s[2]);if v~=nil then if type(v)=='boolean' then out[s[1]][s[2]]=v else errors[#errors+1]=table.concat(s,'.')..': wymagany boolean' end end end
   for _,s in ipairs({{'ui','theme','theme'},{'farm','profile','profile'},{'performance','profile','performance'},{'mm2','kind','kind'},{'mm2','motion','motion'},{'mm2','tempo','tempo'},{'brainrot','tempo','tempo'},{'bike','tempo','tempo'}}) do local v=read(s[1],s[2]);if v~=nil then if type(v)=='string' and enum[s[3]][v] then out[s[1]][s[2]]=v else errors[#errors+1]=s[1]..'.'..s[2]..': nieznany profil' end end end
+  local highway=read('bike','highway')
+  if highway~=nil then
+   if type(highway)~='table' then errors[#errors+1]='Nieprawidłowe punkty autostrady.'
+   else
+    for _,key in ipairs({'start','finish'})do
+     local point=highway[key]
+     if point~=nil then
+      if Util.vector(point) then
+       out.bike.highway[key]={point[1],point[2],point[3]}
+      else errors[#errors+1]='Nieprawidłowy punkt autostrady: '..key end
+     end
+    end
+   end
+  end
   local route=read('farm','route')
   if route~=nil then if route=='Przejście' or route=='Teleport szybki' then out.farm.route=route else errors[#errors+1]='Nieznany tryb trasy.' end end
   if raw.builder and type(raw.builder)=='table' and raw.builder.material~=nil then local m=raw.builder.material;if m=='ORIGINAL' or type(m)=='string' and Inventory.definitions[m] and Inventory.definitions[m].volume then out.builder.material=m else errors[#errors+1]='Nieznany materiał konstrukcji.' end end

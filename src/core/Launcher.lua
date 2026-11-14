@@ -14,7 +14,7 @@ return function(M)
   create('UISizeConstraint',{MaxSize=Vector2.new(440,465)},self.frame);corner(self.frame,14)
   local close=create('TextButton',{Size=UDim2.fromOffset(28,28),Position=UDim2.new(1,-34,0,5),Text='×',TextColor3=Color3.new(1,1,1),BackgroundTransparency=1,TextSize=18,Font=Enum.Font.GothamBold,ZIndex=3},self.frame)
   self.runtime:connect(close.Activated,function()self:unload()end,'Launcher')
-  create('TextLabel',{Size=UDim2.new(1,-60,0,36),Position=UDim2.fromOffset(16,10),BackgroundTransparency=1,TextWrapped=true,Text='KUBI HUB DELUXE 7.0',TextColor3=Color3.fromRGB(235,240,255),TextSize=17,Font=Enum.Font.GothamBold},self.frame)
+  create('TextLabel',{Size=UDim2.new(1,-60,0,36),Position=UDim2.fromOffset(16,10),BackgroundTransparency=1,TextWrapped=true,Text='KUBI HUB DELUXE '..M.Version.current,TextColor3=Color3.fromRGB(235,240,255),TextSize=17,Font=Enum.Font.GothamBold},self.frame)
   self:show(M.Locale.valid(language) and 'games' or 'languages',M.Locale.valid(language) and language or nil)
   return self
  end

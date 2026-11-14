@@ -19,9 +19,10 @@ return function(M)
    if held==-math.huge then return false,'Poczekaj na zwolnienie klawiszy.'end
    self.held[key]=math.max(held,now+seconds);return true
   end
+  self.held[key]=now+seconds
   local ok,err=pcall(function()self.virtual:SendKey(true,key,false)end)
-  if not ok then return false,tostring(err)end
-  self.held[key]=now+seconds;return true
+  if not ok then self.held[key]=nil;return false,tostring(err)end
+  return true
  end
  function A:release(key)
   if not self.held[key] then return true end
@@ -31,6 +32,8 @@ return function(M)
  end
  function A:stop(message)
   self.riding=false;self.rider=nil;self.routeIndex=nil
+  if self.highway and self.highway.active then self.highway:off(message)end
+  if self.flight and self.flight.active then self.flight:stop()end
   for key in pairs(self.held)do self:release(key)end
   self.rideInfo.Text=self:localize(message or 'Jazda zatrzymana.')
   if self.routeInfo then self:updateRouteLabel()end
@@ -48,19 +51,23 @@ return function(M)
   local seat=h and h.SeatPart
   if seat and seat:IsDescendantOf(workspace) and seat.Occupant==h then return c,root,seat end
  end
- function A:hazard(c,root,seat)
+ function A:hazard(c,root,seat,heading)
   if seat.CFrame.UpVector.Y<.35 then return 'Rower się przewrócił.'end
-  local front=seat.CFrame.LookVector
+  local front=heading or seat.CFrame.LookVector
   local velocity=seat.AssemblyLinearVelocity.Magnitude
   local cfg=RaycastParams.new();cfg.FilterType=Enum.RaycastFilterType.Exclude;cfg.IgnoreWater=true;cfg.RespectCanCollide=true
   cfg.FilterDescendantsInstances={c,seat:FindFirstAncestorOfClass('Model') or seat}
   local reach=math.clamp(5+velocity*.22,5,20)
   if workspace:Raycast(seat.Position+Vector3.new(0,.8,0),front*reach,cfg) then return 'Przeszkoda — jazda zatrzymana.'end
   if not workspace:Raycast(seat.Position+front*reach+Vector3.new(0,3,0),Vector3.new(0,-14,0),cfg) then return 'Brak podłoża przed rowerem.'end
-  if self.lastPosition and (root.Position-self.lastPosition).Magnitude>=.75 then self.lastPosition=root.Position;self.lastProgress=self.clock()end
-  if self.riding and self.clock()-self.lastProgress>=4 then return 'Rower utknął. Przejmij sterowanie.'end
+  if self.riding then
+   if (root.Position-self.lastPosition).Magnitude>=.75 then self.lastPosition=root.Position;self.lastProgress=self.clock()end
+   if self.clock()-self.lastProgress>=4 then return 'Rower utknął. Przejmij sterowanie.'end
+  end
  end
  function A:startRide()
+  if self.flight.active then return false,'Najpierw wyłącz Fly na motorze.'end
+  if self.highway.active then return false,'Najpierw zatrzymaj farmę autostrady.'end
   if next(self.held) then return false,'Poczekaj na zwolnienie klawiszy.'end
   local c,root,seat=self:seat()
   if not seat then return false,'Najpierw wsiądź na rower.'end
@@ -70,12 +77,12 @@ return function(M)
   self.rideInfo.Text=self:localize('Automatyczna jazda');return true
  end
  function A:tap(key)
-  if self.riding or self.routeIndex then return false,'Najpierw zatrzymaj jazdę.'end
+  if self.riding or self.routeIndex or self.highway.active or self.flight.active then return false,'Najpierw zatrzymaj jazdę.'end
   local ok,err=self:inputReady();if not ok then return false,err end
   return self:press(key,.12,self.clock())
  end
  function A:mark(index)
-  if self.routeIndex then return false,'Najpierw zatrzymaj trasę.'end
+  if self.routeIndex or self.highway.active or self.flight.active then return false,'Najpierw zatrzymaj trasę.'end
   local _,_,root=self:character();if not root then return false,'Brak aktywnej postaci.'end
   if index then self.startPoint=root.CFrame
   else
@@ -108,31 +115,39 @@ return function(M)
   if not ok then self:stop(err);self:updateRouteLabel();return end
   self.routeIndex=index+1;self.routeAt=now+1;self:updateRouteLabel()
  end
- function A:update(now)
-  for key,untilAt in pairs(self.held)do if now>=untilAt then self:release(key)end end
-  if self.routeIndex then self:raceTick(now);return end
-  if not self.riding then return end
-  local c,root,seat=self:seat();if not seat or c~=self.rider then self:stop('Zejście z roweru.');return end
-  if self.input:GetFocusedTextBox() then self:stop('Otwarto pole tekstowe.');return end
+ function A:driveInput(now,seat,allowTricks)
   local cfg=self.config.data.bike
-  if cfg.guard then local reason=self:hazard(c,root,seat);if reason then self:stop(reason);return end end
   local pace=M.Tempo.bike[cfg.tempo] or M.Tempo.bike.NORMAL
   if now>=self.gasAt then
    local time=pace.gas*(cfg.boost and 1.35 or 1)
-   local ok,err=self:press(keys.W,time,now);if not ok then self:stop(err);return end
+   local ok,err=self:press(keys.W,time,now);if not ok then return false,err end
    self.gasAt=now+time+pace.coast
   end
-  if now>=self.trickAt and seat.AssemblyLinearVelocity.Magnitude>=6 then
+  if allowTricks and now>=self.trickAt and seat.AssemblyLinearVelocity.Magnitude>=6 then
    self.trickAt=now+pace.interval
    local ok,err=true,nil
    if cfg.wheelie and (not cfg.tricks or self.trickIndex%2==0) then ok,err=self:press(keys.LeftControl,pace.wheelie,now)
    elseif cfg.tricks then
     ok,err=self:press(tricks[self.trickSlot],.12,now);self.trickSlot=self.trickSlot%#tricks+1
    end
-   if not ok then self:stop(err)end
+   if not ok then return false,err end
    self.trickIndex+=1
   end
+  return true
  end
+ function A:update(now)
+  for key,untilAt in pairs(self.held)do if now>=untilAt then self:release(key)end end
+  if self.flight.active then self.flight:update();return end
+  if self.highway.active then self.highway:update(now);return end
+  if self.routeIndex then self:raceTick(now);return end
+  if not self.riding then return end
+  local c,root,seat=self:seat();if not seat or c~=self.rider then self:stop('Zejście z roweru.');return end
+  if self.input:GetFocusedTextBox() then self:stop('Otwarto pole tekstowe.');return end
+  local cfg=self.config.data.bike
+  if cfg.guard then local reason=self:hazard(c,root,seat);if reason then self:stop(reason);return end end
+  local ok,err=self:driveInput(now,seat,true);if not ok then self:stop(err)end
+ end
+ function A:restoreProfile()self.highway:label('Wczytano profil.')end
  function A:stopAll()self:stop();self:updateRouteLabel();if self.quickTools then self.quickTools:reset()end end
  function A:unload()
   if not self.alive then return end
@@ -146,9 +161,13 @@ return function(M)
   self.runtime=M.Runtime.new(self.clock,function(module,err)self.log:error(module,err);if self.ui then self.ui:toast(module,err,true)end end)
   if onCreating then onCreating(self)end
   M.Profiles.init(self,'BIKE')
+  self.highway=M.BikeHighway.new(self)
+  self.flight=M.BikeFlight.new(self);self.runtime:own(self.flight)
   self.runtime:own({Destroy=function()for key in pairs(self.held)do self:release(key)end end})
   local ui=M.UI.new(self);self.ui=ui;ui.title.Text='DELUXE / BIKE UNIVERSE'
   local page=ui:page('RIDE')
+  self.highway:page(page)
+  self.flight:page(page)
   local ride=ui:card(page,'Jazda')
   ui:label(ride,'Trzymaj się otwartej drogi. F8 zatrzymuje gaz i triki. Nagrody nalicza gra.')
   self.rideInfo=ui:label(ride,'Gotowy.')
@@ -166,17 +185,25 @@ return function(M)
   self.routeInfo=ui:label(race,'');self:updateRouteLabel()
   ui:button(race,'Zapisz start',function()return self:mark(true)end)
   ui:button(race,'Dodaj checkpoint',function()return self:mark(false)end)
-  ui:button(race,'Przenieś do startu',function()if not self.startPoint then return false,'Najpierw zapisz start.'end;self:stop();return self:moveTo(self.startPoint)end)
+  ui:button(race,'Przenieś do startu',function()if self.flight.active then return false,'Najpierw wyłącz Fly na motorze.'end;if not self.startPoint then return false,'Najpierw zapisz start.'end;self:stop();return self:moveTo(self.startPoint)end)
   ui:button(race,'Przejedź zapisane checkpointy',function()
+   if self.flight.active then return false,'Najpierw wyłącz Fly na motorze.'end
    if #self.checkpoints==0 then return false,'Najpierw dodaj checkpointy.'end
    self:stop();self.routeIndex=1;self.routeAt=self.clock();self:updateRouteLabel();return true
   end)
   ui:button(race,'Wyczyść trasę',function()self:stop();self.startPoint=nil;table.clear(self.checkpoints);self:updateRouteLabel()end)
   M.QuickTools(self);M.Profiles.page(self);M.CommunityLinks.page(self)
   ui:show('RIDE');ui:theme()
-  self.runtime:connect(self.player.CharacterAdded,function()self:stopAll()end,'Bike')
+  self.runtime:connect(self.player.CharacterAdded,function()
+   if self.highway.active then
+    if self.highway.state~='SPAWN' and self.highway.state~='MOUNT' then self.highway:recover(self.clock(),'Postać się odrodziła.')end
+   else self:stopAll()end
+  end,'Bike')
   self.runtime:connect(self.input.WindowFocusReleased,function()self:stopAll()end,'Bike')
-  self.runtime:connect(self.input.InputBegan,function(event)if event.KeyCode==keys.F8 or self.riding and (event.KeyCode==keys.A or event.KeyCode==keys.D or event.KeyCode==keys.S or event.KeyCode==keys.Space) then self:stop()end end,'Bike')
+  self.runtime:connect(self.input.InputBegan,function(event)
+   local key=event.KeyCode
+   if key==keys.F8 or (self.riding or self.highway.active) and not self.held[key] and (key==keys.A or key==keys.D or key==keys.S or key==keys.Space) then self:stop()end
+  end,'Bike')
   self.runtime:connect(self.player.Idled,function()
    if not self.riding or not self.config.data.bike.antiIdle then return end
    local c,root,seat=self:seat();if not seat or self.input:GetFocusedTextBox() or self:hazard(c,root,seat) then return end
