@@ -9,6 +9,6 @@ return function(M)
   ui:feature(p,'Wróć do poprzedniej pozycji',nil,function()return t:back()end,function(panel)ui:label(panel,'Powrót działa dla tej samej żywej postaci i zapamiętuje ostatni teleport.')end)
   if app.mode=='UNIVERSAL' then return end
   local fight=ui:page('FIGHT')
-  if not app.controller then local f=ui:card(fight,'Fight — MM2','Funkcje walki są dostępne w trybie Murder Mystery 2.');ui:label(f,'Dołącz do MM2, uruchom hub i wybierz MM2.');ui:button(f,'Wróć do wyboru gry',function()app:unload();_G.KubiHubRuntime=M.Launcher.new()end) end
+  if not app.controller then local f=ui:card(fight,'Fight — MM2','Funkcje walki są dostępne w trybie Murder Mystery 2.');ui:label(f,'Dołącz do MM2, uruchom hub i wybierz MM2.');ui:button(f,'Wróć do wyboru huba',function()M.Launcher.back(app)end) end
  end
 end

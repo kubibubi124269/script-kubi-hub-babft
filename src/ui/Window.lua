@@ -7,7 +7,7 @@ return function(M)
   self.gui=self:create('ScreenGui',{Name='KubiHubUltimateV5',ResetOnSpawn=false,DisplayOrder=95,ZIndexBehavior=Enum.ZIndexBehavior.Sibling},app.player.PlayerGui);app.runtime:own(self.gui)
   self.frame=self:create('Frame',{Name='Window',BackgroundColor3=self.palette.bg,BorderSizePixel=0,Active=true},self.gui);self:corner(self.frame,14)
   self.header=self:create('Frame',{Size=UDim2.new(1,0,0,65),BackgroundColor3=self.palette.panel,BorderSizePixel=0,Active=true},self.frame);self:corner(self.header,14)
-  self.title=self:create('TextLabel',{Position=UDim2.fromOffset(18,8),Size=UDim2.new(1,-120,0,25),BackgroundTransparency=1,Text='KUBI HUB  /  ULTIMATE',TextColor3=self.palette.text,TextSize=19,Font=Enum.Font.GothamBold,TextXAlignment=Enum.TextXAlignment.Left},self.header)
+  self.title=self:create('TextLabel',{Position=UDim2.fromOffset(18,8),Size=UDim2.new(1,-120,0,25),BackgroundTransparency=1,Text='KUBI HUB / DELUXE',TextColor3=self.palette.text,TextSize=19,Font=Enum.Font.GothamBold,TextXAlignment=Enum.TextXAlignment.Left},self.header)
   self.subtitle=self:create('TextLabel',{Position=UDim2.fromOffset(18,36),Size=UDim2.new(1,-120,0,18),BackgroundTransparency=1,Text='V'..M.Version.current..'  •  TRYB ASYSTENTA',TextColor3=self.palette.muted,TextSize=11,Font=Enum.Font.Gotham,TextXAlignment=Enum.TextXAlignment.Left},self.header)
   self.nav=self:create('ScrollingFrame',{BackgroundTransparency=1,BorderSizePixel=0,ScrollBarThickness=2,CanvasSize=UDim2.new(),AutomaticCanvasSize=Enum.AutomaticSize.Y},self.frame)
   self.navLayout=self:create('UIGridLayout',{CellPadding=UDim2.fromOffset(6,6),FillDirection=Enum.FillDirection.Horizontal,SortOrder=Enum.SortOrder.LayoutOrder},self.nav)
@@ -38,8 +38,9 @@ return function(M)
   self:fit();return self
  end
  function UI:create(class,props,parent)
-  local o=Instance.new(class);for k,v in pairs(props) do o[k]=v end;self.order=self.order+1;if o:IsA('GuiObject') then o.LayoutOrder=self.order end;o.Parent=parent;return o
+  local o=Instance.new(class);for k,v in pairs(props) do if k=='PlaceholderText' or k=='Text' and class~='TextBox' then v=self:t(v)end;o[k]=v end;self.order=self.order+1;if o:IsA('GuiObject') then o.LayoutOrder=self.order end;o.Parent=parent;return o
  end
+ function UI:t(text)return M.Locale.text(self.app.language,text)end
  function UI:bind(signal,fn,list)
   local c=self.app.runtime:connect(signal,fn,'GUI');if list then self.listConnections[#self.listConnections+1]=c end;return c
  end
@@ -90,12 +91,12 @@ return function(M)
   local heading=self:button(card,title,function()end)
   local body=self:create('Frame',{Size=UDim2.new(1,0,0,0),AutomaticSize=Enum.AutomaticSize.Y,BackgroundTransparency=1},card)
   self:create('UIListLayout',{Padding=UDim.new(0,8),SortOrder=Enum.SortOrder.LayoutOrder},body)
-  local record={outer=card,body=body,title=title,page=page.Name,terms=title..' '..(description or '')};self.cards[#self.cards+1]=record;self.cardBodies[body]=record
-  local function open(value)body.Visible=value;heading.Text=(value and '[-]  ' or '[+]  ')..title end;record.open=open
+  local record={outer=card,body=body,title=title,page=page.Name,terms=title..' '..self:t(title)..' '..(description or '')};self.cards[#self.cards+1]=record;self.cardBodies[body]=record
+  local function open(value)body.Visible=value;heading.Text=(value and '[-]  ' or '[+]  ')..self:t(title) end;record.open=open
   self:bind(heading.Activated,function()open(not body.Visible)end)
   open(not self.firstCard[page.Name]);self.firstCard[page.Name]=true
   if description then self:settingsFor(heading,title,function(panel)self:label(panel,description)end) end
-  record.result=self:button(self.results,(self.navigation.titles[page.Name] or page.Name)..'  /  '..title,function()self:reveal(body)end)
+  record.result=self:button(self.results,self:t(self.navigation.titles[page.Name] or page.Name)..'  /  '..self:t(title),function()self:reveal(body)end)
   return body
  end
  function UI:searchCards()
@@ -106,7 +107,7 @@ return function(M)
   for _,record in ipairs(self.cards) do record.result.Visible=self.navigation.matches(query,record.terms) end
  end
  function UI:rememberTerm(parent,text)
-  local at=parent;while at and at~=self.content do local r=self.cardBodies[at];if r then r.terms=r.terms..' '..tostring(text);return end;at=at.Parent end
+  local at=parent;while at and at~=self.content do local r=self.cardBodies[at];if r then r.terms=r.terms..' '..tostring(text)..' '..tostring(self:t(text));return end;at=at.Parent end
  end
  function UI:button(parent,text,fn,tip,list)
   if not list then self:rememberTerm(parent,text) end
@@ -141,7 +142,7 @@ return function(M)
  function UI:feature(parent,title,get,action,build)
   local row=self:create('Frame',{Size=UDim2.new(1,0,0,40),BackgroundTransparency=1},parent)
   local b=self:button(row,title,action);b.Size=UDim2.new(1,-38,1,0);self:rememberTerm(parent,title)
-  local function refresh()b.Text=title..(get and ('  '..(get() and 'ON' or 'OFF')) or '');b.TextColor3=get and get() and self.palette.accent or self.palette.text end
+  local function refresh()b.Text=self:t(title)..(get and ('  '..(get() and 'ON' or 'OFF')) or '');b.TextColor3=get and get() and self.palette.accent or self.palette.text end
   self.featureRefreshers=self.featureRefreshers or {};self.featureRefreshers[#self.featureRefreshers+1]=refresh;self.refreshers[#self.refreshers+1]=refresh;refresh();self:bind(b.Activated,refresh)
   if build then local entry=self:settingsFor(b,title,build);local gear=self:button(row,'⋯',entry.open);gear.Position=UDim2.new(1,-34,0,0);gear.Size=UDim2.fromOffset(34,40);self:bind(gear.InputBegan,function(input)if input.UserInputType==Enum.UserInputType.MouseButton2 then entry.open() end end) end
   return b
@@ -154,17 +155,21 @@ return function(M)
   if get then local function refresh()box.Text=tostring(get())end;refresh();self.refreshers[#self.refreshers+1]=refresh end;return box
  end
  function UI:cycle(parent,title,values,get,set)
+  self:rememberTerm(parent,title)
+  local function text()return self:t(title)..': '..tostring(self:t(get()))end
   local button
-  button=self:button(parent,title..': '..tostring(get()),function()local at=1;for i,v in ipairs(values) do if v==get() then at=i%#values+1;break end end;local ok,err=set(values[at]);button.Text=title..': '..tostring(get());return ok,err end)
-  self.refreshers[#self.refreshers+1]=function()button.Text=title..': '..tostring(get())end
+  button=self:button(parent,text(),function()local at=1;for i,v in ipairs(values) do if v==get() then at=i%#values+1;break end end;local ok,err=set(values[at]);button.Text=text();return ok,err end)
+  self.refreshers[#self.refreshers+1]=function()button.Text=text()end
   return button
  end
  function UI:toggle(parent,title,get,set)
   local b
-  b=self:button(parent,'',function()local ok,err=set(not get());b.Text=title..': '..(get() and 'ON' or 'OFF');return ok,err end);b.Text=title..': '..(get() and 'ON' or 'OFF')
-  self.refreshers[#self.refreshers+1]=function()b.Text=title..': '..(get() and 'ON' or 'OFF')end;return b
+  local function text()return self:t(title)..': '..(get() and 'ON' or 'OFF')end
+  b=self:button(parent,'',function()local ok,err=set(not get());b.Text=text();return ok,err end);b.Text=text()
+  self.refreshers[#self.refreshers+1]=function()b.Text=text()end;return b
  end
  function UI:slider(parent,title,get,set,lo,hi,step)
+  title=self:t(title)
   local label=self:label(parent,title..': '..tostring(get()),30)
   local track=self:create('Frame',{Size=UDim2.new(1,0,0,22),BackgroundColor3=self.palette.bg,BorderSizePixel=0,Active=true},parent);self:corner(track,7)
   local fill=self:create('Frame',{Size=UDim2.new((get()-lo)/(hi-lo),0,1,0),BackgroundColor3=self.palette.accent,BorderSizePixel=0},track);self:corner(fill,7)
@@ -190,7 +195,7 @@ return function(M)
   if self.notification then self.notification:Destroy();self.notification=nil end
  end
  function UI:toast(module,message,bad)
-  local full='['..module..'] '..tostring(message)
+  local full='['..module..'] '..tostring(self:t(message))
   if self.statusInfo then self.statusInfo.Text=full end
   local compact=full:gsub('%s+',' ')
   self.footer.Text=compact;self.footer.TextColor3=bad and self.palette.red or self.palette.muted
@@ -200,7 +205,7 @@ return function(M)
   if valid and cut then preview=compact:sub(1,cut-1)..'…' elseif not valid then preview='['..module..'] Kliknij, aby odczytać pełną treść.' end
   self:clearNotification()
   local camera=workspace.CurrentCamera;local width=math.max(120,math.min(340,(camera and camera.ViewportSize.X or 364)-24))
-  self.notification=self:create('TextButton',{Name='Notification',AnchorPoint=Vector2.new(1,1),Size=UDim2.new(0,width,0,0),AutomaticSize=Enum.AutomaticSize.Y,Position=UDim2.new(1,-12,1,-18),BackgroundColor3=self.palette.panel,Text=preview..'\nKliknij po szczegóły.',TextColor3=bad and self.palette.red or self.palette.text,TextWrapped=true,TextSize=13,Font=Enum.Font.Gotham,TextXAlignment=Enum.TextXAlignment.Left,BorderSizePixel=0,ZIndex=80},self.gui);self:corner(self.notification,10)
+  self.notification=self:create('TextButton',{Name='Notification',AnchorPoint=Vector2.new(1,1),Size=UDim2.new(0,width,0,0),AutomaticSize=Enum.AutomaticSize.Y,Position=UDim2.new(1,-12,1,-18),BackgroundColor3=self.palette.panel,Text=preview..'\n'..self:t('Kliknij po szczegóły.'),TextColor3=bad and self.palette.red or self.palette.text,TextWrapped=true,TextSize=13,Font=Enum.Font.Gotham,TextXAlignment=Enum.TextXAlignment.Left,BorderSizePixel=0,ZIndex=80},self.gui);self:corner(self.notification,10)
   self.notificationConnection=self:bind(self.notification.Activated,function()self.frame.Visible=true;self.bubble.Visible=false;if self.statusBody then self:reveal(self.statusBody) else self:show('DEBUG') end end)
   self:create('UIPadding',{PaddingLeft=UDim.new(0,12),PaddingRight=UDim.new(0,12),PaddingTop=UDim.new(0,10),PaddingBottom=UDim.new(0,10)},self.notification);self.notifyUntil=self.app.clock()+5
  end
