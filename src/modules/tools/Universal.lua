@@ -9,13 +9,13 @@ return function(M)
   self.input=game:GetService('UserInputService');self.runService=game:GetService('RunService');self.lighting=game:GetService('Lighting')
   self.log=M.Log.new(function()return os.date('%H:%M:%S')end);self.runtime=M.Runtime.new(self.clock,function(module,err)self.log:error(module,err);if self.ui then self.ui:toast(module,err,true)end end)
   if onCreating then onCreating(self)end
-  self.config={data=M.Util.copy(M.Config.defaults)};local saved=_G.KubiHubUniversalSettings;if type(saved)=='table' then local value=M.Config.validate({ui=saved.ui});if value then self.config.data.ui=value.ui end end
+  M.Profiles.init(self,'UNIVERSAL')
   self.platform={allowed=true,character=function()
    local c=self.player.Character;local h=c and c:FindFirstChildOfClass('Humanoid');local r=c and c:FindFirstChild('HumanoidRootPart');if c and h and r and h.Health>0 then return c,h,r end
   end}
   self.adapter={mode='UNIVERSAL',capabilities={movement=true},cancel=function()end,movement=function(_,values)local _,h=self.platform:character();if not h then return {ok=false,error='Poczekaj na aktywną postać.'}end;h.WalkSpeed=values.walk;if h.UseJumpPower then h.JumpPower=values.jump else h.JumpHeight=values.jump^2/(2*workspace.Gravity)end;return {ok=true}end}
   self.movement=M.Movement.new(self.runtime,self.adapter,self.player,self.input,self.log,self.config.data.movement);self.avatar=M.AvatarAppearance.new(self.platform,self.runtime);self.runtime:own(self.avatar);self.avatar:bind(self.runService)
-  self.ui=M.UI.new(self);self.ui.title.Text='KUBI HUB  /  UNIVERSAL'
+  self.ui=M.UI.new(self);self.ui.title.Text='KUBI HUB DELUXE / UNIVERSAL'
   self.crossGui=self.ui:create('ScreenGui',{Name='KubiHubUniversalCrosshair',IgnoreGuiInset=true,ResetOnSpawn=false,DisplayOrder=80},self.player.PlayerGui);self.runtime:own(self.crossGui)
   self.cross=self.ui:create('TextLabel',{AnchorPoint=Vector2.new(.5,.5),Position=UDim2.fromScale(.5,.5),Size=UDim2.fromOffset(48,48),Text='+',TextSize=24,Font=Enum.Font.GothamBold,TextColor3=Color3.new(1,1,1),BackgroundTransparency=1,Visible=false},self.crossGui)
   self:pages();M.QuickTools(self);self.ui:show('MISC');self.ui:theme();self:updateDashboard()
@@ -55,7 +55,7 @@ return function(M)
  function A:pages()
   local ui=self.ui;M.ExtraPages(self)
   local main=ui:card(ui:page('MISC'),'Universal','Wspólne narzędzia klienta. Gra może przywracać własny ruch, kamerę i oświetlenie. Nie ma tu serwerowych nagród ani funkcji walki MM2.')
-  self.info=ui:label(main,'');ui:button(main,'STOP / przywróć zmiany',function()self:stopAll()end);ui:button(main,'Wróć do wyboru huba',function()self:unload();_G.KubiHubRuntime=M.Launcher.new()end)
+  self.info=ui:label(main,'');ui:button(main,'STOP / przywróć zmiany',function()self:stopAll()end)
   local player=ui:page('PLAYER');local move=ui:card(player,'Ruch postaci','Zastosowanie lokalne. Gra może korygować ruch. Wyłączenie przywraca zapamiętane ustawienia.')
   local function options(panel)for _,row in ipairs({{'Prędkość','walk',8,60},{'Skok','jump',20,120},{'Prędkość Fly','flySpeed',10,100}})do local spec=row;ui:slider(panel,spec[1],function()return self.config.data.movement[spec[2]]end,function(v)self.config.data.movement[spec[2]]=v end,spec[3],spec[4],1)end end
   ui:feature(move,'Zastosuj ruch',nil,function()return self.movement:apply()end,options)
@@ -73,7 +73,7 @@ return function(M)
   local settings=ui:page('SETTINGS');local s=ui:card(settings,'Wygląd huba')
   ui:cycle(s,'Akcent',{'BLUE','PURPLE'},function()return self.config.data.ui.theme end,function(v)self.config.data.ui.theme=v;ui:theme()end)
   ui:toggle(s,'Tryb kompaktowy',function()return self.config.data.ui.compact end,function(v)self.config.data.ui.compact=v;ui:fit()end)
-  ui:button(s,'Zapisz wygląd na sesję',function()_G.KubiHubUniversalSettings={ui=M.Util.copy(self.config.data.ui)};self:notify('Universal','Zapisano wygląd. Funkcje nie włączą się automatycznie.')end)
+  M.Profiles.page(self);M.CommunityLinks.page(self)
   ui.statusBody=ui:card(settings,'Ostatni komunikat');ui.statusInfo=ui:label(ui.statusBody,'Gotowy.');ui.routes.DEBUG=ui.statusBody
   ui:button(s,'Wyłącz i przywróć zmiany',function()self:unload()end)
  end

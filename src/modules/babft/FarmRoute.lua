@@ -48,6 +48,13 @@
   if stage<=10 then
    if stage==1 and not self.origin then self.origin={character=character,root=root,cf=root.CFrame} end
    if not self.floor then self.floor=Instance.new('Part');self.floor.Name='KubiHubFarmSupport';self.floor.Anchored=true;self.floor.CanCollide=true;self.floor.CanTouch=false;self.floor.CanQuery=false;self.floor.Transparency=1;self.floor.Size=Vector3.new(6,1,6);self.floor.Parent=self.world end
+   if settings and settings.route=='Teleport szybki' then
+    self.phase='Teleport do etapu '..stage..' / 10'
+    while paused and paused() and self.alive() and not cancelled()do self.wait(.05)end
+    if cancelled() or not self.alive() or self.player.Character~=character or not root.Parent then self:stop();return {ok=false,error='Zatrzymano teleport.'}end
+    local cf=target.CFrame;self.floor.CFrame=cf*CFrame.new(0,-3.5,0);self:move(character,root,cf)
+    return {ok=true,stage=stage,completed=false,confirmation='local-route-position'}
+   end
    self.phase='Przejście przez etap '..stage..' / 10'
    local duration=math.clamp(tonumber(settings and settings.crossingTime) or .8,.4,3);local elapsed=0;local last=self.clock()
    while elapsed<duration and self.alive() and not cancelled() do

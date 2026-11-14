@@ -1,6 +1,11 @@
 {
-  "version": "6.6.0",
+  "version": "7.0.0",
   "modules": [
+    {
+      "name": "Tempo",
+      "file": "src/core/Tempo.lua",
+      "sha256": "4449f2758bcdda0aaab368b3a91200ab8e46bab25548602ca472256cc5d270b6"
+    },
     {
       "name": "Util",
       "file": "src/core/Util.lua",
@@ -24,7 +29,7 @@
     {
       "name": "Config",
       "file": "src/config/Config.lua",
-      "sha256": "db3f594f736dc93889b185affc53ce07f627fa10aa633f495929538f104795b7"
+      "sha256": "31a8a4dd32159bde3c55a03e1b5841c448d71e8b740ea8851ebc14169a43bae8"
     },
     {
       "name": "Schema",
@@ -74,7 +79,7 @@
     {
       "name": "BabftFarmRoute",
       "file": "src/modules/babft/FarmRoute.lua",
-      "sha256": "1b9aae070a53ac9de2759d0654b80ce1251b420c2d36c8853dc55d49bf6ed7fc"
+      "sha256": "843091bf6c76d19050de8dc8acea880bebffe167e9d1e4f26da1ee37e7d58b46"
     },
     {
       "name": "BabftEnvironment",
@@ -94,7 +99,7 @@
     {
       "name": "Version",
       "file": "src/modules/tools/Version.lua",
-      "sha256": "5c7e678cef97109693b4c03810fb13c843d0bccae7e5325accae5e94924965fa"
+      "sha256": "4da0885062a0cb946fd50082dd4a6ff7d2410023f9531ffd876aa406240d60c4"
     },
     {
       "name": "Performance",
@@ -134,7 +139,7 @@
     {
       "name": "Games",
       "file": "src/core/Games.lua",
-      "sha256": "0d5060c38d518a8b28f82e5157ab3ac0145fe322c7b3c8b9992782da08918c42"
+      "sha256": "8ca4a382712916f911d0061354648ab5c5898fb694960ac95047d8d6ff095f05"
     },
     {
       "name": "MM2Platform",
@@ -144,7 +149,7 @@
     {
       "name": "MM2Controller",
       "file": "src/modules/mm2/Controller.lua",
-      "sha256": "671571f3bea2015e20925fd90ad0194eb695d7ff483662bda97a51e566e20d08"
+      "sha256": "94b422d28baa80f803a33c3e61e76e4fe64a26382ae3bd6365b457abe10df82b"
     },
     {
       "name": "AvatarAppearance",
@@ -164,27 +169,27 @@
     {
       "name": "UI",
       "file": "src/ui/Window.lua",
-      "sha256": "d5451bdc44a82198bae9e8261eead5ad413c477e2a53fe2d0a837cce7eaab3d3"
+      "sha256": "40b86ae5e83577f252aae99deaee94fcd5f46dc040400e9498998c76a15b95c5"
     },
     {
       "name": "ExtraPages",
       "file": "src/ui/ExtraPages.lua",
-      "sha256": "6616a12e2531d854c758be3821bba34f17ec335a922906aefd535413be6c84d8"
+      "sha256": "6bc863eb4b1b2670e1cad661e64deff3193dc231a2651008b0ebd17d6424b881"
     },
     {
       "name": "Application",
       "file": "src/core/Application.lua",
-      "sha256": "b2908ed49a5cb6b6442f087a83a0fc2a3bc40c3471f3af60c158c24d07db6243"
+      "sha256": "a98076e6b37609d318eec604d862a42e60331c8dc3dcc84351358d8a5eb68c09"
     },
     {
       "name": "MM2App",
       "file": "src/modules/mm2/Application.lua",
-      "sha256": "7760d1e77dbd8f6161a55fdacdf68e80d724ee2f060137be51b711c1c4eaf25a"
+      "sha256": "7d3337f85ba4dea1c71dc85257f2eb28469d64361a2182a75e5e03e9deba9f69"
     },
     {
       "name": "UniversalApp",
       "file": "src/modules/tools/Universal.lua",
-      "sha256": "231b150d60c6146a562ac8d0e401712b66ea466c1b7c6896e25ae7830f8ec31f"
+      "sha256": "9c4b6cfca8420667c9002ec752051e8583b731b55e8bc3d82cea44be46c32bbb"
     },
     {
       "name": "QuickTools",
@@ -199,13 +204,33 @@
     {
       "name": "BrainrotApp",
       "file": "src/modules/brainrot/Application.lua",
-      "sha256": "2039e3098ea820a6f615bd8fe988d415fee418210379257539eb0db4ee9b983a"
+      "sha256": "1dde4748da539ff1aa998d72e31767e659bdd885ff9fe3a78fbeb2630e8b9546"
+    },
+    {
+      "name": "Locale",
+      "file": "src/core/Locale.lua",
+      "sha256": "e6a6d789e7e0499358e8c1a83e4ffed506376a66d80c8558657dc6481dd22a59"
+    },
+    {
+      "name": "Profiles",
+      "file": "src/core/Profiles.lua",
+      "sha256": "1369ced54df43507a9145eb1ba3f33cca42ca8c910e5e3bc62645d749c64dee6"
+    },
+    {
+      "name": "CommunityLinks",
+      "file": "src/ui/Community.lua",
+      "sha256": "ea8cee88191b5bc8e9261ff03c2005b65d0f0d5337246081a92690247ec102fa"
+    },
+    {
+      "name": "BikeApp",
+      "file": "src/modules/bike/Application.lua",
+      "sha256": "4520898d13c11b855b87e20689666ad2bee85b2de424ddd58f1eea5d83eca41d"
     },
     {
       "name": "Launcher",
       "file": "src/core/Launcher.lua",
-      "sha256": "fbfda1d2204301205868ce3d8490bb1dc9b9b622f69e4c021739dece2eec22f7"
+      "sha256": "27ba42da7662ed1c70b982cc51d2a1248ca3f491f021f1fef40afb0749598042"
     }
   ],
-  "mainSha256": "fbe49531e05cd9d86c9f46bc6d6362471e61643045f290426f55325c8fdaa07f"
+  "mainSha256": "b1a4b1584821112f6026465463e2ff10b0487c801a2d280d44a28d2881656f5c"
 }

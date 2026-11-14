@@ -40,6 +40,9 @@ local crossed=route:step(1,function()return false end,nil,{crossingTime=.4})
 check(crossed.ok and routeHum.Sit==false and routeChar.PivotMoves>movesBefore+2 and routeChar.Head.Position.Z~=headBefore,'BABFT unseats and moves the whole character through a stage rather than jumping only the root')
 local cancelCross=false;task.onWait=function()cancelCross=true;task.onWait=nil end
 local stoppedCross=route:step(2,function()return cancelCross end,nil,{crossingTime=.4});check(not stoppedCross.ok and route.floor==nil,'STOP during an active BABFT crossing cancels movement and cleans support')
+local movesBeforeJump=routeChar.PivotMoves
+local jump=route:step(1,function()return false end,nil,{route='Teleport szybki'});check(jump.ok and not jump.completed and routeChar.PivotMoves==movesBeforeJump+1 and routeRoot.Position.Z==100,'BABFT quick mode makes one teleport to the loaded stage without claiming a reward')
+route:stop();check(route.floor==nil,'STOP also removes the quick teleport support')
 routeHub:unload()
 
 game.PlaceId=142823291;game.GameId=66654135
@@ -74,6 +77,9 @@ do
  assert(c:setFilter('CANDY'));assert(c:startFarm());c:tick(.05);renderWalk()
  local flight=mm.platform.pickupFlightState
  check(flight and flight.force.Parent==mmRoot and flight.force.VectorVelocity.X==15 and flight.force.VectorVelocity.Y>0 and mmRoot.Position.X==0 and not mmCharacter.PivotMoves,'coin flight uses a limited physical velocity without moving the character instantly')
+ assert(c:setTempo('FAST'));renderWalk()
+ check(flight.force.VectorVelocity.X==20 and flight==mm.platform.pickupFlightState and not c:setTempo('INVALID'),'MM2 pace changes the existing flight force without restarting the approach')
+ assert(c:setTempo('NORMAL'))
  mmRoot.CFrame=CFrame.new(18,2,0);tick+=.1;c:tick(.05);renderWalk()
  check(mm.platform.pickupFlightState==flight and flight.force.VectorVelocity.X<15 and flight.force.VectorVelocity.Y<0,'flight reuses its force and slows and descends near the pickup')
  assert(c:setFarmMotion('Chód'))

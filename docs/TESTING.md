@@ -1,4 +1,10 @@
-# Testy V6.6.0
+# Testy KUBI HUB DELUXE 7.0
+
+1. Uruchom ten sam loader. Wybierz język, przejdź przez kartę społeczności i wybierz grę. Sprawdź tłumaczenie zakładek i profilu tempa.
+2. Zapisz dwa nazwane profile, przełącz między nimi i ponownie otwórz tryb. Ostatni zapisany lub wczytany profil powinien zostać przywrócony w tym trybie i na tym koncie. Automaty powinny nadal być wyłączone.
+3. W BABFT wybierz **Teleport szybki**. STOP powinien posprzątać platformę i przerwać kolejne etapy. Odbiór nagrody wymaga sprawdzenia w grze.
+4. W Bike Universe sprawdź Q, E, W, Ctrl i triki 1–4 oraz F8. Po ostrzeżeniu o nierozpoznanym siedzeniu lub braku wirtualnego wejścia automat powinien pozostać wyłączony. Na otwartej drodze sprawdź, czy F8 i utrata fokusu zwalniają wszystkie klawisze.
+5. Zapisz start i checkpointy. Przyjmij zaproszenie w grze, a po starcie sam uruchom trasę. Sprawdź, czy serwer zalicza punkty. Nie ma potwierdzonego automatycznego odczytu zaproszenia.
 
 ## Studio skórek MM2
 

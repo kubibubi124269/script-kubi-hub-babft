@@ -12,7 +12,7 @@ local Builder=require('../src/modules/builder/Controller')(U,Schema,Inventory)
 local Adapter=require('../src/core/Adapter')(U)
 local BabftAdapter=require('../src/core/BabftAdapter')(U,Schema,Inventory)
 local Layout=require('../src/ui/Layout');local Nav=require('../src/ui/Navigation')
-local Games=require('../src/core/Games');local MM2Controller=require('../src/modules/mm2/Controller')(U)
+local Games=require('../src/core/Games');local MM2Controller=require('../src/modules/mm2/Controller')(U,require('../src/core/Tempo'))
 local total=0;local failed=0
 local function test(name,fn)local ok,e=pcall(fn);total+=1;if not ok then failed+=1;print('FAIL '..name..': '..tostring(e)) else print('PASS '..name) end end
 local function eq(a,b)assert(a==b,tostring(a)..' ~= '..tostring(b))end
