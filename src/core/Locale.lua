@@ -2,6 +2,14 @@ local L={}
 L.codes={'PL','EN','RU','UK','ZH','ES','DE','PT','FR','IT'}
 L.names={PL='Polski',EN='English',RU='Русский',UK='Українська',ZH='简体中文',ES='Español',DE='Deutsch',PT='Português',FR='Français',IT='Italiano'}
 local rows={
+ ['Autostrada']={'Highway','Шоссе','Шосе','高速公路','Autopista','Autobahn','Rodovia','Autoroute','Autostrada'},
+ ['Farma autostrady']={'Highway farm','Фарм на шоссе','Фарм на шосе','公路刷取','Farmeo en autopista','Autobahn-Farm','Farm na rodovia','Farm sur autoroute','Farm in autostrada'},
+ ['Zapisz A — początek']={'Save A — start','Сохранить A — старт','Зберегти A — старт','保存 A：起点','Guardar A — inicio','A speichern — Start','Salvar A — início','Enregistrer A — départ','Salva A — inizio'},
+ ['Zapisz B — koniec']={'Save B — end','Сохранить B — конец','Зберегти B — кінець','保存 B：终点','Guardar B — fin','B speichern — Ende','Salvar B — fim','Enregistrer B — fin','Salva B — fine'},
+ ['Wyczyść odcinek']={'Clear segment','Очистить отрезок','Очистити відрізок','清除路段','Borrar tramo','Strecke löschen','Limpar trecho','Effacer le tronçon','Cancella tratto'},
+ ['Punkty']={'Points','Точки','Точки','路线点','Puntos','Punkte','Pontos','Points','Punti'},
+ ['Pętle']={'Laps','Круги','Кола','圈数','Vueltas','Runden','Voltas','Tours','Giri'},
+ ['Odzyskania']={'Recoveries','Восстановления','Відновлення','恢复次数','Recuperaciones','Neustarts','Recuperações','Reprises','Riprese'},
  ['Tryb trasy']={'Route mode','Режим маршрута','Режим маршруту','路线模式','Modo de ruta','Routenmodus','Modo de rota','Mode de parcours','Modalità percorso'},
  ['Przejście']={'Crossing','Проезд','Проїзд','穿越','Recorrido','Durchfahrt','Travessia','Traversée','Attraversamento'},
  ['Teleport szybki']={'Quick teleport','Быстрый телепорт','Швидкий телепорт','快速传送','Teletransporte rápido','Schnellteleport','Teleporte rápido','Téléportation rapide','Teletrasporto rapido'},
