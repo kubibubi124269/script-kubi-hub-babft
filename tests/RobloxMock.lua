@@ -20,13 +20,14 @@ local v2m={__div=function(v,n)return Vector2.new(v.X/n,v.Y/n)end}
 Vector2={new=function(x,y)return setmetatable({X=x or 0,Y=y or 0},v2m)end};Vector2.zero=Vector2.new()
 local cm={};cm.__index=function(c,k)if k=='Position'then return c.pos elseif k=='Rotation'then return c elseif k=='LookVector'then return Vector3.new(0,0,-1)elseif k=='ToObjectSpace' then return function(a,b)return CFrame.new(b.pos-a.pos)end elseif k=='ToAxisAngle'then return function()return Vector3.yAxis,0 end end end;cm.__mul=function(a,b)return CFrame.new(a.pos+b.pos)end
 CFrame={new=function(x,y,z)return setmetatable({pos=type(x)=='table' and x or Vector3.new(x,y,z)},cm)end,Angles=function()return CFrame.new()end,lookAt=function(p)return CFrame.new(p)end}
-local originalCFrameIndex=cm.__index;cm.__index=function(c,k)if k=='RightVector' then return Vector3.new(1,0,0) elseif k=='Lerp' then return function(a,b,t)return CFrame.new(a.pos+(b.pos-a.pos)*t)end end;return originalCFrameIndex(c,k)end
+local originalCFrameIndex=cm.__index;cm.__index=function(c,k)if k=='RightVector' then return Vector3.new(1,0,0) elseif k=='UpVector' then return Vector3.yAxis elseif k=='Lerp' then return function(a,b,t)return CFrame.new(a.pos+(b.pos-a.pos)*t)end end;return originalCFrameIndex(c,k)end
+cm.__add=function(c,v)return CFrame.new(c.pos+v)end
 RaycastParams={new=function()return {}end}
 Color3={new=function(r,g,b)return {R=r,G=g,B=b}end,fromRGB=function(r,g,b)return {R=r/255,G=g/255,B=b/255}end,fromHSV=function()return {}end}
 UDim={new=function(s,o)return {Scale=s or 0,Offset=o or 0}end};UDim2={new=function(a,b,c,d)return {X=UDim.new(a,b),Y=UDim.new(c,d)}end};UDim2.fromOffset=function(x,y)return UDim2.new(0,x,0,y)end;UDim2.fromScale=function(x,y)return UDim2.new(x,0,y,0)end
 Enum=setmetatable({},{__index=function(t,k)local group=setmetatable({},{__index=function(g,v)local item={Name=v};rawset(g,v,item);return item end});rawset(t,k,group);return group end})
 Enum.RenderPriority.Camera.Value=200;Enum.RenderPriority.Character.Value=300;Enum.RenderPriority.Last.Value=2000
-local methods={};local im={};local events={Activated=true,FocusLost=true,InputBegan=true,InputChanged=true,InputEnded=true,MouseEnter=true,MouseLeave=true,ChildAdded=true,ChildRemoved=true,Changed=true,CharacterAdded=true,Heartbeat=true,RenderStepped=true}
+local methods={};local im={};local events={Activated=true,FocusLost=true,InputBegan=true,InputChanged=true,InputEnded=true,MouseEnter=true,MouseLeave=true,ChildAdded=true,ChildRemoved=true,Changed=true,CharacterAdded=true,Heartbeat=true,RenderStepped=true,WindowFocusReleased=true,Idled=true}
 im.__index=function(o,k)
  if methods[k] then return methods[k]end
  if o.props[k]~=nil then return o.props[k]end
@@ -68,13 +69,15 @@ function methods:SetAttribute(name,value)self.Attributes[name]=value end
 function methods:GetPlayers()return self:GetChildren()end
 function methods:IsStudio()return game.PlaceId==10 end
 function methods:WorldToViewportPoint(position)return Vector3.new(self.ViewportSize.X/2+position.X,self.ViewportSize.Y/2-position.Y,10),true end
-function methods:Raycast()return self.raycastHit end
+function methods:Raycast(origin,direction,params)if self.mockRaycast then return self.mockRaycast(origin,direction,params)end;return self.raycastHit end
+function methods:FindFirstAncestorOfClass(name)local p=self.Parent;while p do if p.ClassName==name then return p end;p=p.Parent end end
 function methods:BindToRenderStep(name,priority,fn)self.RenderBindings=self.RenderBindings or {};self.RenderBindings[name]={priority=priority,fn=fn}end
 function methods:UnbindFromRenderStep(name)if self.RenderBindings then self.RenderBindings[name]=nil end end
 function methods:WaitForChild(name)return self:FindFirstChild(name)end
 function methods:GetPropertyChangedSignal(name)if not self.signals[name]then self.signals[name]=signal()end;return self.signals[name]end
 function methods:Destroy()for _,c in ipairs(self:GetChildren())do c:Destroy()end;self.Parent=nil;self.Destroyed=true end
-function methods:GetFocusedTextBox()return nil end;function methods:IsKeyDown(key)return self.mockKeys and self.mockKeys[key]==true or false end;function methods:GetState()return {Name='Running'}end
+function methods:GetFocusedTextBox()return self.mockFocused end;function methods:IsKeyDown(key)return self.mockKeys and self.mockKeys[key]==true or false end;function methods:GetState()return {Name='Running'}end
+function methods:CreateVirtualInput()return self.mockVirtualInput end
 local function child(p,c,n)local o=Instance.new(c);o.Name=n or c;o.Parent=p;return o end
 workspace=Instance.new('Workspace');workspace.Gravity=196.2;workspace.CurrentCamera=Instance.new('Camera');workspace.CurrentCamera.ViewportSize=Vector2.new(1280,720);workspace.CurrentCamera.CFrame=CFrame.new();workspace.CurrentCamera.FieldOfView=70
 local services={};for _,name in ipairs({'Players','UserInputService','RunService','HttpService','ReplicatedStorage','Lighting'})do services[name]=Instance.new(name)end
