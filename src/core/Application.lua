@@ -1,15 +1,14 @@
 return function(M)
  local App={};App.__index=App;App.extraPages=M.ExtraPages
  function App.new(onCreating)
-  local self=setmetatable({alive=true,clock=os.clock,pro=_G.KubiHubPremiumKey=='6969',schemaQuery='',schemaCategory='Wszystkie',schemaSort='Nazwa',manualStep=1,fps=0,lastInventoryAt=0},App)
+  local self=setmetatable({alive=true,clock=os.clock,pro=false,schemaQuery='',schemaCategory='Wszystkie',schemaSort='Nazwa',manualStep=1,fps=0,lastInventoryAt=0},App)
   self.player=game:GetService('Players').LocalPlayer;assert(self.player,'V5 wymaga klienta / LocalScript.');self.player:WaitForChild('PlayerGui',10)
   self.input=game:GetService('UserInputService');self.runService=game:GetService('RunService');self.http=game:GetService('HttpService')
   self.log=M.Log.new(function()return os.date('%Y-%m-%d %H:%M:%S')end)
   self.runtime=M.Runtime.new(self.clock,function(module,err)self.log:error(module,err);if self.ui then self.ui:toast(module,err,true) end end)
   if onCreating then onCreating(self) end
   self.codec={encode=function(v)return self.http:JSONEncode(v)end,decode=function(s)return self.http:JSONDecode(s)end}
-  self.storage=self:storageAdapter();self.config=M.Config.new(self.codec,self.storage,self.log)
-  local saved=_G.KubiHubV5Settings;if type(saved)=='table' then local value=M.Config.validate(saved);if value then self.config.data=value end end
+  M.Profiles.init(self,'BABFT')
   self.library=M.Library.new();for _,err in ipairs(self.library.errors) do self.log:error('Schematics',err) end
   self.adapterContext={userId=self.player.UserId,placeId=game.PlaceId,clock=self.clock,spawn=task.spawn,wait=task.wait,alive=function()return self.alive end}
   self.adapter=M.Adapter.new(self.adapterContext)
@@ -37,19 +36,14 @@ return function(M)
   self.runtime:schedule('PreviewRefresh',.2,function()if self.previewDirty and self.ui.current=='MISC' then self:refreshPreview() end end)
   self.runtime:job('Adapter',function()
    local ok,err=self.adapter:connect(game:GetService('ReplicatedStorage'))
-   if not ok and self.babft then self.adapter=self.babft;self.farm.adapter=self.adapter;self.builder.adapter=self.adapter;self.movement.adapter=self.adapter;ok,err=self.adapter:connect();self:select('legacy_RAFT',true);self.builder:center();self.config.data.builder=M.Util.copy(self.builder.options);self:refreshPreview() end
+   if not ok and self.babft then
+    self.adapter=self.babft;self.farm.adapter=self.adapter;self.builder.adapter=self.adapter;self.movement.adapter=self.adapter;ok,err=self.adapter:connect()
+    if self.loadedProfile then self:select('legacy_RAFT')
+    else self:select('legacy_RAFT',true);self.builder:center();self.config.data.builder=M.Util.copy(self.builder.options);self:refreshPreview()end
+   end
    if ok then self.log:add('Adapter',self.adapter.label) else self.log:add('Adapter',err,'WARN') end;self:refreshInventory();return true
   end,task.spawn)
-  self.log:add('Core','KUBI HUB ULTIMATE V'..M.Version.current..' uruchomiony.');self:updateDashboard();return self
- end
- function App:storageAdapter()
-  _G.KubiHubV5Profiles=type(_G.KubiHubV5Profiles)=='table' and _G.KubiHubV5Profiles or {};local memory=_G.KubiHubV5Profiles
-  if type(readfile)=='function' and type(writefile)=='function' and type(isfile)=='function' and type(isfolder)=='function' and type(makefolder)=='function' then
-   local folder='KubiHubUltimateV5';local ok=pcall(function()if not isfolder(folder) then makefolder(folder) end end)
-   if ok then return {label='własne pliki KubiHubUltimateV5',write=function(n,s)local path=folder..'/'..n..'.json';if isfile(path) then writefile(folder..'/'..n..'.backup.json',readfile(path)) end;writefile(path,s)end,read=function(n)local p=folder..'/'..n..'.json';return isfile(p) and readfile(p) or nil end,backup=function(n)local p=folder..'/'..n..'.backup.json';return isfile(p) and readfile(p) or nil end} end
-   self.log:add('Config','Pliki profili niedostępne; używam pamięci sesji.','WARN')
-  end
-  return {label='pamięć bieżącej sesji; eksport JSON do trwałej kopii',write=function(n,s)local old=memory[n];memory[n]={text=s,backup=old and old.text}end,read=function(n)return memory[n] and memory[n].text end,backup=function(n)return memory[n] and memory[n].backup end}
+  self.log:add('Core','KUBI HUB DELUXE V'..M.Version.current..' uruchomiony.');self:updateDashboard();return self
  end
  function App:run(module,fn)
   if not self.alive then return false end
@@ -71,7 +65,7 @@ return function(M)
   self:stopAll();self.farm.settings=self.config.data.farm;self.movement.settings=self.config.data.movement
   if self.builder:isBusy() then self.deferredConfig=true;return true end
   if self.builder.source then local ok,err=self.builder:edit(self.config.data.builder);if not ok then return false,err end end
-  self.ui:fit();self.ui:theme();self.ui:refreshControls();self.previewDirty=true;_G.KubiHubV5Settings=M.Util.copy(self.config.data);return true
+  self.ui:fit();self.ui:theme();self.ui:refreshControls();self.previewDirty=true;return true
  end
  function App:refreshInventory()
   if not self.adapter.capabilities.inventory then self.inventorySnapshot=self.readInventory();return end
@@ -137,9 +131,9 @@ return function(M)
  function App:pages()
   local ui=self.ui
   self:extraPages()
-  local home=ui:page('HOME','HOME');local h=ui:card(home,'KUBI HUB ULTIMATE V'..M.Version.current,'Nowy warsztat z walidowanymi schematami, profilem ustawień i jawnym stanem zgodności. Brak adaptera oznacza tryb asystenta.')
+  local home=ui:page('HOME','HOME');local h=ui:card(home,'KUBI HUB DELUXE V'..M.Version.current,'Nowy warsztat z walidowanymi schematami, profilem ustawień i jawnym stanem zgodności. Brak adaptera oznacza tryb asystenta.')
   self.homeInfo=ui:label(h,'',125);ui:button(h,'WORM MK2 — otwórz warsztat',function()local ok,err=self:select('WORM_MK2');ui:show('BUILDER');return ok,err end)
-  ui:button(h,'Wróć do wyboru huba',function()self:unload();_G.KubiHubRuntime=M.Launcher.new()end)
+  ui:button(h,'Wróć do wyboru huba',function()M.Launcher.back(self)end)
   ui:button(h,'Biblioteka schematów',function()ui:show('SCHEMATICS')end);ui:button(h,'STOP WSZYSTKIE MODUŁY',function()self:stopAll()end)
   local news=ui:card(home,'Ostatnie zmiany','Materiały z osobnymi identyfikatorami. WORM z grafem połączeń. Stos: 1 laska dynamitu, 1 siedzenie, 3000 drewna. Nowy podgląd i profile. Uprawnione budowanie wymaga adaptera.')
   self.versionInfo=ui:label(news,'V'..M.Version.current..' • wydanie '..M.Version.releaseDate..'. Najnowsza wersja: jeszcze nie sprawdzono.',85)
@@ -151,11 +145,12 @@ return function(M)
   self.farmAvailability=ui:label(f,'');self.farmInfo=ui:label(f,'',155)
   ui:button(f,'Odśwież trasę BABFT',function()if self.adapter.mode~='BABFT' then return false,'Odświeżanie tej trasy jest dostępne w BABFT.' end;if self.farm.state~='STOPPED' then return false,'Najpierw zatrzymaj autofarmę.' end;self.adapter:connect();self:updateDashboard();return self.farm:availability()end)
   ui:feature(f,'Autofarma BABFT',function()return self.farm.state=='RUNNING' or self.farm.state=='PAUSED' or self.farm.state=='RETRY' end,function()if self.farm.state=='STOPPED' or self.farm.state=='ERROR' then return self.farm:start() else return self.farm:stop() end end,function(panel)
-   ui:cycle(panel,'Profil',{'NORMAL','FAST','TURBO','HYPER','LIGHTNING','SONIC'},function()return self.config.data.farm.profile end,function(v)self.config.data.farm.profile=v end)
    ui:slider(panel,'Czas przejścia przez etap (s)',function()return self.config.data.farm.crossingTime end,function(v)self.config.data.farm.crossingTime=v end,.4,3,.1)
    ui:field(panel,'Zatrzymaj po cyklach (0 = bez limitu)',0,function(v)self.config.data.farm.stopAfter=M.Util.number(tonumber(v),0,0,10000,true);return self.config.data.farm.stopAfter end,false,function()return self.config.data.farm.stopAfter end)
    ui:button(panel,'RESET SESJI',function()return self.farm:reset()end)
   end)
+  ui:cycle(f,'Profil tempa',{'NORMAL','FAST','TURBO','HYPER','LIGHTNING','SONIC'},function()return self.config.data.farm.profile end,function(v)self.config.data.farm.profile=v end)
+  ui:cycle(f,'Tryb trasy',{'Przejście','Teleport szybki'},function()return self.config.data.farm.route end,function(v)self.config.data.farm.route=v end)
   ui:button(f,'PAUZA / WZNÓW',function()if self.farm.state=='PAUSED' then return self.farm:resume() else return self.farm:pause() end end)
   ui:button(f,'STOP',function()return self.farm:stop()end)
   local builder=ui:page('BUILDER','BUILDER');local b=ui:card(builder,'Podgląd 3D i budowanie','Przeciągnij podgląd, by obrócić kamerę. Kółko myszy lub przyciski zmieniają zoom. Obszar podglądu jest oddzielony od świata gry.')
@@ -294,19 +289,15 @@ return function(M)
   ui:button(dynamite,'Otwórz dokładny plan stosu',function()local ok,err=self:select('DYNAMITE_STACK');ui:show('BUILDER');return ok,err end)
  end
  function App:settingsPage(page)
-  local ui=self.ui;local card=ui:card(page,'Profile i ustawienia','Zapis nie uruchamia automatycznie farmy ani ruchu. Źródło zapisu: '..self.storage.label)
-  self.profileName=ui:field(card,'Nazwa profilu','default');self.configBox=ui:field(card,'Konfiguracja JSON','',nil,true)
-  ui:button(card,'Zapisz profil',function()self.config.data.builder=M.Util.copy(self.builder.options);return self.config:save(self.profileName.Text)end)
-  ui:button(card,'Wczytaj profil',function()local ok,err=self.config:load(self.profileName.Text);if not ok then return false,err end;return self:applyConfig()end)
+  local ui=self.ui;local card=M.Profiles.page(self)
+  self.configBox=ui:field(card,'Konfiguracja JSON','',nil,true)
   ui:button(card,'Eksport ustawień',function()self:copy(self.config:export(),self.configBox)end);ui:button(card,'Import ustawień',function()local ok,err=self.config:import(self.configBox.Text);if not ok then return false,err end;return self:applyConfig()end)
   ui:button(card,'Przywróć poprzednią konfigurację',function()local ok,err=self.config:rollback();if not ok then return false,err end;return self:applyConfig()end);ui:button(card,'Ustawienia domyślne',function()self.config:reset();return self:applyConfig()end)
   ui:cycle(card,'Akcent',{'BLUE','PURPLE'},function()return self.config.data.ui.theme end,function(v)self.config.data.ui.theme=v;ui:theme()end)
   ui:toggle(card,'Tryb kompaktowy',function()return self.config.data.ui.compact end,function(v)self.config.data.ui.compact=v;ui:fit()end);ui:toggle(card,'Podpowiedzi',function()return self.config.data.ui.tooltips end,function(v)self.config.data.ui.tooltips=v end)
   ui:button(card,'Pomoc i nawigacja',function()self:notify('Pomoc','Prawy Ctrl ukrywa okno. U góry wyszukaj nazwę funkcji. Kliknij nagłówek sekcji, aby ją rozwinąć. Raport błędów i wydajność znajdziesz w Settings.')end)
-  local pro=ui:card(ui.pages.SETTINGS,'PRO — społeczność i klucz','Klucz PRO jest lokalnym kodem, a nie uprawnieniem do serwera gry. Hub nie weryfikuje członkostwa na Discordzie.')
-  self.proBody=pro;local key=ui:field(pro,'Klucz','');ui:button(pro,'Odblokuj PRO',function()if key.Text:gsub('%s','')~='6969' then return false,'Nieprawidłowy klucz.' end;self.pro=true;_G.KubiHubPremiumKey='6969';key.Text='';self:notify('PRO','Odblokowano funkcje społeczności.');return true end)
-  ui:button(pro,'Kopiuj zaproszenie Discord',function()self:copy('https://discord.gg/qmWGb4Q9p',self.configBox)end)
-  ui:button(pro,'Wyłącz hub i posprzątaj',function()self:unload()end)
+  M.CommunityLinks.page(self)
+  ui:button(card,'Wyłącz hub i posprzątaj',function()self:unload()end)
  end
  function App:newSchemaId(prefix)
   local id;repeat self.schemaSerial=(self.schemaSerial or 0)+1;id=prefix..'_'..math.floor(self.clock()*1000)..'_'..self.schemaSerial until not self.library.items[id];return id
@@ -348,8 +339,12 @@ return function(M)
  end
  function App:unload()
   if not self.alive then return end
-  self:stopAll();_G.KubiHubV5Settings=M.Util.copy(self.config.data);local f=self.farm:summary();_G.KubiHubLastSession=string.format('%d cykli potwierdzonych, %d nieudanych, %.1f min. Bez deklaracji testów fizyki.',f.completed,f.failed,f.elapsed/60)
+  self:stopAll();local f=self.farm:summary();_G.KubiHubLastSession=string.format('%d cykli potwierdzonych, %d nieudanych, %.1f min. Bez deklaracji testów fizyki.',f.completed,f.failed,f.elapsed/60)
   self.alive=false;self.runtime:close();if _G.KubiHubRuntime==self then _G.KubiHubRuntime=nil end
+ end
+ function App:captureProfile()
+  local layer=self.config.data.builder.previewLayer
+  self.config.data.builder=M.Util.copy(self.builder.options);self.config.data.builder.previewLayer=layer
  end
  return App
 end
