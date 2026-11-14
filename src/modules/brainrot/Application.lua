@@ -32,13 +32,13 @@ return function(M)
   self.player=game:GetService('Players').LocalPlayer;assert(self.player,'Brak LocalPlayer.')
   assert(self.player:WaitForChild('PlayerGui',10),'Brak PlayerGui.')
   self.input=game:GetService('UserInputService')
-  self.config={data=M.Util.copy(M.Config.defaults)}
   self.log=M.Log.new(function()return os.date('%H:%M:%S')end)
   self.runtime=M.Runtime.new(self.clock,function(module,err)self.log:error(module,err);if self.ui then self.ui:toast(module,err,true)end end)
   if onCreating then onCreating(self)end
+  M.Profiles.init(self,'BRAINROT')
   local prompts=game:GetService('ProximityPromptService')
   local ui=M.UI.new(self);self.ui=ui
-  ui.title.Text='KUBI HUB  /  STEAL A BRAINROT'
+  ui.title.Text='DELUXE / STEAL A BRAINROT'
   ui.subtitle.Text='V'..M.Version.current..'  •  AUTOSTEAL'
   local home=ui:card(ui:page('STEAL'),'AutoSteal w zasięgu')
   ui:label(home,'Włącz i podejdź do Brainrota, aż gra pokaże „Steal”. Hub przytrzyma przycisk przez czas wymagany przez grę. Zanieś Brainrota do bazy samodzielnie.')
@@ -46,14 +46,15 @@ return function(M)
    ui:label(panel,'Po otwarciu huba odejdź od celu i podejdź ponownie, jeśli napis był już widoczny. Hub podejmuje jedną próbę dla danego wyświetlenia przycisku. Po przerwie wybiera najbliższą dostępną akcję.')
   end)
   self.state=ui:label(home,'AutoSteal wyłączony.')
+  ui:cycle(home,'Profil tempa',M.Tempo.order,function()return self.config.data.brainrot.tempo end,function(v)self.config.data.brainrot.tempo=v end)
+  ui:label(home,'Profil zmienia przerwę między próbami. Czas przytrzymania ustala gra.')
   self.last=ui:label(home,'Ostatnia próba: —')
   ui:button(home,'STOP / wyłącz AutoSteal',function()self:setEnabled(false)end)
   local settings=ui:card(ui:page('SETTINGS'),'Sesja')
-  ui:button(settings,'Wróć do wyboru huba',function()self:unload();_G.KubiHubRuntime=M.Launcher.new()end)
   ui:button(settings,'Wyłącz hub',function()self:unload()end)
   ui.statusBody=ui:card(ui:page('SETTINGS'),'Ostatni komunikat')
   ui.statusInfo=ui:label(ui.statusBody,'Gotowy.')
-  M.QuickTools(self);ui:show('STEAL')
+  M.QuickTools(self);M.Profiles.page(self);M.CommunityLinks.page(self);ui:show('STEAL')
 
   self.runtime:connect(prompts.PromptShown,function(prompt)
    if not self.shown[prompt] and isSteal(prompt) then
@@ -90,11 +91,11 @@ return function(M)
   local active=self.active
   if not active then return end
   self.active=nil
-  self.nextAt=now+1.25
+  self.nextAt=now+(M.Tempo.steal[self.config.data.brainrot.tempo] or M.Tempo.steal.NORMAL)
   local ok,err=pcall(function()active.prompt:InputHoldEnd()end)
   if not ok then
    self.enabled=false
-   self.state.Text='AutoSteal wyłączony po błędzie interakcji.'
+   self.state.Text=self.ui:t('AutoSteal wyłączony po błędzie interakcji.')
    self.last.Text='Ostatnia próba: nie udało się zwolnić przycisku.'
    self.ui:refreshFeatures()
    self.runtime.errors('AutoSteal',err)
@@ -102,16 +103,16 @@ return function(M)
   end
   if active.triggered then result='Zarejestrowano interakcję. Sprawdź, czy niesiesz Brainrota.' end
   self.last.Text='Ostatnia próba: '..result
-  if self.enabled then self.state.Text='Krótka przerwa przed kolejną próbą.' end
+  if self.enabled then self.state.Text=self.ui:t('Krótka przerwa przed kolejną próbą.') end
  end
 
  function A:setEnabled(value,reason)
   self.enabled=value
   if value then
-   self.state.Text='Czekam na „Steal” w zasięgu.'
+   self.state.Text=self.ui:t('Czekam na „Steal” w zasięgu.')
   else
    self:finish(self.clock(),'Przerwano ręcznie.')
-   self.state.Text=reason or 'AutoSteal wyłączony.'
+   self.state.Text=self.ui:t(reason or 'AutoSteal wyłączony.')
   end
   self.ui:refreshFeatures()
  end
@@ -142,12 +143,12 @@ return function(M)
     if distance and (not best or distance<best or distance==best and row.order<record.order) then closest,record,best=prompt,row,distance end
    end
   end
-  if not closest then self.state.Text='Czekam na nowe „Steal” w zasięgu.';return end
+  if not closest then self.state.Text=self.ui:t('Czekam na „Steal” w zasięgu.');return end
   record.attempted=true
   local duration=closest.HoldDuration
   if duration<0 or duration>60 or duration~=duration then self.last.Text='Ostatnia próba: nieobsługiwany czas interakcji.';return end
   self.active={prompt=closest,character=model,untilAt=now+duration+.1}
-  self.state.Text='Przytrzymuję „Steal”…'
+  self.state.Text=self.ui:t('Przytrzymuję „Steal”…')
   local ok,err=pcall(function()closest:InputHoldBegin()end)
   if not ok then self:setEnabled(false,'Gra nie przyjęła próby AutoSteal.');self.runtime.errors('AutoSteal',err)end
  end
