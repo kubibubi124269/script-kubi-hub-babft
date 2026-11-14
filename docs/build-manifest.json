@@ -1,5 +1,5 @@
 {
-  "version": "7.0.0",
+  "version": "7.1.0",
   "modules": [
     {
       "name": "Tempo",
@@ -29,7 +29,7 @@
     {
       "name": "Config",
       "file": "src/config/Config.lua",
-      "sha256": "31a8a4dd32159bde3c55a03e1b5841c448d71e8b740ea8851ebc14169a43bae8"
+      "sha256": "d6012c869dce8aed90384c7794de9b10f8834565fac809d32857ee690f027157"
     },
     {
       "name": "Schema",
@@ -99,7 +99,7 @@
     {
       "name": "Version",
       "file": "src/modules/tools/Version.lua",
-      "sha256": "4da0885062a0cb946fd50082dd4a6ff7d2410023f9531ffd876aa406240d60c4"
+      "sha256": "6cc463136860cd251c237dcdc2d6bbed6a5492a967bed7aa9508d96b3f3ed081"
     },
     {
       "name": "Performance",
@@ -209,7 +209,7 @@
     {
       "name": "Locale",
       "file": "src/core/Locale.lua",
-      "sha256": "e6a6d789e7e0499358e8c1a83e4ffed506376a66d80c8558657dc6481dd22a59"
+      "sha256": "599dffcac1ff3b1271f0337315d27471483c55f9f54fe785dca2587eeb3b7c82"
     },
     {
       "name": "Profiles",
@@ -222,15 +222,20 @@
       "sha256": "ea8cee88191b5bc8e9261ff03c2005b65d0f0d5337246081a92690247ec102fa"
     },
     {
+      "name": "BikeHighway",
+      "file": "src/modules/bike/Highway.lua",
+      "sha256": "973597d1817c5f3c9fa7cc7f1b70456dd0ec0c8de39965b1b42b6fe8ed003f2b"
+    },
+    {
       "name": "BikeApp",
       "file": "src/modules/bike/Application.lua",
-      "sha256": "4520898d13c11b855b87e20689666ad2bee85b2de424ddd58f1eea5d83eca41d"
+      "sha256": "27853cd419eafebd3297740248cdb701ca66068e8c977f6e0282061e6213c25e"
     },
     {
       "name": "Launcher",
       "file": "src/core/Launcher.lua",
-      "sha256": "27ba42da7662ed1c70b982cc51d2a1248ca3f491f021f1fef40afb0749598042"
+      "sha256": "acdb5f1818dcded5013e938ca90027da8fd05a21d682c5a0df73d701b4dd602d"
     }
   ],
-  "mainSha256": "b1a4b1584821112f6026465463e2ff10b0487c801a2d280d44a28d2881656f5c"
+  "mainSha256": "97fa40062a8739b1462ca7a012d11e72e30ea9f43c65a510c6c1384a58cd6470"
 }

@@ -1,4 +1,10 @@
-# Testy KUBI HUB DELUXE 7.0
+# Testy KUBI HUB DELUXE 7.1
+
+1. W Bike Universe zapisz A–B na tym samym pasie. Sprawdź powrót do A i ustawienie roweru przed przytrzymaniem W. Sprawdź korektę po lekkim zjechaniu z linii i triki po wyprostowaniu.
+2. Sprawdź wyłączenie wejść na końcu, przerwę i powrót na start. Potwierdź w grze, czy trik zostaje rozliczony.
+3. Po upadku sprawdź Q, E i wznowienie dopiero po wykryciu siedzenia. F8, utrata fokusu lub limit prób mają zatrzymać dalsze wejścia. Testy offline obejmują logikę, nie fizykę gry ani wypłaty.
+
+## Deluxe 7.0
 
 1. Uruchom ten sam loader. Wybierz język, przejdź przez kartę społeczności i wybierz grę. Sprawdź tłumaczenie zakładek i profilu tempa.
 2. Zapisz dwa nazwane profile, przełącz między nimi i ponownie otwórz tryb. Ostatni zapisany lub wczytany profil powinien zostać przywrócony w tym trybie i na tym koncie. Automaty powinny nadal być wyłączone.
