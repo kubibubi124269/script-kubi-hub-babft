@@ -2,6 +2,9 @@ local L={}
 L.codes={'PL','EN','RU','UK','ZH','ES','DE','PT','FR','IT'}
 L.names={PL='Polski',EN='English',RU='Русский',UK='Українська',ZH='简体中文',ES='Español',DE='Deutsch',PT='Português',FR='Français',IT='Italiano'}
 local rows={
+ ['Lot na motorze']={'Motorcycle flight','Полёт на мотоцикле','Політ на мотоциклі','摩托车飞行','Vuelo en moto','Motorradflug','Voo de moto','Vol à moto','Volo in moto'},
+ ['Fly na motorze']={'Fly motorcycle','Летать на мотоцикле','Летіти на мотоциклі','驾驶摩托车飞行','Volar en moto','Motorrad fliegen','Voar de moto','Voler à moto','Vola in moto'},
+ ['Prędkość lotu']={'Flight speed','Скорость полёта','Швидкість польоту','飞行速度','Velocidad de vuelo','Fluggeschwindigkeit','Velocidade de voo','Vitesse de vol','Velocità di volo'},
  ['Autostrada']={'Highway','Шоссе','Шосе','高速公路','Autopista','Autobahn','Rodovia','Autoroute','Autostrada'},
  ['Farma autostrady']={'Highway farm','Фарм на шоссе','Фарм на шосе','公路刷取','Farmeo en autopista','Autobahn-Farm','Farm na rodovia','Farm sur autoroute','Farm in autostrada'},
  ['Zapisz A — początek']={'Save A — start','Сохранить A — старт','Зберегти A — старт','保存 A：起点','Guardar A — inicio','A speichern — Start','Salvar A — início','Enregistrer A — départ','Salva A — inizio'},
