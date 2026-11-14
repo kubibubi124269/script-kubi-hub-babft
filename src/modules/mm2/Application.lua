@@ -7,13 +7,13 @@ return function(M)
   self.input=game:GetService('UserInputService');self.runService=game:GetService('RunService');self.http=game:GetService('HttpService')
   self.log=M.Log.new(function()return os.date('%H:%M:%S')end);self.runtime=M.Runtime.new(self.clock,function(module,e)self.log:error(module,e);if self.ui then self.ui:toast(module,e,true) end end)
   if onCreating then onCreating(self) end
-  self.config={data=M.Util.copy(M.Config.defaults)}
-  local saved=_G.KubiHubMM2Settings;if type(saved)=='table' then local data=M.Config.validate({ui=saved.ui});if data then self.config.data.ui=data.ui end end
+  M.Profiles.init(self,'MM2')
   self.platform=M.MM2Platform.new(self.player,self.players,workspace,game.PlaceId,game.GameId);self.controller=M.MM2Controller.new(self.runtime,self.platform,self.clock);self.avatar=M.AvatarAppearance.new(self.platform,self.runtime);self.controller.avatar=self.avatar;self.controller.itemESP={coins=false,gun=false,range=120};self.runtime:own(self.avatar);self.avatar:bind(self.runService)
+  self:restoreProfile()
   self.adapter={mode='MM2',capabilities={movement=self.platform.allowed},cancel=function()end}
   self.adapter.movement=function(_,values)local _,h=self.platform:character();if not self.platform.allowed or not h then return {ok=false,error='Brak aktywnej postaci MM2.'} end;h.WalkSpeed=values.walk;if h.UseJumpPower then h.JumpPower=values.jump else h.JumpHeight=values.jump^2/(2*workspace.Gravity) end;return {ok=true}end
   self.movement=M.Movement.new(self.runtime,self.adapter,self.player,self.input,self.log,self.config.data.movement);self.effects=M.Effects.new(self.clock)
-  self.ui=M.UI.new(self);self.ui.title.Text='KUBI HUB  /  MM2';self:pages();M.QuickTools(self);self.ui:show('FARM');self.ui:theme();self:updateDashboard()
+  self.ui=M.UI.new(self);self.ui.title.Text='KUBI HUB DELUXE / MM2';self:pages();M.QuickTools(self);self.ui:show('FARM');self.ui:theme();self:updateDashboard()
   self.runtime:connect(self.runService.Heartbeat,function(dt)self.fps=self.fps==0 and 1/math.max(dt,.001) or self.fps*.95+1/math.max(dt,.001)*.05;self.runtime:tick(dt)end,'MM2')
   self.runtime:connect(self.runService.RenderStepped,function()self.movement:tick()end,'Movement')
   self.runService:BindToRenderStep('KubiHubMM2Aim',Enum.RenderPriority.Camera.Value+1,function(dt)if self.alive then local ok,err=pcall(function()self.controller:aimTick(dt)end);if not ok then self.controller.aimbot=false;self.controller.autoShot=false;self.log:error('Aim',err);self.ui:toast('Aim',err,true);self.ui:refreshControls() end end end)
@@ -48,6 +48,8 @@ return function(M)
    ui:button(panel,'Reset statystyk',function()return c:resetStats()end)
   end)
   ui:cycle(f,'Ruch',{'Lot','Chód'},function()return c.farmMotion end,function(v)return c:setFarmMotion(v)end)
+  ui:cycle(f,'Profil tempa',M.Tempo.order,function()return c.farmTempo or 'NORMAL'end,function(v)return c:setTempo(v)end)
+  ui:label(f,'Profil zmienia tempo lotu i szukania. Szybki lot może podlegać ograniczeniom serwera.')
   ui:button(f,'PAUZA / WZNÓW',function()return c:pauseFarm()end);ui:button(f,'STOP zbierania',function()return c:stopFarm()end)
   local combat=ui:page('FIGHT');local aim=ui:card(combat,'Celowanie i walka','Auto Shot wymaga własnego pistoletu. Kill all i Knife Aura wymagają własnego noża. Skutki akcji zatwierdza gra.')
   self.combatInfo=ui:label(aim,'')
@@ -112,12 +114,19 @@ return function(M)
   ui:feature(move,'Fly',function()return self.movement.fly end,function()if self.movement.fly then self.movement:stopFly();return true else return self.movement:startFly() end end,moveOptions)
   ui:button(move,'Przywróć ruch',function()return self.movement:reset()end)
   local settings=ui:page('SETTINGS');local s=ui:card(settings,'KUBI HUB / MM2')
-  self.homeInfo=ui:label(s,'');ui:button(s,'STOP WSZYSTKO',function()self:stopAll()end);ui:button(s,'Wybór BABFT / MM2',function()self:unload();_G.KubiHubRuntime=M.Launcher.new()end)
+  self.homeInfo=ui:label(s,'');ui:button(s,'STOP WSZYSTKO',function()self:stopAll()end)
   ui:cycle(s,'Akcent',{'BLUE','PURPLE'},function()return self.config.data.ui.theme end,function(v)self.config.data.ui.theme=v;ui:theme()end);ui:toggle(s,'Tryb kompaktowy',function()return self.config.data.ui.compact end,function(v)self.config.data.ui.compact=v;ui:fit()end)
-  ui:button(s,'Zapisz wygląd na sesję',function()_G.KubiHubMM2Settings={ui=M.Util.copy(self.config.data.ui)};self:notify('Ustawienia','Zapisano wygląd.')end)
+  M.Profiles.page(self);M.CommunityLinks.page(self)
   ui.statusBody=ui:card(settings,'Ostatni komunikat');ui.statusInfo=ui:label(ui.statusBody,'Gotowy.')
   local debug=ui:card(settings,'Raport MM2');ui.routes.DEBUG=debug
   self.debugBox=ui:field(debug,'Raport do skopiowania','',nil,true);ui:button(debug,'Skopiuj raport MM2',function()self:copy(self:report(),self.debugBox)end);ui:button(debug,'Wyłącz hub',function()self:unload()end)
+ end
+ function A:captureProfile()
+  local c=self.controller;self.config.data.mm2={tempo=c.farmTempo or 'NORMAL',kind=c.kind,motion=c.farmMotion,range=c.farmRange,timeout=c.pickupTimeout}
+ end
+ function A:restoreProfile()
+  local c,s=self.controller,self.config.data.mm2
+  c.farmRange=s.range;c.pickupTimeout=s.timeout;c:setTempo(s.tempo);c:setFarmMotion(s.motion);c:setFilter(s.kind)
  end
  function A:report()
   local c=self.controller;return self.log:text()..'\nWersja: '..M.Version.current..string.format('\nMM2 wykryte: %s\nWłasna broń / rola: %s\nZbieranie: %s\nPróby odbioru: %d\nZniknięcia obiektów po próbie: %d\nAktywacje pistoletu: %d\nAktywacje noża: %d\nOstatni błąd: %s',tostring(self.platform.allowed),self.platform:role(self.player),c.state,c.attempts,c.disappeared,c.shots,c.stabs,c.lastError)
@@ -131,7 +140,7 @@ return function(M)
   self.ui.subtitle.Text='V'..M.Version.current..'  •  MURDER MYSTERY 2'
   self.homeInfo.Text=string.format('MM2: %s\nWłasna rola / broń: %s\nFPS %.1f • zbieranie: %s\nAkcja walki: %s',self.platform.allowed and 'wykryto' or 'nie wykryto — moduły gry zablokowane',self.platform:role(self.player),self.fps,c.state,c.combat and c.combat.kind or 'STOP')
   local states={STOPPED='Wyłączona',SEARCHING='Szukam przedmiotów',WAIT_ITEMS='Brak przedmiotu w zasięgu — podejdź bliżej',WAIT_CHARACTER='Czekam na aktywną postać',BAG_FULL='Pełna torba — czekam',PICKUP='Czekam na odbiór',APPROACH=c.farmMotion=='Lot' and 'Lecę do przedmiotu' or 'Idę do przedmiotu',MANUAL='Sterujesz ręcznie',PAUSED='Pauza'}
-  self.farmInfo.Text=string.format('Stan %s\nPróby odbioru %d • zniknięcia obiektów %d\nNie jest to potwierdzone saldo monet ani cukierków.\n%s',(states[c.state] or c.state)..' · znaleziono '..c.lastScanCount,c.attempts,c.disappeared,c.lastError)
+  self.farmInfo.Text=string.format('%s: %s\nPróby odbioru %d • zniknięcia obiektów %d\nNie jest to potwierdzone saldo monet ani cukierków.\n%s',self.ui:t('Stan'),self.ui:t(states[c.state] or c.state)..' · '..c.lastScanCount,c.attempts,c.disappeared,c.lastError)
   self.combatInfo.Text=string.format('Aimbot %s • Auto Shot %s\nAktywacje pistoletu %d • noża %d\n%s',c.aimbot and 'ON' or 'OFF',c.autoShot and 'ON' or 'OFF',c.shots,c.stabs,c.lastError)
   self.rolesInfo.Text=#roles>0 and table.concat(roles,'\n') or 'Brak innych aktywnych postaci.'
   if self.ui.current=='SETTINGS' then self.debugBox.Text=self:report() end

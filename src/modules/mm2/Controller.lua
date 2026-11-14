@@ -1,4 +1,4 @@
-return function(Util)
+return function(Util,Tempo)
  local C={};C.__index=C
  function C.new(runtime,platform,clock)
   return setmetatable({runtime=runtime,p=platform,clock=clock,farming=false,paused=false,state='STOPPED',kind='BOTH',farmMotion='Lot',farmRange=32,nextAt=0,coins={},cooldown=setmetatable({},{__mode='k'}),scannedAt=-math.huge,attempts=0,disappeared=0,aimbot=false,autoShot=false,autoGun=false,aura=false,esp=false,lastShot=-math.huge,lastKnife=-math.huge,nextGunAt=0,lastError='',shots=0,stabs=0,pickupTimeout=.8,lastScanCount=0,settings={target='MURDERER',selected='',fov=200,prediction=.08,smooth=35,wallCheck=true,shotInterval=.7}},C)
@@ -32,6 +32,10 @@ return function(Util)
  function C:setFarmMotion(mode)
   if mode~='Lot' and mode~='Chód' then return false,'Nieznany tryb ruchu.' end
   self.farmMotion=mode;self:refreshFarm();return true
+ end
+ function C:setTempo(mode)
+  if not Tempo.mm2[mode] then return false,'Nieznany profil.' end
+  self.farmTempo=mode;return true
  end
  function C:arrival(delta)
   return horizontal(delta).Magnitude<=.65 and (self.farmMotion=='Chód' or math.abs(delta.Y)<=2.75)
@@ -68,7 +72,7 @@ return function(Util)
     self.cooldown[coin.object]=now+5;self:clearFarmTarget()
    end
   end
-  if now-self.scannedAt>=.75 then self.coins=self.p:coins(self.kind);self.scannedAt=now;self.lastScanCount=#self.coins end
+  if now-self.scannedAt>=(Tempo.mm2[self.farmTempo] or Tempo.mm2.NORMAL).scan then self.coins=self.p:coins(self.kind);self.scannedAt=now;self.lastScanCount=#self.coins end
   local best,distance=nil,math.huge
   for _,coin in ipairs(self.coins) do
    if self.p:present(coin) and (self.cooldown[coin.object] or 0)<=now then
@@ -90,15 +94,16 @@ return function(Util)
   if not root or model~=self.farmCharacter or h.Sit or h.PlatformStand or h.WalkSpeed<=0 or not self.p:present(coin) then self:stopFarmMotion();return end
   local delta=coin.part.Position-root.Position;local flat=horizontal(delta);local distance=flat.Magnitude
   if not self:farmReachable(delta) or self:arrival(delta) then self:stopFarmMotion();return end
+  local pace=Tempo.mm2[self.farmTempo] or Tempo.mm2.NORMAL
   if self.farmMotion=='Lot' then
    local targetY=coin.part.Position.Y+(distance>5 and 2.5 or .6)
    if distance>5 then targetY=math.max(targetY,self.takeoffY+1.75)end
-   local drift=distance>.15 and flat.Unit*math.min(15,distance*3) or Vector3.zero
-   self.p:pickupFlight(root,drift+Vector3.new(0,math.clamp((targetY-root.Position.Y)*4,-9,9),0))
+   local drift=distance>.15 and flat.Unit*math.min(pace.flight,distance*3) or Vector3.zero
+   self.p:pickupFlight(root,drift+Vector3.new(0,math.clamp((targetY-root.Position.Y)*4,-pace.vertical,pace.vertical),0))
    return
   end
   self.walkHumanoid=h
-  h:Move(flat.Unit*math.clamp(distance/3,.25,1),false)
+  h:Move(flat.Unit*math.clamp(distance/3,.25,pace.walk),false)
  end
  function C:startKillAll()
   if not self.p.allowed then return false,'Najpierw dołącz do Murder Mystery 2.' end
