@@ -209,7 +209,7 @@
     {
       "name": "Locale",
       "file": "src/core/Locale.lua",
-      "sha256": "599dffcac1ff3b1271f0337315d27471483c55f9f54fe785dca2587eeb3b7c82"
+      "sha256": "93e568d4103da50dde25f91c57fe8ef476d311fb01364398347f309c2b9917bf"
     },
     {
       "name": "Profiles",
@@ -224,12 +224,17 @@
     {
       "name": "BikeHighway",
       "file": "src/modules/bike/Highway.lua",
-      "sha256": "973597d1817c5f3c9fa7cc7f1b70456dd0ec0c8de39965b1b42b6fe8ed003f2b"
+      "sha256": "1aca323ae5aea54a57ecedf948ca6ac7a3634d8e6497a26f8d7dcc90eceabbf7"
+    },
+    {
+      "name": "BikeFlight",
+      "file": "src/modules/bike/Flight.lua",
+      "sha256": "6f1d453d65b7b2b8d2331a03a765080c5c3918c13c2be521b0c63d98295677fe"
     },
     {
       "name": "BikeApp",
       "file": "src/modules/bike/Application.lua",
-      "sha256": "27853cd419eafebd3297740248cdb701ca66068e8c977f6e0282061e6213c25e"
+      "sha256": "a1d1fc6509c10fcc97d80b19ea8068006e89f58d2ce44e0f8a6bbe84125b02f4"
     },
     {
       "name": "Launcher",
@@ -237,5 +242,5 @@
       "sha256": "acdb5f1818dcded5013e938ca90027da8fd05a21d682c5a0df73d701b4dd602d"
     }
   ],
-  "mainSha256": "97fa40062a8739b1462ca7a012d11e72e30ea9f43c65a510c6c1384a58cd6470"
+  "mainSha256": "82c22eb96f38f74b600a15db58f06146e4d7c38129b08e1f9266d37a4b922d31"
 }

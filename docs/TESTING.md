@@ -3,6 +3,7 @@
 1. W Bike Universe zapisz A–B na tym samym pasie. Sprawdź powrót do A i ustawienie roweru przed przytrzymaniem W. Sprawdź korektę po lekkim zjechaniu z linii i triki po wyprostowaniu.
 2. Sprawdź wyłączenie wejść na końcu, przerwę i powrót na start. Potwierdź w grze, czy trik zostaje rozliczony.
 3. Po upadku sprawdź Q, E i wznowienie dopiero po wykryciu siedzenia. F8, utrata fokusu lub limit prób mają zatrzymać dalsze wejścia. Testy offline obejmują logikę, nie fizykę gry ani wypłaty.
+4. Na motorze otwórz **Lot na motorze**. Sprawdź kierunek względem kamery, wznoszenie Spacją i opadanie lewym Ctrl. Sprawdź F8 i zejście z siedzenia: sterowanie lotem i jego trzy obiekty muszą zniknąć. Testy klienta nie zastępują próby fizyki w grze.
 
 ## Deluxe 7.0
 
