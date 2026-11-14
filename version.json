@@ -1,11 +1,11 @@
 {
-  "version": "7.0.0",
+  "version": "7.1.0",
   "releaseDate": "2026-11-14",
   "changes": [
-    "KUBI HUB DELUXE: 10 języków w menu startowym i podstawowych kontrolkach",
-    "Profile tempa BABFT, MM2, AutoSteal i Bike Universe; szybkie teleporty etapów BABFT",
-    "Bike Universe: jazda, wheelie, triki i przechodzenie przez ręcznie zapisane checkpointy",
-    "Własne nazwane konfiguracje na konto i grę; Discord i YouTube na ekranie startowym"
+    "Bike Universe: zapisz prostą A–B i uruchom farmę autostrady z korektą kierunku, wheelie i trikami",
+    "Pętla wraca na start po przerwie; po kraksie hub próbuje odtworzyć rower przez Q i E",
+    "Fly na motorze: WASD, Spacja, lewy Ctrl i F8, z regulacją prędkości",
+    "Zapis pozycji autostrady w nazwanych profilach konta"
   ],
-  "compatibility": "Jazda wymaga wejścia wirtualnego i rozpoznanego siedzenia. Zaproszenia wyścigowe przyjmujesz w grze. Wynik, nagrody i rozłączenia zależą od serwera. Starsze opisy mogą pozostać po polsku."
+  "compatibility": "Autostrada wymaga wejścia wirtualnego, rozpoznanego siedzenia i zapisanych pozycji A/B. Fly wymaga rozpoznanego ruchomego pojazdu. Testy offline nie potwierdzają fizyki, teleportów ani naliczania kasy w grze."
 }

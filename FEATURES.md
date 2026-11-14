@@ -1,4 +1,7 @@
-# Funkcje KUBI HUB DELUXE 7.0
+# Funkcje KUBI HUB DELUXE 7.1
+
+- **Bike Universe → Jazda → Autostrada:** zapisz dwie pozycje na tym samym prostym pasie. Farma ustawia rower w A, koryguje kierunek i wykonuje wheelie i triki ze zwykłej sekcji Jazda. Na końcu czeka przed powrotem do A. Po kraksie próbuje wrócić, odtworzyć rower przez Q i wsiąść przez E. F8 lub utrata fokusu zatrzymują automat. Brak gwarancji wypłaty lub akceptacji teleportu przez grę.
+- **Bike Universe → Jazda → Lot na motorze:** WASD, Spacja, lewy Ctrl, regulacja prędkości pod PPM / ⋯, F8. Tryb odłącza napęd lotu po zejściu i nie działa równocześnie z farmą.
 
 - **10 języków** w wyborze gry, kartach społeczności, nawigacji i podstawowych kontrolkach. Starsze teksty bez tłumaczeń używają polskiego.
 - **Profile tempa:** BABFT zmienia przerwę po etapie z zachowaniem minimum adaptera; MM2 zmienia szybkość lotu i odświeżania celów; AutoSteal zmienia przerwę pomiędzy próbami, zostawiając czas przytrzymania gry; Bike Universe zmienia długość gazu i rytm trików.

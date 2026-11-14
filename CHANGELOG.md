@@ -1,5 +1,9 @@
 # Historia zmian
 
+## 7.1.0 — 2026-11-14
+
+Bike Universe: farma autostrady wraca do zapisanego początku, ustawia rower w kierunku końca, koryguje dryf i wykonuje triki na prostej. Po 3 sekundach na końcu ponawia pętlę. Utrata siedzenia, wykryta przeszkoda, upadek lub brak postępu zatrzymują wejścia i uruchamiają ograniczoną próbę Q/E. F8 wyłącza odzyskiwanie. Konfiguracje konta przechowują oba punkty. Gra rozstrzyga wynik trików i zarobki. Osobny Fly napędza pojazd pod graczem i zwalnia sterowanie przy wyłączeniu lub zejściu.
+
 ## 7.0.0 — 2026-11-14
 
 KUBI HUB DELUXE z wyborem 10 języków, kartą społeczności i nazwanymi profilami oddzielonymi według konta i gry. Tłumaczenia obejmują ekran startowy, zakładki i główne kontrolki. Dodano wybór tempa MM2, AutoSteal i Bike Universe oraz udostępniono wybór tempa BABFT bezpośrednio w Autofarm.
