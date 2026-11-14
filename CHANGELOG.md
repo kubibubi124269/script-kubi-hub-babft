@@ -1,5 +1,11 @@
 # Historia zmian
 
+## 7.0.0 — 2026-11-14
+
+KUBI HUB DELUXE z wyborem 10 języków, kartą społeczności i nazwanymi profilami oddzielonymi według konta i gry. Tłumaczenia obejmują ekran startowy, zakładki i główne kontrolki. Dodano wybór tempa MM2, AutoSteal i Bike Universe oraz udostępniono wybór tempa BABFT bezpośrednio w Autofarm.
+
+BABFT ma osobny tryb szybkiego teleportu do wczytanego etapu. Bike Universe ma sterowanie standardowymi klawiszami, zatrzymanie przy przeszkodzie i ręcznie uruchamianą trasę przez zapisane checkpointy. Zaproszenia, nagrody i zaliczenia punktów pozostają po stronie gry.
+
 ## 6.6.0 — 2026-11-09
 
 Studio skórek w MM2 / Misc: własne modele 3D noża i pistoletu, sześć stylów, obrót, losowanie, przymiarka na widocznej broni trzymanej przez gracza i założenie istniejącej broni z rundy. Przymiarka nie zmienia oryginalnej skórki, statystyk ani ekwipunku. Schowanie broni, STOP, odrodzenie i zamknięcie usuwają efekt.

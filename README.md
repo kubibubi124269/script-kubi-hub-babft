@@ -1,12 +1,19 @@
-# KUBI HUB V6.6.0 — BABFT, MM2, Steal a Brainrot i Universal
+# KUBI HUB DELUXE 7.0
 
-Ten sam loader otwiera wybór BABFT / MM2 / Steal a Brainrot / Universal. Moduły zaczynają wyłączone.
+Ten sam loader otwiera wybór języka, kartę społeczności i menu BABFT / MM2 / Steal a Brainrot / Bike Universe / Universal. Automaty zaczynają wyłączone.
 
 ```lua
 loadstring(game:HttpGet("https://raw.githubusercontent.com/kubibubi124269/script-kubi-hub-babft/main/main.lua"))()
 ```
 
-**Nowe w V6.6:** **MM2 → Misc → Studio skórek MM2** pokazuje nóż i pistolet w 3D w sześciu wzorach. Możesz obracać model, losować styl, przymierzyć kolor na własnej broni z rundy lub założyć broń, którą już masz w plecaku. Podgląd i kolor są lokalne. Prawdziwe wymiany odbywają się w grze.
+**Nowe w 7.0:** Na ekranie startowym i w podstawowych kontrolkach wybierzesz polski, angielski, rosyjski, ukraiński, chiński uproszczony, hiszpański, niemiecki, portugalski, francuski lub włoski. Starsze opisy i część komunikatów mogą pozostać po polsku.
+
+- **Tempo:** osobny wybór w BABFT, MM2, Steal a Brainrot i Bike Universe. W BABFT wybierz **Autofarm → Tryb trasy → Teleport szybki**, jeśli chcesz pojedynczy skok do każdego etapu. Nadal czeka na trasę i powrót od skrzyni.
+- **Bike Universe:** automatyczny gaz, sekwencja wheelie i trików, boost gazu i zatrzymanie przy wykrytej przeszkodzie. **F8** zwalnia klawisze. Zapisz start i checkpointy, przyjmij zaproszenie w grze, a po starcie uruchom trasę. Gra nalicza kasę i wynik; sterowania i zaliczenia nie potwierdzono w publicznej grze.
+- **Konfiguracje konta:** wpisz nazwę w Ustawieniach i zapisz. Hub przywraca ostatni profil zapisany dla aktualnego UserId i trybu gry. Używa plików, jeśli środowisko je udostępnia; w przeciwnym razie to pamięć sesji. Zapis dotyczy ustawień, a nie danych logowania.
+- **Społeczność:** kartę [Discord](https://discord.gg/qmWGb4Q9p) / [YouTube](https://www.youtube.com/@Kubi_Bubi1242) można pominąć. O kod PRO zapytaj twórcę. Hub nie sprawdza subskrypcji ani członkostwa.
+
+**Z V6.6:** **MM2 → Misc → Studio skórek MM2** pokazuje nóż i pistolet w 3D w sześciu wzorach. Możesz obracać model, losować styl, przymierzyć kolor na własnej broni z rundy lub założyć broń, którą już masz w plecaku. Podgląd i kolor są lokalne. Prawdziwe wymiany odbywają się w grze.
 
 **Z V6.5:** Farma MM2 leci płynnie do pobliskich monet lub cukierków, a w opcji **Ruch** można zmienić Lot na Chód. Podejdź bliżej, gdy nie ma celu w zasięgu. W każdym trybie zakładka **Narzędzia** zawiera 20 funkcji: HUD, filtry obrazu, stoper, minutnik i znacznik miejsca. [Lista](FEATURES.md).
 
@@ -28,10 +35,10 @@ MM2 zachowuje Aimbot, Auto Shot, ESP ról, Auto Gun, Knife Aura, obieg z własny
 
 Nowe w MM2: podgląd gracza z przywróceniem kamery, teleport do wybranego gracza i ostrzeżenie o bliskim Murdererze rozpoznanym po nożu. Opcje nicku i odległości są pod PPM.
 
-Sprawdzenie: testy logiki i klienta, 4 importy modeli, 41 modułów (Luau 0.744). Nie testowano wyglądu w natywnym kliencie Roblox ani odbioru przedmiotów na publicznych serwerach.
+Sprawdzenie: testy logiki i klienta, 4 importy modeli, 46 modułów (Luau 0.744). Nie testowano w natywnym kliencie Roblox ani na publicznych serwerach.
 
 [Raport V6.1](docs/V6.1-REPORT.md) · [Testy w grze](docs/TESTING.md) · [Źródła modeli](docs/COMMUNITY-MODELS.md) · [Historia](CHANGELOG.md)
 
 Budowanie pakietu: `node tools/build.cjs`. Testy: `LUAU_BIN=/path/to/luau LUAU_COMPILE=/path/to/luau-compile node tools/test.cjs`.
 
-Kod klienta jest zawarty w main.lua; brak zewnętrznych bibliotek Lua. Modele są danymi JSON z tego repozytorium. PRO pozostaje lokalnym kluczem **6969**; [Discord](https://discord.gg/qmWGb4Q9p). Klucz nie weryfikuje członkostwa ani uprawnień serwera.
+Kod klienta jest zawarty w main.lua; brak zewnętrznych bibliotek Lua. Modele są danymi JSON z tego repozytorium. Kod PRO odblokowuje funkcje lokalnie i nie nadaje uprawnień na serwerze.

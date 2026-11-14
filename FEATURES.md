@@ -1,4 +1,11 @@
-# Funkcje V6.6.0
+# Funkcje KUBI HUB DELUXE 7.0
+
+- **10 języków** w wyborze gry, kartach społeczności, nawigacji i podstawowych kontrolkach. Starsze teksty bez tłumaczeń używają polskiego.
+- **Profile tempa:** BABFT zmienia przerwę po etapie z zachowaniem minimum adaptera; MM2 zmienia szybkość lotu i odświeżania celów; AutoSteal zmienia przerwę pomiędzy próbami, zostawiając czas przytrzymania gry; Bike Universe zmienia długość gazu i rytm trików.
+- **Bike Universe:** Q i E, automatyczne W, Ctrl i triki 1–4, boost gazu, opcjonalny impuls bezczynności w trakcie jazdy i STOP/F8. Osłona działa na podstawie przeszkód, podłoża i ruchu. Nie zapobiega zawieszeniu Roblox ani rozłączeniu.
+- **Trasa wyścigu:** zapisz start i do 30 punktów na sesję, przejdź do startu lub przejedź zapisane punkty. Akceptacja zaproszenia i uruchomienie trasy pozostają ręczne.
+- **Konfiguracje konta:** zapis i odczyt nazwanych ustawień oddzielnie dla zalogowanego konta i gry. Wczytanie nie aktywuje automatu.
+- **Społeczność i PRO:** karta startowa i linki w ustawieniach. Kod od twórcy odblokowuje lokalne funkcje PRO w BABFT; subskrypcji nie weryfikuje hub.
 
 ## 6.6.0 — Studio skórek MM2
 
